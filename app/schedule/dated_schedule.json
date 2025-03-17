@@ -1,0 +1,208 @@
+{
+  "groups": {
+    "z3142": [
+      {
+        "date": "2025-04-15",
+        "date_type": "exact",
+        "lesson": {
+          "name": "soft skills",
+          "room": null,
+          "detail": "теория с 15:20, БТ с 17",
+          "type": null,
+          "number": 6
+        }
+      },
+      {
+        "date": "2025-04-22",
+        "date_type": "exact",
+        "lesson": {
+          "name": "soft skills",
+          "room": null,
+          "detail": "теория с 15:20, БТ с 17",
+          "type": null,
+          "number": 6
+        }
+      },
+      {
+        "date": "2025-04-29",
+        "date_type": "exact",
+        "lesson": {
+          "name": "soft skills",
+          "room": null,
+          "detail": "теория с 15:20, БТ с 17",
+          "type": null,
+          "number": 6
+        }
+      },
+      {
+        "date": "2025-04-16",
+        "date_type": "exact",
+        "lesson": {
+          "name": "ТПВ",
+          "room": null,
+          "detail": null,
+          "type": null,
+          "number": 6
+        }
+      },
+      {
+        "date": "2025-04-23",
+        "date_type": "exact",
+        "lesson": {
+          "name": "ТПВ",
+          "room": null,
+          "detail": null,
+          "type": null,
+          "number": 6
+        }
+      },
+      {
+        "date": "2025-04-30",
+        "date_type": "exact",
+        "lesson": {
+          "name": "ТПВ",
+          "room": null,
+          "detail": null,
+          "type": null,
+          "number": 6
+        }
+      }
+    ],
+    "z3242": [
+      {
+        "date": "2025-03-07",
+        "date_type": "exact",
+        "lesson": {
+          "name": "Теоретическая механика",
+          "room": null,
+          "detail": "Кривосенко Ю.С.",
+          "type": "лекция",
+          "number": 5
+        }
+      }
+    ],
+    "z3243": [
+      {
+        "date": "2025-03-07",
+        "date_type": "exact",
+        "lesson": {
+          "name": "Теоретическая механика",
+          "room": null,
+          "detail": "Кривосенко Ю.С.",
+          "type": "лекция",
+          "number": 5
+        }
+      }
+    ],
+    "z3200": [
+      {
+        "date": "2025-03-07",
+        "date_type": "exact",
+        "lesson": {
+          "name": "Теоретическая механика",
+          "room": null,
+          "detail": "Кривосенко Ю.С.",
+          "type": "лекция",
+          "number": 5
+        }
+      }
+    ],
+    "z3201": [
+      {
+        "date": "2025-03-07",
+        "date_type": "exact",
+        "lesson": {
+          "name": "Теоретическая механика",
+          "room": null,
+          "detail": "Кривосенко Ю.С.",
+          "type": "лекция",
+          "number": 5
+        }
+      }
+    ],
+    "z33431": [
+      {
+        "date": "2025-02-17",
+        "date_type": "after",
+        "week": "odd_week",
+        "weekday": "monday",
+        "lesson": {
+          "name": "Дифференциальная геометрия",
+          "room": 2435,
+          "detail": "до 20:00",
+          "type": null,
+          "number": 6
+        }
+      },
+      {
+        "date": "2025-02-17",
+        "date_type": "after",
+        "week": "all_weeks",
+        "weekday": "monday",
+        "lesson": {
+          "name": "Дифференциальная геометрия",
+          "room": 2435,
+          "detail": "до 20:00",
+          "type": null,
+          "number": 6
+        }
+      }
+    ],
+    "z33432": [
+      {
+        "date": "2025-02-17",
+        "date_type": "after",
+        "week": "odd_week",
+        "weekday": "monday",
+        "lesson": {
+          "name": "Дифференциальная геометрия",
+          "room": 2435,
+          "detail": "до 20:00",
+          "type": null,
+          "number": 6
+        }
+      },
+      {
+        "date": "2025-02-17",
+        "date_type": "after",
+        "week": "all_weeks",
+        "weekday": "monday",
+        "lesson": {
+          "name": "Дифференциальная геометрия",
+          "room": 2435,
+          "detail": "до 20:00",
+          "type": null,
+          "number": 6
+        }
+      }
+    ],
+    "z3300": [
+      {
+        "date": "2025-03-03",
+        "date_type": "after",
+        "week": "all_weeks",
+        "weekday": "monday",
+        "lesson": {
+          "name": "Основы теории информации",
+          "room": 2530,
+          "detail": null,
+          "type": null,
+          "number": 5
+        }
+      },
+      {
+        "date": "2025-03-03",
+        "date_type": "after",
+        "week": "all_weeks",
+        "weekday": "monday",
+        "lesson": {
+          "name": "Основы теории информации",
+          "room": 2530,
+          "detail": null,
+          "type": null,
+          "number": 6
+        }
+      }
+    ]
+  }
+}

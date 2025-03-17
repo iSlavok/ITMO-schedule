@@ -1,0 +1,19 @@
+{
+    "users": {
+        "313": {
+            "lessons": [
+                {
+                    "lesson": {
+                        "name": "Тест",
+                        "room": 52,
+                        "detail": null,
+                        "type": null,
+                        "number": 1
+                    },
+                    "week": "all_weeks",
+                    "weekday": "monday"
+                }
+            ]
+        }
+    }
+}
