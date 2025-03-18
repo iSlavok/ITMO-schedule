@@ -1,5 +1,4 @@
 import datetime
-import json
 import time
 import threading
 from typing import TYPE_CHECKING
@@ -19,19 +18,14 @@ class ScheduleUpdater:
 
     def _update_loop(self):
         while True:
+            start_time = datetime.datetime.now()
             try:
                 self._update_schedule()
                 print(f"[{datetime.datetime.now()}] Расписание обновлено.")
             except Exception as e:
                 print(f"[{datetime.datetime.now()}] Ошибка при обновлении расписания: {str(e)}")
-            time.sleep(self.interval)
+            time.sleep(self.interval-(datetime.datetime.now()-start_time).total_seconds())
 
     def _update_schedule(self):
         data = self._schedule_parser.parse()
-        self._save_schedule_to_file(data)
         self._schedule_service.schedule = data
-
-    @staticmethod
-    def _save_schedule_to_file(data):
-        with open("app/schedule/schedule.json", "w", encoding="utf-8") as file:
-            json.dump(data, file, ensure_ascii=False, indent=4)

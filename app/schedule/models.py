@@ -71,17 +71,3 @@ class DatedLesson(BaseModel):
 
 class DatedSchedule(BaseModel):
     groups: dict[str, list[DatedLesson]] = Field(default_factory=dict)
-
-
-class UserLesson(BaseModel):
-    lesson: Lesson
-    week: Week | None = None
-    weekday: Weekday | None = None
-
-
-class UserSchedule(BaseModel):
-    lessons: list[UserLesson] = Field(default_factory=list)
-
-
-class UsersSchedule(BaseModel):
-    users: dict[int, UserSchedule] = Field(default_factory=dict)

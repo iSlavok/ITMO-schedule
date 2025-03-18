@@ -12,7 +12,7 @@ class UserMiddleware(BaseMiddleware):
             service: UserService = data.get("user_service")
             user = service.get_user(tg_user.id)
             if not user:
-                user = service.register_user(
+                user = service.create_user(
                     user_id=tg_user.id,
                     username=tg_user.username,
                     name=tg_user.full_name,

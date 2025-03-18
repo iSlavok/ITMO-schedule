@@ -1,3 +1,5 @@
 google-credentials.json
 .idea
 .venv
+database.db
+__pycache__/

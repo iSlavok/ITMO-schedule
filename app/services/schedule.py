@@ -1,15 +1,14 @@
-import json
 from datetime import date
 
 from app.repositories.schedule import ScheduleRepository
-from app.schedule import Schedule, DatedSchedule, Week, Weekday, DateType, Lesson
+from app.schedule import Schedule, Week, Weekday, DateType, Lesson
 
 
 class ScheduleService:
     def __init__(self):
         self._schedule_repository = ScheduleRepository()
         self._schedule: Schedule | None = None
-        self._dated_schedule = self._load_dated_schedule()
+        self._dated_schedule = self._schedule_repository.dated_schedule
 
     @property
     def schedule(self) -> Schedule:
@@ -18,14 +17,9 @@ class ScheduleService:
     @schedule.setter
     def schedule(self, value: dict) -> None:
         self._schedule = Schedule.model_validate(value)
+        self._schedule_repository.schedule = self._schedule
 
-    @staticmethod
-    def _load_dated_schedule() -> DatedSchedule:
-        with open("app/schedule/dated_schedule.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
-            return DatedSchedule.model_validate(data)
-
-    def get_schedule(self, target_date: date, group: str) -> list[Lesson]:
+    def get_schedule(self, target_date: date, group: str, user: int) -> list[Lesson]:
         weekday = self._get_weekday(target_date)
         is_even_week = self.is_even_week(target_date)
         lessons = []
@@ -40,21 +34,21 @@ class ScheduleService:
         lessons.sort(key=lambda x: x.number)
         return lessons
 
-    def _get_dated_schedule(self, target_date: date, group: str, weekday: Weekday, is_even_week) -> list[Lesson]:
-        dated_lessons = []
+    def _get_dated_schedule(self, target_date: date, group: str, weekday: Weekday, is_even_week: bool) -> list[Lesson]:
+        lessons = []
         if group in self._dated_schedule.groups:
             for lesson in self._dated_schedule.groups[group]:
                 if lesson.date == target_date:
-                    dated_lessons.append(lesson.lesson)
+                    lessons.append(lesson.lesson)
                 elif lesson.date_type == DateType.AFTER and target_date < lesson.date:
                     if lesson.week == Week.ALL or (lesson.week == Week.EVEN and is_even_week) or (lesson.week == Week.ODD and not is_even_week):
                         if lesson.weekday == weekday:
-                            dated_lessons.append(lesson.lesson)
+                            lessons.append(lesson.lesson)
                 elif lesson.date_type == DateType.BEFORE and target_date > lesson.date:
                     if lesson.week == Week.ALL or (lesson.week == Week.EVEN and is_even_week) or (lesson.week == Week.ODD and not is_even_week):
                         if lesson.weekday == weekday:
-                            dated_lessons.append(lesson.lesson)
-        return dated_lessons
+                            lessons.append(lesson.lesson)
+        return lessons
 
     @staticmethod
     def _get_weekday(target_date: date) -> Weekday:
