@@ -1,8 +1,8 @@
 from aiogram import BaseMiddleware
 
 from app.database import get_session
-from app.repositories.user import UserRepository
-from app.services.user import UserService
+from app.repositories import UserRepository
+from app.services import UserService
 
 
 class UserServiceMiddleware(BaseMiddleware):

@@ -1,6 +1,6 @@
 from datetime import date
 
-from app.repositories.schedule import ScheduleRepository
+from app.repositories import ScheduleRepository
 from app.schedule import Schedule, Week, Weekday, DateType, Lesson
 
 

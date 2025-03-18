@@ -2,9 +2,8 @@ from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.filters import Command
 
-from app.database import User
-from app.database.enums import Role
-from app.filters.role import RoleFilter
+from app.database import User, Role
+from app.filters import RoleFilter
 from app.services import ScheduleService
 
 router = Router()

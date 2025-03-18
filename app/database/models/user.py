@@ -1,9 +1,9 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.database.base import BaseModel
 from typing import TYPE_CHECKING
 
-from ..enums import Role
+from app.database.base import BaseModel
+from app.database import Role
 
 if TYPE_CHECKING:
     from . import Group

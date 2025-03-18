@@ -1,8 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.database.enums import Role
-from app.database.models import User, Group
+from app.database import Role, User, Group
 
 
 class UserRepository:

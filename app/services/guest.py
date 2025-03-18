@@ -1,5 +1,4 @@
-from app.repositories import CourseRepository
-from app.repositories import GroupRepository
+from app.repositories import CourseRepository, GroupRepository
 
 
 class GuestService:

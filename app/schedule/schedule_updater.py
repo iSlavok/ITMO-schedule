@@ -1,9 +1,11 @@
 import datetime
 import time
 import threading
+
 from typing import TYPE_CHECKING
 
 from .schedule_parser import ScheduleParser
+
 if TYPE_CHECKING:
     from app.services import ScheduleService
 

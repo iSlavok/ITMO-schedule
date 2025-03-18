@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload, Session
-from app.database.models import Course
+
+from app.database import Course
 
 
 class CourseRepository:

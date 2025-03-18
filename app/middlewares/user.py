@@ -1,8 +1,8 @@
 from aiogram import BaseMiddleware
 from aiogram.types import User
 
-from app.database.enums import Role
-from app.services.user import UserService
+from app.database import Role
+from app.services import UserService
 
 
 class UserMiddleware(BaseMiddleware):

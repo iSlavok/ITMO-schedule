@@ -1,9 +1,8 @@
 from aiogram import BaseMiddleware
 from aiogram.dispatcher.flags import get_flag
 
-from app.repositories import GroupRepository
-from app.repositories.course import CourseRepository
-from app.services.guest import GuestService
+from app.repositories import GroupRepository, CourseRepository
+from app.services import GuestService
 
 
 class ServicesMiddleware(BaseMiddleware):

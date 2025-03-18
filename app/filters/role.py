@@ -1,8 +1,7 @@
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
-from app.database import User
-from app.database.enums import Role
+from app.database import User, Role
 
 
 class RoleFilter(BaseFilter):

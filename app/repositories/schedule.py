@@ -1,6 +1,6 @@
 import json
 
-from app.schedule import DatedSchedule, Schedule, UsersSchedule
+from app.schedule import DatedSchedule, Schedule
 
 
 class ScheduleRepository:

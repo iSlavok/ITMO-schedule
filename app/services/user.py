@@ -1,6 +1,5 @@
-from app.database import User
-from app.database.enums import Role
-from app.repositories.user import UserRepository
+from app.database import User, Role
+from app.repositories import UserRepository
 
 
 class UserService:
