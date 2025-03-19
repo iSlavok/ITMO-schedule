@@ -29,8 +29,8 @@ class DateType(str, Enum):
 class Lesson(BaseModel):
     name: str | None = None
     room: int | None = None
-    detail: str | None = None
-    type: Literal["лекция", "практика", "теория", "лабораторная"] | None = None
+    lecturer: str | None = None
+    type: Literal["лекция", "практика", "теория", "лабораторная", "факультатив"] | None = None
     number: int
 
 

@@ -19,7 +19,9 @@ class ScheduleService:
         self._schedule = Schedule.model_validate(value)
         self._schedule_repository.schedule = self._schedule
 
-    def get_schedule(self, target_date: date, group: str, user: int) -> list[Lesson]:
+    def get_schedule(self, target_date: date, group: str) -> list[Lesson]:
+        if self._schedule is None:
+            return []
         weekday = self._get_weekday(target_date)
         is_even_week = self.is_even_week(target_date)
         lessons = []

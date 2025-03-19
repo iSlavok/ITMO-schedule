@@ -25,6 +25,30 @@ class ScheduleParser:
             "НЕЧЕТНАЯ НЕДЕЛЯ": "odd_week",
             "ЧЕТНАЯ НЕДЕЛЯ": "even_week",
         }
+        self._lesson_replace = [
+            (re.compile(r"лабораторные"), "лабораторная"),
+            (re.compile(r"\bКривосенко Ю\.(?!С)"), "Кривосенко Ю.С."),
+            (re.compile(r"\bКоробков М\.(?!П)"), "Коробков М.П."),
+            (re.compile(r"\bУздин В.М(?!\.)"), "Уздин В.М."),
+            (re.compile(r"Математический анализ"), "Матанализ"),
+            (re.compile(r"Физическая химия"), "Физхимия"),
+            (re.compile(r"АНГЛИЙСКИЙ ЯЗЫК"), "Английский язык"),
+            (re.compile(r"АНГЛИЙСКИЙ"), "Английский язык"),
+            (re.compile(r"ВОЕННАЯ КАФЕДРА"), "Военная кафедра"),
+            (re.compile(r"ИСТОРИЯ"), "История"),
+            (re.compile(r"soft skills"), "Soft Skills"),
+            (re.compile(r"Доп.главы статфизики"), "Доп. главы статфизики"),
+            (re.compile(r"Линейная алгебра"), "Линал"),
+            (re.compile(r"Математическая физика"), "Матфизика"),
+            (re.compile(r"Теоретическая механика"), "Теормех"),
+            (re.compile(r"Английский язык в профессиональной деятельности"), "Английский язык в проф. деятельности"),
+            (re.compile(r"Дополнительные главы квантовой механики"), "Доп. главы квантмеха"),
+            (re.compile(r"Машинное обучение в физических задачах"), "ML в физических задачах"),
+        ]
+        self._lecturer_in_name = [
+            "Клещенко В.",
+            "Яковлев З."
+        ]
 
     def parse(self) -> dict:
         self._parse_google_sheet()
@@ -107,19 +131,21 @@ class ScheduleParser:
             for j, value in enumerate(row[3:], 3):
                 if j % 2 == 0:
                     continue
-                if self._values[0][j] not in self._data[year]['groups'][group][week]['days']:
-                    self._data[year]['groups'][group][week]['days'][self._values[0][j]] = {'lessons': []}
                 if re.search(r'(?<!-)\b(?:[1-9]|[1-9]\d)\b', value):
                     continue
+                for pattern, repl in self._lesson_replace:
+                    value = pattern.sub(repl, value)
+                if self._values[0][j] not in self._data[year]['groups'][group][week]['days']:
+                    self._data[year]['groups'][group][week]['days'][self._values[0][j]] = {'lessons': []}
                 value = re.sub(r'\n{2,}', '\n', value.replace(',', '').replace('"', ''))
                 room, value = self._extract_room(value, row, j)
                 lecture_type, value = self._extract_lecture_type(value)
-                name, detail = self._extract_name_and_detail(value)
+                name, lecturer = self._extract_name_and_lecturer(value)
                 number = len(self._data[year]['groups'][group][week]['days'][self._values[0][j]]['lessons']) + 1
                 self._data[year]['groups'][group][week]['days'][self._values[0][j]]['lessons'].append({
                     "name": name,
                     "room": room,
-                    "detail": detail,
+                    "lecturer": lecturer,
                     "type": lecture_type,
                     "number": number
                 })
@@ -137,26 +163,30 @@ class ScheduleParser:
 
     @staticmethod
     def _extract_lecture_type(value) -> tuple:
-        types_pattern = r'\b(лекция|практика|теория|лабораторная)\b'
+        types_pattern = r'\b(лекция|практика|лабораторная|факультатив|ZOOM)\b'
         lecture_type = re.findall(types_pattern, value, flags=re.IGNORECASE)
         lecture_type = lecture_type[0].lower() if lecture_type else None
         value = re.sub(types_pattern, '', value, flags=re.IGNORECASE)
         value = re.sub(r'\n{2,}', '\n', value)
         return lecture_type, value
 
-    @staticmethod
-    def _extract_name_and_detail(value) -> tuple:
+    def _extract_name_and_lecturer(self, value) -> tuple:
         parts = value.split('\n', 1)
         name = parts[0].strip()
         if len(parts) > 1:
-            detail = re.sub(r'\s+', ' ', parts[1].replace('\n', ', ')).strip()
+            lecturer = re.sub(r'\s+', ' ', parts[1].replace('\n', ', ')).strip()
         else:
-            detail = ""
+            lecturer = ""
         name = re.sub(r'\s+', ' ', name).strip()
         name = name if name != "" else None
-        detail = re.sub(r'\s+', ' ', detail).strip(" ,\n")
-        detail = detail if detail != "" else None
-        return name, detail
+        lecturer = re.sub(r'\s+', ' ', lecturer).strip(" ,\n")
+        lecturer = lecturer if lecturer != "" else None
+        if not lecturer and name:
+            for _lecturer in self._lecturer_in_name:
+                if _lecturer in name:
+                    name = name.replace(_lecturer, "").strip()
+                    lecturer = _lecturer
+        return name, lecturer
 
     def _remove_empty_lessons(self) -> None:
         for year in self._data:

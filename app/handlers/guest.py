@@ -5,8 +5,9 @@ from aiogram.types import Message, CallbackQuery
 
 from app.database import User, Role
 from app.filters import RoleFilter
+from app.handlers.user import today_schedule
 from app.keyboards.guest import get_course_keyboard, get_group_keyboard
-from app.services import GuestService, UserService
+from app.services import GuestService, UserService, ScheduleService
 from app.states import RegisterStates
 
 router = Router()
@@ -14,7 +15,10 @@ router.message.filter(RoleFilter(Role.GUEST))
 router.callback_query.filter(RoleFilter(Role.GUEST))
 
 
-@router.message(StateFilter(None), flags={"required_data": ["guest_service"]})
+@router.message(
+    StateFilter(None),
+    flags={"services": ["guest"]}
+)
 async def start_registration(message: Message, state: FSMContext, guest_service: GuestService):
     keyboard = get_course_keyboard(guest_service.get_all_courses())
     await message.delete()
@@ -22,7 +26,11 @@ async def start_registration(message: Message, state: FSMContext, guest_service:
     await state.set_state(RegisterStates.COURSE_SELECT)
 
 
-@router.callback_query(F.data.startswith("course_"), StateFilter(RegisterStates.COURSE_SELECT), flags={"required_data": ["guest_service"]})
+@router.callback_query(
+    F.data.startswith("course_"),
+    StateFilter(RegisterStates.COURSE_SELECT),
+    flags={"services": ["guest"]}
+)
 async def course_select(callback: CallbackQuery, state: FSMContext, guest_service: GuestService):
     course_id = int(callback.data.split("_")[1])
     keyboard = get_group_keyboard(guest_service.get_course_groups(course_id))
@@ -30,13 +38,19 @@ async def course_select(callback: CallbackQuery, state: FSMContext, guest_servic
     await state.set_state(RegisterStates.GROUP_SELECT)
 
 
-@router.callback_query(F.data.startswith("group_"), StateFilter(RegisterStates.GROUP_SELECT))
-async def group_select(callback: CallbackQuery, state: FSMContext, user: User, user_service: UserService):
+@router.callback_query(
+    F.data.startswith("group_"),
+    StateFilter(RegisterStates.GROUP_SELECT),
+    flags={"services": ["schedule"]}
+)
+async def group_select(callback: CallbackQuery, state: FSMContext, user: User, user_service: UserService, schedule_service: ScheduleService):
     group_id = int(callback.data.split("_")[1])
     user_service.register_user(user, group_id)
+    await today_schedule(callback.message, user, schedule_service)
     await state.clear()
 
 
 @router.message(~StateFilter(None))
-async def on_message(message: Message):
+async def on_message(message: Message, state: FSMContext):
     await message.delete()
+    await state.clear()

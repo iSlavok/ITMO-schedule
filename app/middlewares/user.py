@@ -1,12 +1,18 @@
+from typing import Callable, Dict, Any, Awaitable
 from aiogram import BaseMiddleware
-from aiogram.types import User
+from aiogram.types import User, Message
 
 from app.database import Role
 from app.services import UserService
 
 
 class UserMiddleware(BaseMiddleware):
-    async def __call__(self, handler, event, data):
+    async def __call__(
+            self,
+            handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
+            event: Message,
+            data: Dict[str, Any]
+    ) -> Any:
         tg_user = get_user(event)
         if tg_user:
             service: UserService = data.get("user_service")
