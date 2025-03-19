@@ -1,8 +1,5 @@
-import asyncio
 from datetime import date, timedelta
-
 from aiogram import Router, F
-from aiogram.client import bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
@@ -26,8 +23,8 @@ async def today_schedule(message: Message, user: User, schedule_service: Schedul
     schedule = schedule_service.get_schedule(today, user.group.name)
     if not schedule:
         return
-    text = schedule_to_text(schedule, "сегодня")
-    schedule_message = await message.answer(text, reply_markup=main_keyboard, parse_mode="Markdown")
+    text = schedule_to_text(schedule, "сегодня", schedule_service, is_today=True)
+    schedule_message = await message.answer(text, reply_markup=main_keyboard, parse_mode="html")
     data = await state.get_data()
     old_message = data.get("schedule_message_id")
     if old_message:
@@ -48,8 +45,8 @@ async def tomorrow_schedule(message: Message, user: User, schedule_service: Sche
     schedule = schedule_service.get_schedule(tomorrow, user.group.name)
     if not schedule:
         return
-    text = schedule_to_text(schedule, "завтра")
-    schedule_message = await message.answer(text, reply_markup=main_keyboard, parse_mode="Markdown")
+    text = schedule_to_text(schedule, "завтра", schedule_service)
+    schedule_message = await message.answer(text, reply_markup=main_keyboard, parse_mode="html")
     data = await state.get_data()
     old_message = data.get("schedule_message_id")
     if old_message:
@@ -60,20 +57,37 @@ async def tomorrow_schedule(message: Message, user: User, schedule_service: Sche
     await state.update_data(schedule_message_id=schedule_message.message_id)
 
 
-def schedule_to_text(schedule: list[Lesson], day: str):
-    text = (f"📆 *Расписание на {day}* 📆\n"
+def schedule_to_text(schedule: list[Lesson], day: str, schedule_service: ScheduleService, is_today: bool = False):
+    current, is_waiting = 0, False
+    if is_today:
+        current, is_waiting = schedule_service.get_current_lesson()
+    text = (f"📆 <b>Расписание на {day}</b> 📆\n"
             "════════════════════════")
     for lesson in schedule:
-        text += f"\n\n🕒 *{times[lesson.number - 1]}* | {lesson.number} пара\n"
-        text += f"📚 {lesson.name}"
-        if lesson.type:
-            text += f" — {lesson.type}"
-        text += "\n"
-        if lesson.lecturer:
-            text += f"👨 {lesson.lecturer} | ⭐️ 4.8\n"
-        if lesson.room:
-            text += f"🚪 Аудитория: *{lesson.room}*\n"
-        text += "\n———————————————"
+        text += lesson_to_text(lesson, current, is_waiting)
+    return text
+
+
+def lesson_to_text(lesson: Lesson, current_lesson: int, is_waiting: bool):
+    if lesson.number == current_lesson:
+        if is_waiting:
+            status_emoji = "🔴"
+        else:
+            status_emoji = "🟠"
+    elif lesson.number < current_lesson:
+        status_emoji = "✅"
+    else:
+        status_emoji = "🕒"
+    text = f"\n\n{status_emoji} <b>{times[lesson.number - 1]}</b> | {lesson.number} пара\n"
+    text += f"📚 {lesson.name}"
+    if lesson.type:
+        text += f" — {lesson.type}"
+    text += "\n"
+    if lesson.lecturer:
+        text += f"👨 {lesson.lecturer} | ⭐️ 4.8\n"
+    if lesson.room:
+        text += f"🚪 Аудитория: <b>{lesson.room}</b>\n"
+    text += "\n———————————————"
     return text
 
 

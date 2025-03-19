@@ -1,10 +1,20 @@
-from datetime import date
-
+from datetime import datetime, timedelta, date, UTC
 from app.repositories import ScheduleRepository
 from app.schedule import Schedule, Week, Weekday, DateType, Lesson
 
 
 class ScheduleService:
+    schedule_times = [
+        (datetime.strptime("8:10", "%H:%M").time(), datetime.strptime("9:40", "%H:%M").time()),
+        (datetime.strptime("9:50", "%H:%M").time(), datetime.strptime("11:20", "%H:%M").time()),
+        (datetime.strptime("11:30", "%H:%M").time(), datetime.strptime("13:00", "%H:%M").time()),
+        (datetime.strptime("13:30", "%H:%M").time(), datetime.strptime("15:00", "%H:%M").time()),
+        (datetime.strptime("15:30", "%H:%M").time(), datetime.strptime("17:00", "%H:%M").time()),
+        (datetime.strptime("17:10", "%H:%M").time(), datetime.strptime("18:40", "%H:%M").time()),
+        (datetime.strptime("18:40", "%H:%M").time(), datetime.strptime("20:10", "%H:%M").time()),
+        (datetime.strptime("20:10", "%H:%M").time(), datetime.strptime("23:59", "%H:%M").time()),
+    ]
+
     def __init__(self):
         self._schedule_repository = ScheduleRepository()
         self._schedule: Schedule | None = None
@@ -43,11 +53,13 @@ class ScheduleService:
                 if lesson.date == target_date:
                     lessons.append(lesson.lesson)
                 elif lesson.date_type == DateType.AFTER and target_date < lesson.date:
-                    if lesson.week == Week.ALL or (lesson.week == Week.EVEN and is_even_week) or (lesson.week == Week.ODD and not is_even_week):
+                    if lesson.week == Week.ALL or (lesson.week == Week.EVEN and is_even_week) or (
+                            lesson.week == Week.ODD and not is_even_week):
                         if lesson.weekday == weekday:
                             lessons.append(lesson.lesson)
                 elif lesson.date_type == DateType.BEFORE and target_date > lesson.date:
-                    if lesson.week == Week.ALL or (lesson.week == Week.EVEN and is_even_week) or (lesson.week == Week.ODD and not is_even_week):
+                    if lesson.week == Week.ALL or (lesson.week == Week.EVEN and is_even_week) or (
+                            lesson.week == Week.ODD and not is_even_week):
                         if lesson.weekday == weekday:
                             lessons.append(lesson.lesson)
         return lessons
@@ -69,3 +81,22 @@ class ScheduleService:
     @staticmethod
     def is_even_week(target_date: date) -> bool:
         return target_date.isocalendar()[1] % 2 == 1
+
+    def get_current_lesson(self):
+        msk_time = self._get_msk_time()
+        current_time = msk_time.time()
+        # current_time = datetime.strptime("14:30", "%H:%M").time()
+        current = 0
+        is_waiting = False
+        for i, (start, end) in enumerate(self.schedule_times):
+            if current_time > end:
+                current = i + 1
+        if current_time < self.schedule_times[current][0]:
+            is_waiting = True
+        return current + 1, is_waiting
+
+    @staticmethod
+    def _get_msk_time():
+        utc_time = datetime.now(UTC)
+        msk_time = utc_time + timedelta(hours=3)
+        return msk_time
