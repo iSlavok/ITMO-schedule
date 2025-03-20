@@ -33,16 +33,16 @@ class ScheduleService:
         if self._schedule is None:
             return []
         weekday = self._get_weekday(target_date)
-        is_even_week = self.is_even_week(target_date)
+        _is_even_week = is_even_week(target_date)
         lessons = []
         for course in self._schedule.courses:
             if group in self._schedule.courses[course].groups:
                 group_schedule = self._schedule.courses[course].groups[group]
-                if is_even_week and group_schedule.even_week:
+                if _is_even_week and group_schedule.even_week:
                     lessons = group_schedule.even_week.days[weekday].lessons
-                elif not is_even_week and group_schedule.odd_week:
+                elif not _is_even_week and group_schedule.odd_week:
                     lessons = group_schedule.odd_week.days[weekday].lessons
-        lessons += self._get_dated_schedule(target_date, group, weekday, is_even_week)
+        lessons += self._get_dated_schedule(target_date, group, weekday, _is_even_week)
         lessons.sort(key=lambda x: x.number)
         return lessons
 
@@ -78,14 +78,9 @@ class ScheduleService:
         weekday = weekdays[target_date.weekday()]
         return Weekday(weekday)
 
-    @staticmethod
-    def is_even_week(target_date: date) -> bool:
-        return target_date.isocalendar()[1] % 2 == 1
-
     def get_current_lesson(self):
         msk_time = self._get_msk_time()
         current_time = msk_time.time()
-        # current_time = datetime.strptime("14:30", "%H:%M").time()
         current = 0
         is_waiting = False
         for i, (start, end) in enumerate(self.schedule_times):
@@ -100,3 +95,7 @@ class ScheduleService:
         utc_time = datetime.now(UTC)
         msk_time = utc_time + timedelta(hours=3)
         return msk_time
+
+
+def is_even_week(target_date: date) -> bool:
+    return target_date.isocalendar()[1] % 2 == 1

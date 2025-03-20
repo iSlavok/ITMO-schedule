@@ -7,45 +7,33 @@ from app.database import User, Role
 from app.filters import RoleFilter
 from app.keyboards.user import main_keyboard
 from app.schedule import Lesson
-from app.services import ScheduleService
+from app.services import ScheduleService, AiService
 
 router = Router()
 router.message.filter(RoleFilter(Role.USER))
 
 
 @router.message(
-    F.text == "Сегодня",
-    flags={"services": ["schedule"]}
+    flags={"services": ["schedule", "ai"]}
 )
-async def today_schedule(message: Message, user: User, schedule_service: ScheduleService, state: FSMContext):
+async def get_schedule(message: Message, user: User, schedule_service: ScheduleService, ai_service: AiService, state: FSMContext):
     await message.delete()
-    today = date.today()
-    schedule = schedule_service.get_schedule(today, user.group.name)
+    if message.text == "Сегодня":
+        day = date.today()
+        day_str = "сегодня"
+    elif message.text == "Завтра":
+        day = date.today() + timedelta(days=1)
+        day_str = "завтра"
+    else:
+        day = await ai_service.date_parsing(message.text)
+        if not day:
+            return
+        else:
+            day_str = day.strftime("%Y-%m-%d")
+    schedule = schedule_service.get_schedule(day, user.group.name)
     if not schedule:
         return
-    text = schedule_to_text(schedule, "сегодня", schedule_service, is_today=True)
-    schedule_message = await message.answer(text, reply_markup=main_keyboard, parse_mode="html")
-    data = await state.get_data()
-    old_message = data.get("schedule_message_id")
-    if old_message:
-        try:
-            await message.bot.delete_message(chat_id=message.chat.id, message_id=old_message)
-        except Exception:
-            pass
-    await state.update_data(schedule_message_id=schedule_message.message_id)
-
-
-@router.message(
-    F.text == "Завтра",
-    flags={"services": ["schedule"]}
-)
-async def tomorrow_schedule(message: Message, user: User, schedule_service: ScheduleService, state: FSMContext):
-    await message.delete()
-    tomorrow = date.today() + timedelta(days=1)
-    schedule = schedule_service.get_schedule(tomorrow, user.group.name)
-    if not schedule:
-        return
-    text = schedule_to_text(schedule, "завтра", schedule_service)
+    text = schedule_to_text(schedule, day_str, schedule_service, is_today=message.text == "Сегодня")
     schedule_message = await message.answer(text, reply_markup=main_keyboard, parse_mode="html")
     data = await state.get_data()
     old_message = data.get("schedule_message_id")
