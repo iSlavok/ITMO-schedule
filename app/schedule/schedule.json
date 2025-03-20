@@ -88,7 +88,7 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2202,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": null,
                                         "number": 5
                                     }
@@ -270,7 +270,7 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2202,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": null,
                                         "number": 5
                                     }
@@ -348,14 +348,14 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2313,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": "лабораторная",
                                         "number": 5
                                     },
                                     {
                                         "name": "Физхимия",
                                         "room": 2313,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": "лабораторная",
                                         "number": 6
                                     }
@@ -454,7 +454,7 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2202,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": null,
                                         "number": 5
                                     }
@@ -586,14 +586,14 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2313,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": "лабораторная",
                                         "number": 4
                                     },
                                     {
                                         "name": "Физхимия",
                                         "room": 2313,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": "лабораторная",
                                         "number": 5
                                     }
@@ -650,7 +650,7 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2202,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": null,
                                         "number": 5
                                     }
@@ -841,7 +841,7 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2202,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": null,
                                         "number": 5
                                     }
@@ -933,14 +933,14 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2313,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": "лабораторная",
                                         "number": 5
                                     },
                                     {
                                         "name": "Физхимия",
                                         "room": 2313,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": "лабораторная",
                                         "number": 6
                                     }
@@ -1030,7 +1030,7 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2202,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": null,
                                         "number": 5
                                     }
@@ -1235,7 +1235,7 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2202,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": null,
                                         "number": 5
                                     }
@@ -1424,7 +1424,7 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2202,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": null,
                                         "number": 5
                                     }
@@ -1520,14 +1520,14 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2313,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": "лабораторная",
                                         "number": 2
                                     },
                                     {
                                         "name": "Физхимия",
                                         "room": 2313,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": "лабораторная",
                                         "number": 3
                                     },
@@ -1604,14 +1604,14 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2313,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": "лабораторная",
                                         "number": 3
                                     },
                                     {
                                         "name": "Физхимия",
                                         "room": 2313,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": "лабораторная",
                                         "number": 4
                                     }
@@ -1643,7 +1643,7 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2202,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": null,
                                         "number": 5
                                     }
@@ -1832,7 +1832,7 @@
                                     {
                                         "name": "Физхимия",
                                         "room": 2202,
-                                        "lecturer": null,
+                                        "lecturer": "Королев Д.А.",
                                         "type": null,
                                         "number": 5
                                     }

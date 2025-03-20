@@ -48,6 +48,9 @@ class ScheduleParser:
             "Клещенко В.",
             "Яковлев З."
         ]
+        self._lecturer_by_name = {
+            "Физхимия": "Королев Д.А.",
+        }
 
     def parse(self) -> dict:
         self._parse_google_sheet()
@@ -185,6 +188,9 @@ class ScheduleParser:
                 if _lecturer in name:
                     name = name.replace(_lecturer, "").strip()
                     lecturer = _lecturer
+                    break
+            if name in self._lecturer_by_name:
+                lecturer = self._lecturer_by_name[name]
         return name, lecturer
 
     def _remove_empty_lessons(self) -> None:
