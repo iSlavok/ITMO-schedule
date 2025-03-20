@@ -16,7 +16,8 @@ router.message.filter(RoleFilter(Role.USER))
 @router.message(
     flags={"services": ["schedule", "ai"]}
 )
-async def get_schedule(message: Message, user: User, schedule_service: ScheduleService, ai_service: AiService, state: FSMContext):
+async def get_schedule(message: Message, user: User, schedule_service: ScheduleService, ai_service: AiService,
+                       state: FSMContext):
     await message.delete()
     if message.text == "Сегодня":
         day = date.today()
@@ -30,11 +31,18 @@ async def get_schedule(message: Message, user: User, schedule_service: ScheduleS
             return
         else:
             day_str = day.strftime("%Y-%m-%d")
+
+    await send_schedule(message, user, schedule_service, state, day, day_str, message.text == "Сегодня")
+
+
+async def send_schedule(message, user, schedule_service, state, day, day_str, is_today=False):
     schedule = schedule_service.get_schedule(day, user.group.name)
     if not schedule:
         return
-    text = schedule_to_text(schedule, day_str, schedule_service, is_today=message.text == "Сегодня")
+
+    text = schedule_to_text(schedule, day_str, schedule_service, is_today=is_today)
     schedule_message = await message.answer(text, reply_markup=main_keyboard, parse_mode="html")
+
     data = await state.get_data()
     old_message = data.get("schedule_message_id")
     if old_message:
@@ -42,6 +50,7 @@ async def get_schedule(message: Message, user: User, schedule_service: ScheduleS
             await message.bot.delete_message(chat_id=message.chat.id, message_id=old_message)
         except Exception:
             pass
+
     await state.update_data(schedule_message_id=schedule_message.message_id)
 
 
