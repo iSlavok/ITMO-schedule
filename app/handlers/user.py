@@ -1,6 +1,7 @@
 from contextlib import suppress
 from datetime import date, timedelta
 from aiogram import Router, F
+from aiogram.filters import or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
@@ -12,7 +13,8 @@ from app.schedule import Lesson
 from app.services import ScheduleService, AiService, RatingService
 
 router = Router()
-router.message.filter(RoleFilter(Role.USER))
+router.message.filter(or_f(RoleFilter(Role.USER), RoleFilter(Role.ADMIN)))
+router.callback_query.filter(or_f(RoleFilter(Role.USER), RoleFilter(Role.ADMIN)))
 
 
 @router.callback_query(
@@ -161,7 +163,7 @@ async def send_schedule(message: Message, user: User, schedule_service: Schedule
     await delete_last_message(message, state, schedule_message.message_id)
 
 
-async def delete_last_message(message, state, new_message_id):
+async def delete_last_message(message: Message, state: FSMContext, new_message_id: int):
     data = await state.get_data()
     old_message = data.get("last_message_id")
     if old_message:
