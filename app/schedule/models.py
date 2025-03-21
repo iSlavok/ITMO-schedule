@@ -12,6 +12,7 @@ class Weekday(str, Enum):
     THURSDAY = "thursday"
     FRIDAY = "friday"
     SATURDAY = "saturday"
+    SUNDAY = "sunday"
 
 
 class Week(str, Enum):

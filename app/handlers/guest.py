@@ -1,3 +1,4 @@
+from contextlib import suppress
 from datetime import date
 
 from aiogram import Router, F
@@ -9,7 +10,7 @@ from app.database import User, Role
 from app.filters import RoleFilter
 from app.handlers.user import send_schedule
 from app.keyboards.guest import get_course_keyboard, get_group_keyboard
-from app.services import GuestService, UserService, ScheduleService
+from app.services import GuestService, UserService, ScheduleService, RatingService
 from app.states import RegisterStates
 
 router = Router()
@@ -43,13 +44,16 @@ async def course_select(callback: CallbackQuery, state: FSMContext, guest_servic
 @router.callback_query(
     F.data.startswith("group_"),
     StateFilter(RegisterStates.GROUP_SELECT),
-    flags={"services": ["schedule"]}
+    flags={"services": ["schedule", "rating"]}
 )
-async def group_select(callback: CallbackQuery, state: FSMContext, user: User, user_service: UserService, schedule_service: ScheduleService):
+async def group_select(callback: CallbackQuery, state: FSMContext, user: User, user_service: UserService, schedule_service: ScheduleService, rating_service: RatingService):
     group_id = int(callback.data.split("_")[1])
     user_service.register_user(user, group_id)
-    await send_schedule(callback.message, user, schedule_service, state, date.today(), "сегодня", is_today=True)
+    with suppress(Exception):
+        await callback.answer()
+        await callback.message.delete()
     await state.clear()
+    await send_schedule(callback.message, user, schedule_service, rating_service, state, date.today(), "сегодня", is_today=True)
 
 
 @router.message(~StateFilter(None))

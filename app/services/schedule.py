@@ -12,7 +12,6 @@ class ScheduleService:
         (datetime.strptime("15:30", "%H:%M").time(), datetime.strptime("17:00", "%H:%M").time()),
         (datetime.strptime("17:10", "%H:%M").time(), datetime.strptime("18:40", "%H:%M").time()),
         (datetime.strptime("18:40", "%H:%M").time(), datetime.strptime("20:10", "%H:%M").time()),
-        (datetime.strptime("20:10", "%H:%M").time(), datetime.strptime("23:59", "%H:%M").time()),
     ]
 
     def __init__(self):
@@ -29,22 +28,40 @@ class ScheduleService:
         self._schedule = Schedule.model_validate(value)
         self._schedule_repository.schedule = self._schedule
 
-    def get_schedule(self, target_date: date, group: str) -> list[Lesson]:
+    def get_schedule(self, target_date: date, group: str) -> list[Lesson] | None:
         if self._schedule is None:
+            return None
+        try:
+            weekday = self._get_weekday(target_date)
+            _is_even_week = is_even_week(target_date)
+            lessons = []
+            for course in self._schedule.courses:
+                if group in self._schedule.courses[course].groups:
+                    group_schedule = self._schedule.courses[course].groups[group]
+                    if _is_even_week and group_schedule.even_week:
+                        lessons = group_schedule.even_week.days[weekday].lessons
+                    elif not _is_even_week and group_schedule.odd_week:
+                        lessons = group_schedule.odd_week.days[weekday].lessons
+            lessons += self._get_dated_schedule(target_date, group, weekday, _is_even_week)
+            lessons.sort(key=lambda x: x.number)
+            return lessons
+        except KeyError:
             return []
-        weekday = self._get_weekday(target_date)
-        _is_even_week = is_even_week(target_date)
-        lessons = []
-        for course in self._schedule.courses:
-            if group in self._schedule.courses[course].groups:
-                group_schedule = self._schedule.courses[course].groups[group]
-                if _is_even_week and group_schedule.even_week:
-                    lessons = group_schedule.even_week.days[weekday].lessons
-                elif not _is_even_week and group_schedule.odd_week:
-                    lessons = group_schedule.odd_week.days[weekday].lessons
-        lessons += self._get_dated_schedule(target_date, group, weekday, _is_even_week)
-        lessons.sort(key=lambda x: x.number)
-        return lessons
+
+    def get_last_lecturer(self, group: str) -> str | None:
+        schedule = self.get_schedule(date.today(), group)
+        if not schedule:
+            return None
+        last_lesson_num = self.get_last_lesson_num()
+        last_lesson = None
+        for lesson in schedule:
+            if lesson.number <= last_lesson_num:
+                last_lesson = lesson
+            else:
+                break
+        if last_lesson:
+            return last_lesson.lecturer
+        return None
 
     def _get_dated_schedule(self, target_date: date, group: str, weekday: Weekday, is_even_week: bool) -> list[Lesson]:
         lessons = []
@@ -73,12 +90,12 @@ class ScheduleService:
             "thursday",
             "friday",
             "saturday",
-            "saturday",
+            "sunday",
         ]
         weekday = weekdays[target_date.weekday()]
         return Weekday(weekday)
 
-    def get_current_lesson(self):
+    def get_current_lesson(self) -> tuple[int, bool]:
         msk_time = self._get_msk_time()
         current_time = msk_time.time()
         current = 0
@@ -86,9 +103,18 @@ class ScheduleService:
         for i, (start, end) in enumerate(self.schedule_times):
             if current_time > end:
                 current = i + 1
-        if current_time < self.schedule_times[current][0]:
+        if current < len(self.schedule_times) and current_time < self.schedule_times[current][0]:
             is_waiting = True
         return current + 1, is_waiting
+
+    def get_last_lesson_num(self) -> int:
+        msk_time = self._get_msk_time()
+        current_time = msk_time.time()
+        current = 0
+        for i, (start, end) in enumerate(self.schedule_times):
+            if current_time > start:
+                current = i + 1
+        return current
 
     @staticmethod
     def _get_msk_time():

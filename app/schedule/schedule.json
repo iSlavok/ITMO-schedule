@@ -4135,7 +4135,7 @@
                         }
                     }
                 },
-                "Z3300": {
+                "z3300Б": {
                     "odd_week": {
                         "days": {
                             "monday": {
@@ -4160,20 +4160,6 @@
                                         "lecturer": "Акулов Д.",
                                         "type": "практика",
                                         "number": 5
-                                    },
-                                    {
-                                        "name": "Микроконтроллеры",
-                                        "room": 2433,
-                                        "lecturer": "Денисов К.",
-                                        "type": null,
-                                        "number": 8
-                                    },
-                                    {
-                                        "name": "Численные методы физики",
-                                        "room": 1609,
-                                        "lecturer": "Спиридонов С.",
-                                        "type": "практика",
-                                        "number": 9
                                     }
                                 ]
                             },
@@ -4216,41 +4202,6 @@
                                         "lecturer": null,
                                         "type": "факультатив",
                                         "number": 6
-                                    },
-                                    {
-                                        "name": "Иностранный язык",
-                                        "room": null,
-                                        "lecturer": null,
-                                        "type": null,
-                                        "number": 8
-                                    },
-                                    {
-                                        "name": "Иностранный язык",
-                                        "room": null,
-                                        "lecturer": null,
-                                        "type": null,
-                                        "number": 9
-                                    },
-                                    {
-                                        "name": "Устройства СВЧ и антенны",
-                                        "room": 4,
-                                        "lecturer": null,
-                                        "type": "лабораторная",
-                                        "number": 11
-                                    },
-                                    {
-                                        "name": "Устройства СВЧ и антенны",
-                                        "room": 4,
-                                        "lecturer": null,
-                                        "type": "лабораторная",
-                                        "number": 12
-                                    },
-                                    {
-                                        "name": "Графовые вероятностные модели",
-                                        "room": 2435,
-                                        "lecturer": null,
-                                        "type": "факультатив",
-                                        "number": 13
                                     }
                                 ]
                             },
@@ -4276,34 +4227,6 @@
                                         "lecturer": "Глыбовский С.",
                                         "type": null,
                                         "number": 4
-                                    },
-                                    {
-                                        "name": "Устройства СВЧ и антенны",
-                                        "room": 4,
-                                        "lecturer": "Удров М.",
-                                        "type": "практика",
-                                        "number": 9
-                                    },
-                                    {
-                                        "name": "Устройства СВЧ и антенны",
-                                        "room": 4,
-                                        "lecturer": "Глыбовский С.",
-                                        "type": null,
-                                        "number": 10
-                                    },
-                                    {
-                                        "name": "Устройства СВЧ и антенны",
-                                        "room": 4,
-                                        "lecturer": "Глыбовский С.",
-                                        "type": null,
-                                        "number": 11
-                                    },
-                                    {
-                                        "name": "Микроконтроллеры",
-                                        "room": 49,
-                                        "lecturer": "Денисов К.",
-                                        "type": null,
-                                        "number": 12
                                     }
                                 ]
                             },
@@ -4329,13 +4252,6 @@
                                         "lecturer": null,
                                         "type": "лекция",
                                         "number": 5
-                                    },
-                                    {
-                                        "name": "Численные методы физики",
-                                        "room": 2530,
-                                        "lecturer": null,
-                                        "type": "лекция",
-                                        "number": 12
                                     }
                                 ]
                             },
@@ -4383,20 +4299,6 @@
                                         "lecturer": "Акулов Д.",
                                         "type": "практика",
                                         "number": 5
-                                    },
-                                    {
-                                        "name": "Микроконтроллеры",
-                                        "room": 2433,
-                                        "lecturer": "Денисов К.",
-                                        "type": null,
-                                        "number": 8
-                                    },
-                                    {
-                                        "name": "Численные методы физики",
-                                        "room": 1609,
-                                        "lecturer": "Спиридонов С.",
-                                        "type": "практика",
-                                        "number": 9
                                     }
                                 ]
                             },
@@ -4425,27 +4327,140 @@
                                         "lecturer": null,
                                         "type": "факультатив",
                                         "number": 6
+                                    }
+                                ]
+                            },
+                            "thursday": {
+                                "lessons": [
+                                    {
+                                        "name": "Устройства СВЧ и антенны",
+                                        "room": 4,
+                                        "lecturer": "Удров М.",
+                                        "type": "практика",
+                                        "number": 2
+                                    },
+                                    {
+                                        "name": "Устройства СВЧ и антенны",
+                                        "room": 4,
+                                        "lecturer": "Глыбовский С.",
+                                        "type": null,
+                                        "number": 3
+                                    },
+                                    {
+                                        "name": "Устройства СВЧ и антенны",
+                                        "room": 4,
+                                        "lecturer": "Глыбовский С.",
+                                        "type": null,
+                                        "number": 4
+                                    }
+                                ]
+                            },
+                            "friday": {
+                                "lessons": [
+                                    {
+                                        "name": "Аналоговая и цифровая обработка сигналов",
+                                        "room": 4,
+                                        "lecturer": "Сочава А.А.",
+                                        "type": null,
+                                        "number": 2
+                                    },
+                                    {
+                                        "name": "Аналоговая и цифровая обработка сигналов",
+                                        "room": 4,
+                                        "lecturer": "Сочава А.А.",
+                                        "type": null,
+                                        "number": 3
+                                    },
+                                    {
+                                        "name": "Численные методы физики",
+                                        "room": 2530,
+                                        "lecturer": null,
+                                        "type": "лекция",
+                                        "number": 5
+                                    }
+                                ]
+                            },
+                            "saturday": {
+                                "lessons": [
+                                    {
+                                        "name": "Техническая электродинамика II",
+                                        "room": 4,
+                                        "lecturer": null,
+                                        "type": "лекция",
+                                        "number": 2
+                                    },
+                                    {
+                                        "name": "Техническая электродинамика II",
+                                        "room": 4,
+                                        "lecturer": null,
+                                        "type": "практика",
+                                        "number": 3
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "z3300Т": {
+                    "odd_week": {
+                        "days": {
+                            "monday": {
+                                "lessons": [
+                                    {
+                                        "name": "Микроконтроллеры",
+                                        "room": 2433,
+                                        "lecturer": "Денисов К.",
+                                        "type": null,
+                                        "number": 2
+                                    },
+                                    {
+                                        "name": "Численные методы физики",
+                                        "room": 1609,
+                                        "lecturer": "Спиридонов С.",
+                                        "type": "практика",
+                                        "number": 3
+                                    }
+                                ]
+                            },
+                            "tuesday": {
+                                "lessons": []
+                            },
+                            "wednesday": {
+                                "lessons": [
+                                    {
+                                        "name": "Иностранный язык",
+                                        "room": null,
+                                        "lecturer": null,
+                                        "type": null,
+                                        "number": 1
                                     },
                                     {
                                         "name": "Иностранный язык",
                                         "room": null,
                                         "lecturer": null,
                                         "type": null,
-                                        "number": 8
+                                        "number": 2
                                     },
                                     {
-                                        "name": "Иностранный язык",
-                                        "room": null,
+                                        "name": "Устройства СВЧ и антенны",
+                                        "room": 4,
                                         "lecturer": null,
-                                        "type": null,
-                                        "number": 9
+                                        "type": "лабораторная",
+                                        "number": 4
+                                    },
+                                    {
+                                        "name": "Устройства СВЧ и антенны",
+                                        "room": 4,
+                                        "lecturer": null,
+                                        "type": "лабораторная",
+                                        "number": 5
                                     },
                                     {
                                         "name": "Графовые вероятностные модели",
                                         "room": 2435,
                                         "lecturer": null,
                                         "type": "факультатив",
-                                        "number": 13
+                                        "number": 6
                                     }
                                 ]
                             },
@@ -4473,84 +4488,123 @@
                                         "number": 4
                                     },
                                     {
-                                        "name": "Устройства СВЧ и антенны",
-                                        "room": 4,
-                                        "lecturer": "Удров М.",
-                                        "type": "практика",
-                                        "number": 9
-                                    },
-                                    {
-                                        "name": "Устройства СВЧ и антенны",
-                                        "room": 4,
-                                        "lecturer": "Глыбовский С.",
-                                        "type": null,
-                                        "number": 10
-                                    },
-                                    {
-                                        "name": "Устройства СВЧ и антенны",
-                                        "room": 4,
-                                        "lecturer": "Глыбовский С.",
-                                        "type": null,
-                                        "number": 11
-                                    },
-                                    {
                                         "name": "Микроконтроллеры",
                                         "room": 49,
                                         "lecturer": "Денисов К.",
                                         "type": null,
-                                        "number": 12
+                                        "number": 5
                                     }
                                 ]
                             },
                             "friday": {
                                 "lessons": [
                                     {
-                                        "name": "Аналоговая и цифровая обработка сигналов",
-                                        "room": 4,
-                                        "lecturer": "Сочава А.А.",
+                                        "name": "Численные методы физики",
+                                        "room": 2530,
+                                        "lecturer": null,
+                                        "type": "лекция",
+                                        "number": 5
+                                    }
+                                ]
+                            },
+                            "saturday": {
+                                "lessons": []
+                            }
+                        }
+                    },
+                    "even_week": {
+                        "days": {
+                            "monday": {
+                                "lessons": [
+                                    {
+                                        "name": "Микроконтроллеры",
+                                        "room": 2433,
+                                        "lecturer": "Денисов К.",
                                         "type": null,
                                         "number": 2
                                     },
                                     {
-                                        "name": "Аналоговая и цифровая обработка сигналов",
+                                        "name": "Численные методы физики",
+                                        "room": 1609,
+                                        "lecturer": "Спиридонов С.",
+                                        "type": "практика",
+                                        "number": 3
+                                    }
+                                ]
+                            },
+                            "tuesday": {
+                                "lessons": []
+                            },
+                            "wednesday": {
+                                "lessons": [
+                                    {
+                                        "name": "Иностранный язык",
+                                        "room": null,
+                                        "lecturer": null,
+                                        "type": null,
+                                        "number": 1
+                                    },
+                                    {
+                                        "name": "Иностранный язык",
+                                        "room": null,
+                                        "lecturer": null,
+                                        "type": null,
+                                        "number": 2
+                                    },
+                                    {
+                                        "name": "Графовые вероятностные модели",
+                                        "room": 2435,
+                                        "lecturer": null,
+                                        "type": "факультатив",
+                                        "number": 6
+                                    }
+                                ]
+                            },
+                            "thursday": {
+                                "lessons": [
+                                    {
+                                        "name": "Устройства СВЧ и антенны",
                                         "room": 4,
-                                        "lecturer": "Сочава А.А.",
+                                        "lecturer": "Удров М.",
+                                        "type": "практика",
+                                        "number": 2
+                                    },
+                                    {
+                                        "name": "Устройства СВЧ и антенны",
+                                        "room": 4,
+                                        "lecturer": "Глыбовский С.",
                                         "type": null,
                                         "number": 3
                                     },
+                                    {
+                                        "name": "Устройства СВЧ и антенны",
+                                        "room": 4,
+                                        "lecturer": "Глыбовский С.",
+                                        "type": null,
+                                        "number": 4
+                                    },
+                                    {
+                                        "name": "Микроконтроллеры",
+                                        "room": 49,
+                                        "lecturer": "Денисов К.",
+                                        "type": null,
+                                        "number": 5
+                                    }
+                                ]
+                            },
+                            "friday": {
+                                "lessons": [
                                     {
                                         "name": "Численные методы физики",
                                         "room": 2530,
                                         "lecturer": null,
                                         "type": "лекция",
                                         "number": 5
-                                    },
-                                    {
-                                        "name": "Численные методы физики",
-                                        "room": 2530,
-                                        "lecturer": null,
-                                        "type": "лекция",
-                                        "number": 12
                                     }
                                 ]
                             },
                             "saturday": {
-                                "lessons": [
-                                    {
-                                        "name": "Техническая электродинамика II",
-                                        "room": 4,
-                                        "lecturer": null,
-                                        "type": "лекция",
-                                        "number": 2
-                                    },
-                                    {
-                                        "name": "Техническая электродинамика II",
-                                        "room": 4,
-                                        "lecturer": null,
-                                        "type": "практика",
-                                        "number": 3
-                                    }
-                                ]
+                                "lessons": []
                             }
                         }
                     }
@@ -4781,7 +4835,7 @@
                         }
                     }
                 },
-                "радио": {
+                "z34433": {
                     "odd_week": {
                         "days": {
                             "monday": {
@@ -4921,7 +4975,138 @@
                             }
                         }
                     },
-                    "even_week": null
+                    "even_week": {
+                        "days": {
+                            "monday": {
+                                "lessons": []
+                            },
+                            "tuesday": {
+                                "lessons": [
+                                    {
+                                        "name": "Распространение и прием радиоволн",
+                                        "room": 1310,
+                                        "lecturer": "Лебедев Б.",
+                                        "type": null,
+                                        "number": 5
+                                    },
+                                    {
+                                        "name": "Методы обработки и анализа данных",
+                                        "room": 2536,
+                                        "lecturer": "Аль-Хайдри В.",
+                                        "type": null,
+                                        "number": 6
+                                    }
+                                ]
+                            },
+                            "wednesday": {
+                                "lessons": [
+                                    {
+                                        "name": "Английский язык в проф. деятельности",
+                                        "room": 3229,
+                                        "lecturer": "Джек Вуд",
+                                        "type": null,
+                                        "number": 1
+                                    },
+                                    {
+                                        "name": "Английский язык в проф. деятельности",
+                                        "room": 3229,
+                                        "lecturer": "Джек Вуд",
+                                        "type": null,
+                                        "number": 2
+                                    },
+                                    {
+                                        "name": "Военная кафедра",
+                                        "room": null,
+                                        "lecturer": null,
+                                        "type": null,
+                                        "number": 3
+                                    },
+                                    {
+                                        "name": "Военная кафедра",
+                                        "room": null,
+                                        "lecturer": null,
+                                        "type": null,
+                                        "number": 4
+                                    },
+                                    {
+                                        "name": "Военная кафедра",
+                                        "room": null,
+                                        "lecturer": null,
+                                        "type": null,
+                                        "number": 5
+                                    },
+                                    {
+                                        "name": "Военная кафедра",
+                                        "room": null,
+                                        "lecturer": null,
+                                        "type": null,
+                                        "number": 6
+                                    },
+                                    {
+                                        "name": "Военная кафедра",
+                                        "room": null,
+                                        "lecturer": null,
+                                        "type": null,
+                                        "number": 7
+                                    }
+                                ]
+                            },
+                            "thursday": {
+                                "lessons": [
+                                    {
+                                        "name": "Цифровая схемотехника",
+                                        "room": 214,
+                                        "lecturer": "Белов А.",
+                                        "type": null,
+                                        "number": 3
+                                    },
+                                    {
+                                        "name": "Цифровая схемотехника",
+                                        "room": 214,
+                                        "lecturer": "Белов А.",
+                                        "type": null,
+                                        "number": 4
+                                    }
+                                ]
+                            },
+                            "friday": {
+                                "lessons": [
+                                    {
+                                        "name": "Аналоговая и цифровая обработка сигналов",
+                                        "room": 4,
+                                        "lecturer": "Сочава А.А.",
+                                        "type": null,
+                                        "number": 2
+                                    },
+                                    {
+                                        "name": "Аналоговая и цифровая обработка сигналов",
+                                        "room": 4,
+                                        "lecturer": "Сочава А.А.",
+                                        "type": null,
+                                        "number": 3
+                                    }
+                                ]
+                            },
+                            "saturday": {
+                                "lessons": [
+                                    {
+                                        "name": "Английский язык в проф. деятельности",
+                                        "room": 3112,
+                                        "lecturer": "Муфалали Чипо",
+                                        "type": null,
+                                        "number": 5
+                                    },
+                                    {
+                                        "name": "Английский язык в проф. деятельности",
+                                        "room": 3112,
+                                        "lecturer": "Муфалали Чипо",
+                                        "type": null,
+                                        "number": 6
+                                    }
+                                ]
+                            }
+                        }
+                    }
                 },
                 "z34431": {
                     "odd_week": {
@@ -5427,141 +5612,6 @@
                             },
                             "friday": {
                                 "lessons": []
-                            },
-                            "saturday": {
-                                "lessons": [
-                                    {
-                                        "name": "Английский язык в проф. деятельности",
-                                        "room": 3112,
-                                        "lecturer": "Муфалали Чипо",
-                                        "type": null,
-                                        "number": 5
-                                    },
-                                    {
-                                        "name": "Английский язык в проф. деятельности",
-                                        "room": 3112,
-                                        "lecturer": "Муфалали Чипо",
-                                        "type": null,
-                                        "number": 6
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                },
-                "z34433": {
-                    "odd_week": null,
-                    "even_week": {
-                        "days": {
-                            "monday": {
-                                "lessons": []
-                            },
-                            "tuesday": {
-                                "lessons": [
-                                    {
-                                        "name": "Распространение и прием радиоволн",
-                                        "room": 1310,
-                                        "lecturer": "Лебедев Б.",
-                                        "type": null,
-                                        "number": 5
-                                    },
-                                    {
-                                        "name": "Методы обработки и анализа данных",
-                                        "room": 2536,
-                                        "lecturer": "Аль-Хайдри В.",
-                                        "type": null,
-                                        "number": 6
-                                    }
-                                ]
-                            },
-                            "wednesday": {
-                                "lessons": [
-                                    {
-                                        "name": "Английский язык в проф. деятельности",
-                                        "room": 3229,
-                                        "lecturer": "Джек Вуд",
-                                        "type": null,
-                                        "number": 1
-                                    },
-                                    {
-                                        "name": "Английский язык в проф. деятельности",
-                                        "room": 3229,
-                                        "lecturer": "Джек Вуд",
-                                        "type": null,
-                                        "number": 2
-                                    },
-                                    {
-                                        "name": "Военная кафедра",
-                                        "room": null,
-                                        "lecturer": null,
-                                        "type": null,
-                                        "number": 3
-                                    },
-                                    {
-                                        "name": "Военная кафедра",
-                                        "room": null,
-                                        "lecturer": null,
-                                        "type": null,
-                                        "number": 4
-                                    },
-                                    {
-                                        "name": "Военная кафедра",
-                                        "room": null,
-                                        "lecturer": null,
-                                        "type": null,
-                                        "number": 5
-                                    },
-                                    {
-                                        "name": "Военная кафедра",
-                                        "room": null,
-                                        "lecturer": null,
-                                        "type": null,
-                                        "number": 6
-                                    },
-                                    {
-                                        "name": "Военная кафедра",
-                                        "room": null,
-                                        "lecturer": null,
-                                        "type": null,
-                                        "number": 7
-                                    }
-                                ]
-                            },
-                            "thursday": {
-                                "lessons": [
-                                    {
-                                        "name": "Цифровая схемотехника",
-                                        "room": 214,
-                                        "lecturer": "Белов А.",
-                                        "type": null,
-                                        "number": 3
-                                    },
-                                    {
-                                        "name": "Цифровая схемотехника",
-                                        "room": 214,
-                                        "lecturer": "Белов А.",
-                                        "type": null,
-                                        "number": 4
-                                    }
-                                ]
-                            },
-                            "friday": {
-                                "lessons": [
-                                    {
-                                        "name": "Аналоговая и цифровая обработка сигналов",
-                                        "room": 4,
-                                        "lecturer": "Сочава А.А.",
-                                        "type": null,
-                                        "number": 2
-                                    },
-                                    {
-                                        "name": "Аналоговая и цифровая обработка сигналов",
-                                        "room": 4,
-                                        "lecturer": "Сочава А.А.",
-                                        "type": null,
-                                        "number": 3
-                                    }
-                                ]
                             },
                             "saturday": {
                                 "lessons": [

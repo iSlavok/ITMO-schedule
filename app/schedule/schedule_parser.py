@@ -24,6 +24,9 @@ class ScheduleParser:
             "СУББОТА": "saturday",
             "НЕЧЕТНАЯ НЕДЕЛЯ": "odd_week",
             "ЧЕТНАЯ НЕДЕЛЯ": "even_week",
+            "радио": "z34433",
+            "Z3300\nБеспроводные технологии": "z3300Б",
+            "Z3300\nТелеком": "z3300Т"
         }
         self._lesson_replace = [
             (re.compile(r"лабораторные"), "лабораторная"),
@@ -105,8 +108,9 @@ class ScheduleParser:
                             self._values[target_row][c] = next_value
 
     def _replace_values(self) -> None:
-        for n in range(2):
+        for n in range(3):
             for i, value in enumerate(self._values[n][2:], 2):
+                value = value.strip()
                 if value == "":
                     self._values[n][i] = self._values[n][i - 1]
                 if value in self._replace:

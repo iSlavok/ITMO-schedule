@@ -3,8 +3,8 @@ from aiogram import BaseMiddleware
 from aiogram.dispatcher.flags import get_flag
 from aiogram.types import Message
 
-from app.repositories import GroupRepository, CourseRepository
-from app.services import GuestService, ScheduleService, AiService
+from app.repositories import GroupRepository, CourseRepository, LecturerRepository, RatingRepository
+from app.services import GuestService, ScheduleService, AiService, RatingService
 
 
 class ServicesMiddleware(BaseMiddleware):
@@ -31,5 +31,9 @@ class ServicesMiddleware(BaseMiddleware):
                 course_repo = CourseRepository(session)
                 group_repo = GroupRepository(session)
                 services["guest_service"] = GuestService(course_repo, group_repo)
+            elif service == "rating":
+                lecturer_repo = LecturerRepository(session)
+                rating_repo = RatingRepository(session)
+                services["rating_service"] = RatingService(lecturer_repo, rating_repo)
         data.update(services)
         return await handler(event, data)
