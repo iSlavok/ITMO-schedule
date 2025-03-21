@@ -25,7 +25,6 @@ async def main():
     dp = Dispatcher(storage=RedisStorage(Redis()))
     register_handlers(dp)
     register_middlewares(dp, schedule_service, ai_service)
-    # await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":

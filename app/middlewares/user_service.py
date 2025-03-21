@@ -17,5 +17,6 @@ class UserServiceMiddleware(BaseMiddleware):
         session = next(get_session())
         data["session"] = session
         user_repo = UserRepository(session)
+        data["user_repo"] = user_repo
         data["user_service"] = UserService(user_repo)
         return await handler(event, data)
