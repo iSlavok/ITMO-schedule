@@ -28,7 +28,7 @@ class UserRepository:
         return result.scalars().first()
 
     def get_all(self) -> list[User]:
-        query = select(User)
+        query = select(User).options(selectinload(User.group))
         result = self.session.execute(query)
         return list(result.scalars().all())
 

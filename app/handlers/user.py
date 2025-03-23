@@ -1,3 +1,4 @@
+import time
 from contextlib import suppress
 from datetime import date, timedelta
 from aiogram import Router, F
@@ -10,7 +11,7 @@ from app.filters import RoleFilter
 from app.keyboards.user import main_keyboard, ranking_order_keyboard, get_pagination_rating_keyboard, \
     get_rating_keyboard
 from app.schedule import Lesson
-from app.services import ScheduleService, AiService, RatingService
+from app.services import ScheduleService, AiService, RatingService, LogService
 
 router = Router()
 router.message.filter(or_f(RoleFilter(Role.USER), RoleFilter(Role.ADMIN)))
@@ -22,10 +23,11 @@ router.callback_query.filter(or_f(RoleFilter(Role.USER), RoleFilter(Role.ADMIN))
     flags={"services": ["schedule", "rating"]}
 )
 async def get_main_menu(callback: CallbackQuery, state: FSMContext, user: User, schedule_service: ScheduleService,
-                        rating_service: RatingService):
+                        rating_service: RatingService, log_service: LogService):
     with suppress(Exception):
         await callback.answer()
         await callback.message.delete()
+    log_service.log_action(callback.from_user.id, f"button {callback.data}")
     await send_schedule(callback.message, user, schedule_service, rating_service, state, date.today(), "сегодня",
                         is_today=True)
 
@@ -33,9 +35,14 @@ async def get_main_menu(callback: CallbackQuery, state: FSMContext, user: User, 
 @router.message(
     F.text == "Рейтинг"
 )
-async def get_rating_menu(message: Message, state: FSMContext):
+async def get_rating_menu(message: Message, state: FSMContext, log_service: LogService):
     with suppress(Exception):
         await message.delete()
+    log_service.log_action(message.from_user.id, f"message {message.text}")
+    await show_rating_menu(message, state)
+
+
+async def show_rating_menu(message: Message, state: FSMContext):
     new_message = await message.answer(
         f"Выберите, какой рейтинг вы хотите посмотреть:",
         reply_markup=ranking_order_keyboard
@@ -46,18 +53,23 @@ async def get_rating_menu(message: Message, state: FSMContext):
 @router.callback_query(
     F.data == "rating_menu",
 )
-async def get_rating_menu_button(callback: CallbackQuery, state: FSMContext):
-    await get_rating_menu(callback.message, state)
+async def get_rating_menu_button(callback: CallbackQuery, state: FSMContext, log_service: LogService):
+    with suppress(Exception):
+        await callback.answer()
+        await callback.message.delete()
+    log_service.log_action(callback.from_user.id, f"button {callback.data}")
+    await show_rating_menu(callback.message, state)
 
 
 @router.callback_query(
     F.data.startswith("rating_"),
     flags={"services": ["rating"]}
 )
-async def show_rating(callback: CallbackQuery, state: FSMContext, rating_service: RatingService):
+async def show_rating(callback: CallbackQuery, state: FSMContext, rating_service: RatingService, log_service: LogService):
     with suppress(Exception):
         await callback.answer()
         await callback.message.delete()
+    log_service.log_action(callback.from_user.id, f"button {callback.data}")
     is_best = callback.data.split("_")[1] == "best"
     page = int(callback.data.split("_")[2])
     rating = rating_service.get_top_lecturers_with_rank(page, ascending=not is_best)
@@ -76,9 +88,10 @@ async def show_rating(callback: CallbackQuery, state: FSMContext, rating_service
     flags={"services": ["rating", "schedule"]}
 )
 async def select_rating(message: Message, state: FSMContext, rating_service: RatingService,
-                        schedule_service: ScheduleService, user: User):
+                        schedule_service: ScheduleService, user: User, log_service: LogService):
     with suppress(Exception):
         await message.delete()
+    log_service.log_action(message.from_user.id, f"message {message.text}")
     last_lecturer = schedule_service.get_last_lecturer(user.group.name)
     if last_lecturer:
         lecturer = rating_service.get_lecturer(last_lecturer)
@@ -106,10 +119,11 @@ async def select_rating(message: Message, state: FSMContext, rating_service: Rat
     flags={"services": ["rating", "schedule"]}
 )
 async def submit_rating(callback: CallbackQuery, state: FSMContext, rating_service: RatingService,
-                        schedule_service: ScheduleService, user: User):
+                        schedule_service: ScheduleService, user: User, log_service: LogService):
     with suppress(Exception):
         await callback.answer()
         await callback.message.delete()
+    log_service.log_action(callback.from_user.id, f"button {callback.data}")
     lecturer_id, rating = map(int, callback.data.split("_")[2:])
     last_lecturer = schedule_service.get_last_lecturer(user.group.name)
     if not last_lecturer or rating_service.get_lecturer(last_lecturer).id != lecturer_id:
@@ -133,8 +147,10 @@ async def submit_rating(callback: CallbackQuery, state: FSMContext, rating_servi
     flags={"services": ["schedule", "ai", "rating"]},
 )
 async def get_schedule(message: Message, user: User, schedule_service: ScheduleService, ai_service: AiService,
-                       rating_service: RatingService, state: FSMContext):
-    await message.delete()
+                       rating_service: RatingService, state: FSMContext, log_service: LogService):
+    with suppress(Exception):
+        await message.delete()
+    log_service.log_action(message.from_user.id, f"message {message.text}")
     if message.text == "Сегодня":
         day = date.today()
         day_str = "сегодня"
@@ -142,7 +158,10 @@ async def get_schedule(message: Message, user: User, schedule_service: ScheduleS
         day = date.today() + timedelta(days=1)
         day_str = "завтра"
     else:
+        start_time = time.perf_counter()
         day = await ai_service.date_parsing(message.text)
+        duration = time.perf_counter() - start_time
+        log_service.log_action(message.from_user.id, f"ai {message.text} {duration:.3f}s {day}")
         if not day:
             return
         else:

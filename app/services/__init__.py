@@ -4,6 +4,7 @@ from .guest import GuestService
 from .ai import AiService
 from .rating import RatingService
 from .admin import AdminService
+from .log import LogService
 
 __all__ = [
     "ScheduleService",
@@ -12,4 +13,5 @@ __all__ = [
     "AiService",
     "RatingService",
     "AdminService"
+    "LogService",
 ]

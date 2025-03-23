@@ -16,7 +16,7 @@ class AiService:
 
     async def date_parsing(self, message: str) -> date | None:
         today = date.today()
-        model = "gemini-2.0-flash-lite"
+        model = "gemini-2.0-flash"
         contents = [
             types.Content(
                 role="user",

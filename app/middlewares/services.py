@@ -3,8 +3,8 @@ from aiogram import BaseMiddleware
 from aiogram.dispatcher.flags import get_flag
 from aiogram.types import Message
 
-from app.repositories import GroupRepository, CourseRepository, LecturerRepository, RatingRepository
-from app.services import GuestService, ScheduleService, AiService, RatingService, AdminService
+from app.repositories import GroupRepository, CourseRepository, LecturerRepository, RatingRepository, LogRepository
+from app.services import GuestService, ScheduleService, AiService, RatingService, AdminService, LogService
 
 
 class ServicesMiddleware(BaseMiddleware):
@@ -22,6 +22,8 @@ class ServicesMiddleware(BaseMiddleware):
         required = get_flag(data, "services", default=[])
         services = {}
         session = data["session"]
+        log_repo = LogRepository(session)
+        services["log_service"] = LogService(log_repo)
         for service in required:
             if service == "schedule":
                 services["schedule_service"] = self._schedule_service

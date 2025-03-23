@@ -4,6 +4,7 @@ from .course import CourseRepository
 from .schedule import ScheduleRepository
 from .lecturer import LecturerRepository
 from .rating import RatingRepository
+from .log import LogRepository
 
 __all__ = [
     "UserRepository",
@@ -12,4 +13,5 @@ __all__ = [
     "ScheduleRepository",
     "LecturerRepository",
     "RatingRepository",
+    "LogRepository",
 ]
