@@ -13,7 +13,7 @@ class ScheduleRepository:
     @schedule.setter
     def schedule(self, schedule: Schedule):
         with open("app/schedule/schedule.json", "w", encoding="utf-8") as file:
-            json.dump(schedule.model_dump(), file, ensure_ascii=False, indent=4)
+            json.dump(schedule.model_dump(), file, ensure_ascii=False, indent=2)
 
     @property
     def dated_schedule(self) -> DatedSchedule:
@@ -24,4 +24,4 @@ class ScheduleRepository:
     @dated_schedule.setter
     def dated_schedule(self, schedule: DatedSchedule):
         with open("app/schedule/dated_schedule.json", "w", encoding="utf-8") as file:
-            json.dump(schedule.model_dump(), file, ensure_ascii=False, indent=4)
+            json.dump(schedule.model_dump(), file, ensure_ascii=False, indent=2)

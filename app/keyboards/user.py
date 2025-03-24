@@ -51,6 +51,13 @@ def get_rating_keyboard(lecturer_id: int):
                 InlineKeyboardButton(text="⭐5", callback_data=f"add_rating_{lecturer_id}_5"),
             ],
             [
+                InlineKeyboardButton(text="⭐️6", callback_data=f"add_rating_{lecturer_id}_6"),
+                InlineKeyboardButton(text="⭐7", callback_data=f"add_rating_{lecturer_id}_7"),
+                InlineKeyboardButton(text="⭐8", callback_data=f"add_rating_{lecturer_id}_8"),
+                InlineKeyboardButton(text="⭐9", callback_data=f"add_rating_{lecturer_id}_9"),
+                InlineKeyboardButton(text="⭐10", callback_data=f"add_rating_{lecturer_id}_10"),
+            ],
+            [
                 InlineKeyboardButton(text="Назад", callback_data="main_menu")
             ]
         ]
