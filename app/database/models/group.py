@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING
 from app.database.base import BaseModel
 
 if TYPE_CHECKING:
-    from . import Course
-    from . import User
+    from . import Course, User
 
 
 class Group(BaseModel):

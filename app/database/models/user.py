@@ -6,9 +6,7 @@ from ..base import BaseModel
 from ..enums import Role
 
 if TYPE_CHECKING:
-    from . import Group
-    from . import Rating
-    from . import Log
+    from . import Group, Rating, Log
 
 
 class User(BaseModel):
