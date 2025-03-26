@@ -1,15 +1,20 @@
+import re
+
+from datetime import datetime
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, declared_attr
 from sqlalchemy import Integer, DateTime, func
-from datetime import datetime
 
 
 class Base(AsyncAttrs, DeclarativeBase):
 
     @declared_attr.directive
     def __tablename__(self) -> str:
-        return self.__name__.lower() + "s"
+        name = re.sub(r'(?<!^)(?=[A-Z])', '_', self.__name__).lower()
+        if not name.endswith('s'):
+            name += 's'
+        return name
 
 
 class TimestampMixin:
