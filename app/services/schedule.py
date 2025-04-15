@@ -39,9 +39,10 @@ class ScheduleService:
                 if group in self._schedule.courses[course].groups:
                     group_schedule = self._schedule.courses[course].groups[group]
                     if _is_even_week and group_schedule.even_week:
-                        lessons = group_schedule.even_week.days[weekday].lessons
+                        lessons = group_schedule.even_week.days[weekday].lessons.copy()
                     elif not _is_even_week and group_schedule.odd_week:
-                        lessons = group_schedule.odd_week.days[weekday].lessons
+                        lessons = group_schedule.odd_week.days[weekday].lessons.copy()
+                    break
             lessons += self._get_dated_schedule(target_date, group, weekday, _is_even_week)
             lessons.sort(key=lambda x: x.number)
             return lessons

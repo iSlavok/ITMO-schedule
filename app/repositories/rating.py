@@ -1,5 +1,5 @@
 from datetime import date
-from sqlalchemy import select, cast, Date, func
+from sqlalchemy import select, func
 
 from app.database import Rating
 from app.database.connection import Session
