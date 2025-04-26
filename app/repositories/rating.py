@@ -1,8 +1,8 @@
 from datetime import date
 from sqlalchemy import select, func
 
-from app.database import Rating
 from app.database.connection import Session
+from app.models import Rating
 
 
 class RatingRepository:

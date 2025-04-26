@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from app.database import Course, Group
+from app.models import Course, Group
 
 
 def get_course_keyboard(courses: list[Course]):

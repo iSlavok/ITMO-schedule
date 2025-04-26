@@ -1213,13 +1213,6 @@
                     "lecturer": "Джандалиева А.",
                     "type": "лабораторная",
                     "number": 5
-                  },
-                  {
-                    "name": "Физика",
-                    "room": 4304,
-                    "lecturer": "Джандалиева А.",
-                    "type": "лабораторная",
-                    "number": 6
                   }
                 ]
               },
@@ -1402,13 +1395,6 @@
                     "lecturer": "Джандалиева А.",
                     "type": "лабораторная",
                     "number": 5
-                  },
-                  {
-                    "name": "Физика",
-                    "room": 4304,
-                    "lecturer": "Джандалиева А.",
-                    "type": "лабораторная",
-                    "number": 6
                   }
                 ]
               },
@@ -2194,6 +2180,13 @@
                     "lecturer": "Даниловский Э.",
                     "type": "лекция",
                     "number": 4
+                  },
+                  {
+                    "name": "Теормех",
+                    "room": 1315,
+                    "lecturer": "Кривосенко Ю.С., 06.05",
+                    "type": "практика",
+                    "number": 5
                   }
                 ]
               },
@@ -2294,6 +2287,20 @@
                     "lecturer": "Акацевич П.",
                     "type": "практика",
                     "number": 3
+                  },
+                  {
+                    "name": "Soft Skills",
+                    "room": null,
+                    "lecturer": null,
+                    "type": null,
+                    "number": 4
+                  },
+                  {
+                    "name": "Soft Skills",
+                    "room": null,
+                    "lecturer": null,
+                    "type": null,
+                    "number": 5
                   }
                 ]
               }
@@ -2457,6 +2464,20 @@
                     "lecturer": "Табиева А.",
                     "type": "практика",
                     "number": 3
+                  },
+                  {
+                    "name": "Soft Skills",
+                    "room": null,
+                    "lecturer": null,
+                    "type": null,
+                    "number": 4
+                  },
+                  {
+                    "name": "Soft Skills",
+                    "room": null,
+                    "lecturer": null,
+                    "type": null,
+                    "number": 5
                   }
                 ]
               }
@@ -2618,6 +2639,20 @@
                     "lecturer": "Табиева А.",
                     "type": "практика",
                     "number": 3
+                  },
+                  {
+                    "name": "Soft Skills",
+                    "room": null,
+                    "lecturer": null,
+                    "type": null,
+                    "number": 4
+                  },
+                  {
+                    "name": "Soft Skills",
+                    "room": null,
+                    "lecturer": null,
+                    "type": null,
+                    "number": 5
                   }
                 ]
               }
@@ -2695,7 +2730,7 @@
                   },
                   {
                     "name": "Матфизика",
-                    "room": 1609,
+                    "room": 1310,
                     "lecturer": "Акацевич П.",
                     "type": "практика",
                     "number": 3
@@ -2703,7 +2738,7 @@
                   {
                     "name": "Теормех",
                     "room": 1609,
-                    "lecturer": null,
+                    "lecturer": "Симонян",
                     "type": "практика",
                     "number": 4
                   },
@@ -2884,7 +2919,7 @@
                   },
                   {
                     "name": "Матфизика",
-                    "room": 1609,
+                    "room": 1122,
                     "lecturer": "Акацевич П.",
                     "type": "практика",
                     "number": 3
@@ -2892,7 +2927,7 @@
                   {
                     "name": "Теормех",
                     "room": 1609,
-                    "lecturer": null,
+                    "lecturer": "Симонян",
                     "type": "практика",
                     "number": 4
                   },
@@ -3089,14 +3124,14 @@
                   },
                   {
                     "name": "Теормех",
-                    "room": 2435,
+                    "room": 1609,
                     "lecturer": "Иванов В.",
                     "type": "практика",
                     "number": 3
                   },
                   {
                     "name": "Матфизика",
-                    "room": 2435,
+                    "room": 4213,
                     "lecturer": "Акацевич П.",
                     "type": "практика",
                     "number": 4
@@ -3278,14 +3313,14 @@
                   },
                   {
                     "name": "Теормех",
-                    "room": 2435,
+                    "room": 1609,
                     "lecturer": "Иванов В.",
                     "type": "практика",
                     "number": 3
                   },
                   {
                     "name": "Матфизика",
-                    "room": 2435,
+                    "room": 4213,
                     "lecturer": "Акацевич П.",
                     "type": "практика",
                     "number": 4
@@ -3394,6 +3429,13 @@
               "monday": {
                 "lessons": [
                   {
+                    "name": "Теория калибровочных полей",
+                    "room": 2219,
+                    "lecturer": "Шендерович И.",
+                    "type": null,
+                    "number": 3
+                  },
+                  {
                     "name": "Численные методы физики",
                     "room": 2435,
                     "lecturer": "Акулов Д.",
@@ -3417,20 +3459,6 @@
                     "lecturer": null,
                     "type": null,
                     "number": 1
-                  },
-                  {
-                    "name": "Теория калибровочных полей",
-                    "room": 1315,
-                    "lecturer": "Глазов Д.",
-                    "type": null,
-                    "number": 4
-                  },
-                  {
-                    "name": "Теория калибровочных полей",
-                    "room": 1315,
-                    "lecturer": "Глазов Д.",
-                    "type": null,
-                    "number": 5
                   }
                 ]
               },
@@ -3452,21 +3480,21 @@
                   },
                   {
                     "name": "Физика твердого тела",
-                    "room": 1310,
+                    "room": 2435,
                     "lecturer": "Глазов М.",
                     "type": "лекция",
                     "number": 3
                   },
                   {
                     "name": "Физика твердого тела",
-                    "room": 4213,
+                    "room": 2435,
                     "lecturer": "Глазов М.",
                     "type": "лекция",
                     "number": 4
                   },
                   {
                     "name": "Графовые вероятностные модели",
-                    "room": 2435,
+                    "room": 1609,
                     "lecturer": null,
                     "type": "факультатив",
                     "number": 6
@@ -3551,18 +3579,18 @@
               "tuesday": {
                 "lessons": [
                   {
-                    "name": "Теория калибровочных полей",
-                    "room": 1315,
-                    "lecturer": "Глазов Д.",
-                    "type": null,
-                    "number": 4
+                    "name": "Доп. главы квантовой механики",
+                    "room": 2433,
+                    "lecturer": "Штернин П., 06.05",
+                    "type": "лекция",
+                    "number": 5
                   },
                   {
-                    "name": "Теория калибровочных полей",
-                    "room": 1315,
-                    "lecturer": "Глазов Д.",
-                    "type": null,
-                    "number": 5
+                    "name": "Доп. главы квантовой механики",
+                    "room": 2433,
+                    "lecturer": "Штернин П., 06.05",
+                    "type": "лекция",
+                    "number": 6
                   }
                 ]
               },
@@ -3584,21 +3612,21 @@
                   },
                   {
                     "name": "Физика твердого тела",
-                    "room": 1122,
+                    "room": 2435,
                     "lecturer": "Глазов М.",
                     "type": "лекция",
                     "number": 3
                   },
                   {
                     "name": "Физика твердого тела",
-                    "room": 4213,
+                    "room": 2435,
                     "lecturer": "Глазов М.",
                     "type": "лекция",
                     "number": 4
                   },
                   {
                     "name": "Графовые вероятностные модели",
-                    "room": 2435,
+                    "room": 1609,
                     "lecturer": null,
                     "type": "факультатив",
                     "number": 6
@@ -3703,21 +3731,21 @@
                   },
                   {
                     "name": "Физика твердого тела",
-                    "room": 1310,
+                    "room": 2435,
                     "lecturer": "Глазов М.",
                     "type": "лекция",
                     "number": 3
                   },
                   {
                     "name": "Физика твердого тела",
-                    "room": 4213,
+                    "room": 2435,
                     "lecturer": "Глазов М.",
                     "type": "лекция",
                     "number": 4
                   },
                   {
                     "name": "Графовые вероятностные модели",
-                    "room": 2435,
+                    "room": 1609,
                     "lecturer": null,
                     "type": "факультатив",
                     "number": 6
@@ -3815,7 +3843,22 @@
                 ]
               },
               "tuesday": {
-                "lessons": []
+                "lessons": [
+                  {
+                    "name": "Доп. главы квантовой механики",
+                    "room": 2433,
+                    "lecturer": "Штернин П., 06.05",
+                    "type": "лекция",
+                    "number": 5
+                  },
+                  {
+                    "name": "Доп. главы квантовой механики",
+                    "room": 2433,
+                    "lecturer": "Штернин П., 06.05",
+                    "type": "лекция",
+                    "number": 6
+                  }
+                ]
               },
               "wednesday": {
                 "lessons": [
@@ -3835,21 +3878,21 @@
                   },
                   {
                     "name": "Физика твердого тела",
-                    "room": 1122,
+                    "room": 2435,
                     "lecturer": "Глазов М.",
                     "type": "лекция",
                     "number": 3
                   },
                   {
                     "name": "Физика твердого тела",
-                    "room": 4213,
+                    "room": 2435,
                     "lecturer": "Глазов М.",
                     "type": "лекция",
                     "number": 4
                   },
                   {
                     "name": "Графовые вероятностные модели",
-                    "room": 2435,
+                    "room": 1609,
                     "lecturer": null,
                     "type": "факультатив",
                     "number": 6
@@ -3955,6 +3998,13 @@
                     "lecturer": "Клещенко В.",
                     "type": "практика",
                     "number": 4
+                  },
+                  {
+                    "name": "Методы оптимизации-1",
+                    "room": 1512,
+                    "lecturer": "Свинцов М.",
+                    "type": null,
+                    "number": 5
                   }
                 ]
               },
@@ -3976,7 +4026,7 @@
                   },
                   {
                     "name": "Графовые вероятностные модели",
-                    "room": 2435,
+                    "room": 1609,
                     "lecturer": null,
                     "type": "факультатив",
                     "number": 6
@@ -3994,6 +4044,13 @@
                     "lecturer": null,
                     "type": "лекция",
                     "number": 5
+                  },
+                  {
+                    "name": "Методы оптимизации-1",
+                    "room": 2530,
+                    "lecturer": "Свинцов М.",
+                    "type": null,
+                    "number": 6
                   }
                 ]
               },
@@ -4012,20 +4069,6 @@
                     "lecturer": null,
                     "type": null,
                     "number": 3
-                  },
-                  {
-                    "name": "Методы оптимизации-1",
-                    "room": 1512,
-                    "lecturer": "Свинцов М.",
-                    "type": null,
-                    "number": 4
-                  },
-                  {
-                    "name": "Методы оптимизации-1",
-                    "room": 1512,
-                    "lecturer": "Свинцов М.",
-                    "type": null,
-                    "number": 5
                   }
                 ]
               }
@@ -4058,6 +4101,13 @@
                     "lecturer": "Клещенко В.",
                     "type": "практика",
                     "number": 4
+                  },
+                  {
+                    "name": "Методы оптимизации-1",
+                    "room": 1512,
+                    "lecturer": "Свинцов М.",
+                    "type": null,
+                    "number": 5
                   }
                 ]
               },
@@ -4079,7 +4129,7 @@
                   },
                   {
                     "name": "Графовые вероятностные модели",
-                    "room": 2435,
+                    "room": 1609,
                     "lecturer": null,
                     "type": "факультатив",
                     "number": 6
@@ -4115,20 +4165,6 @@
                     "lecturer": null,
                     "type": null,
                     "number": 3
-                  },
-                  {
-                    "name": "Методы оптимизации-1",
-                    "room": 1512,
-                    "lecturer": "Свинцов М.",
-                    "type": null,
-                    "number": 4
-                  },
-                  {
-                    "name": "Методы оптимизации-1",
-                    "room": 1512,
-                    "lecturer": "Свинцов М.",
-                    "type": null,
-                    "number": 5
                   }
                 ]
               }
@@ -4198,7 +4234,7 @@
                   },
                   {
                     "name": "Графовые вероятностные модели",
-                    "room": 2435,
+                    "room": 1609,
                     "lecturer": null,
                     "type": "факультатив",
                     "number": 6
@@ -4323,7 +4359,7 @@
                   },
                   {
                     "name": "Графовые вероятностные модели",
-                    "room": 2435,
+                    "room": 1609,
                     "lecturer": null,
                     "type": "факультатив",
                     "number": 6
@@ -4419,6 +4455,20 @@
                     "lecturer": "Спиридонов С.",
                     "type": "практика",
                     "number": 3
+                  },
+                  {
+                    "name": "Основы теории информации",
+                    "room": 2530,
+                    "lecturer": null,
+                    "type": null,
+                    "number": 5
+                  },
+                  {
+                    "name": "Основы теории информации",
+                    "room": 2530,
+                    "lecturer": null,
+                    "type": null,
+                    "number": 6
                   }
                 ]
               },
@@ -4457,7 +4507,7 @@
                   },
                   {
                     "name": "Графовые вероятностные модели",
-                    "room": 2435,
+                    "room": 1609,
                     "lecturer": null,
                     "type": "факультатив",
                     "number": 6
@@ -4529,6 +4579,20 @@
                     "lecturer": "Спиридонов С.",
                     "type": "практика",
                     "number": 3
+                  },
+                  {
+                    "name": "Основы теории информации",
+                    "room": 2530,
+                    "lecturer": null,
+                    "type": null,
+                    "number": 5
+                  },
+                  {
+                    "name": "Основы теории информации",
+                    "room": 2530,
+                    "lecturer": null,
+                    "type": null,
+                    "number": 6
                   }
                 ]
               },
@@ -4553,7 +4617,7 @@
                   },
                   {
                     "name": "Графовые вероятностные модели",
-                    "room": 2435,
+                    "room": 1609,
                     "lecturer": null,
                     "type": "факультатив",
                     "number": 6

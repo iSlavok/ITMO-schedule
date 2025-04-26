@@ -1,7 +1,7 @@
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
-from app.database import Lecturer, Rating
+from app.models import Lecturer, Rating
 
 
 class LecturerRepository:

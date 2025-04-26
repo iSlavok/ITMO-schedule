@@ -5,4 +5,11 @@ from .lecturer import Lecturer
 from .rating import Rating
 from .log import Log
 
-__all__ = ["Course", "Group", "User", "Lecturer", "Rating", "Log"]
+__all__ = [
+    "Course",
+    "Group",
+    "User",
+    "Lecturer",
+    "Rating",
+    "Log",
+]

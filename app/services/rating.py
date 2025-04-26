@@ -1,4 +1,4 @@
-from app.database import Lecturer, Rating
+from app.models import Lecturer, Rating
 from app.repositories import LecturerRepository, RatingRepository
 
 

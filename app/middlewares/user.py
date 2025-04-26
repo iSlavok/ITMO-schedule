@@ -2,7 +2,7 @@ from typing import Callable, Dict, Any, Awaitable
 from aiogram import BaseMiddleware
 from aiogram.types import User, Message
 
-from app.database import Role
+from app.enums import UserRole
 from app.services import UserService
 
 
@@ -22,7 +22,7 @@ class UserMiddleware(BaseMiddleware):
                     user_id=tg_user.id,
                     username=tg_user.username,
                     name=tg_user.full_name,
-                    role=Role.GUEST,
+                    role=UserRole.GUEST,
                 )
             data["user"] = user
         return await handler(event, data)

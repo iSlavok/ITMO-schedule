@@ -12,6 +12,6 @@ __all__ = [
     "GuestService",
     "AiService",
     "RatingService",
-    "AdminService"
+    "AdminService",
     "LogService",
 ]

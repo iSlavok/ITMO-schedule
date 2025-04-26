@@ -6,16 +6,17 @@ from aiogram.filters import or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-from app.database import User, Role
+from app.enums import UserRole
 from app.filters import RoleFilter
 from app.keyboards.user import main_keyboard, ranking_order_keyboard, get_pagination_rating_keyboard, \
     get_rating_keyboard
+from app.models import User
 from app.schedule import Lesson
 from app.services import ScheduleService, AiService, RatingService, LogService
 
 router = Router()
-router.message.filter(or_f(RoleFilter(Role.USER), RoleFilter(Role.ADMIN)))
-router.callback_query.filter(or_f(RoleFilter(Role.USER), RoleFilter(Role.ADMIN)))
+router.message.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole.ADMIN)))
+router.callback_query.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole.ADMIN)))
 
 
 @router.callback_query(

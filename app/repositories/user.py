@@ -1,7 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.database import Role, User, Group
+from app.enums import UserRole
+from app.models import User, Group
 
 
 class UserRepository:
@@ -9,7 +10,7 @@ class UserRepository:
         self.session = session
 
     def create(self, user_id: int, username: str = None, name: str = None,
-               role: Role = Role.USER, group_id: int = None) -> User:
+               role: UserRole = UserRole.USER, group_id: int = None) -> User:
         user = User(user_id=user_id, username=username, name=name,
                     role=role, group_id=group_id)
         self.session.add(user)
@@ -37,7 +38,7 @@ class UserRepository:
         result = self.session.execute(query)
         return list(result.scalars().all())
 
-    def get_by_role(self, role: Role) -> list[User]:
+    def get_by_role(self, role: UserRole) -> list[User]:
         query = select(User).where(User.role == role)
         result = self.session.execute(query)
         return list(result.scalars().all())

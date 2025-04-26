@@ -1,6 +1,7 @@
 from sqlalchemy import select
-from app.database import Log
+
 from app.database.connection import Session
+from app.models import Log
 
 
 class LogRepository:

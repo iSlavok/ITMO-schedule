@@ -4,15 +4,15 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from app.database import Role
+from app.enums import UserRole
 from app.filters import RoleFilter
 from app.handlers.user import delete_last_message
 from app.keyboards.user import main_keyboard
 from app.services import AdminService
 
 router = Router()
-router.message.filter(RoleFilter(Role.ADMIN))
-router.callback_query.filter(RoleFilter(Role.ADMIN))
+router.message.filter(RoleFilter(UserRole.ADMIN))
+router.callback_query.filter(RoleFilter(UserRole.ADMIN))
 
 
 @router.message(

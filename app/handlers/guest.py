@@ -6,16 +6,17 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-from app.database import User, Role
+from app.enums import UserRole
 from app.filters import RoleFilter
 from app.handlers.user import send_schedule
 from app.keyboards.guest import get_course_keyboard, get_group_keyboard
+from app.models import User
 from app.services import GuestService, UserService, ScheduleService, RatingService
 from app.states import RegisterStates
 
 router = Router()
-router.message.filter(RoleFilter(Role.GUEST))
-router.callback_query.filter(RoleFilter(Role.GUEST))
+router.message.filter(RoleFilter(UserRole.GUEST))
+router.callback_query.filter(RoleFilter(UserRole.GUEST))
 
 
 @router.message(
