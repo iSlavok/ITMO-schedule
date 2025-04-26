@@ -1,0 +1,96 @@
+services:
+  bot:
+    image: ghcr.io/islavok/itmo-schedule:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+      - ./google-credentials.json:/app/google-credentials.json
+    profiles: ["prod"]
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - bot_network
+
+  bot-dev:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+      - ./google-credentials.json:/app/google-credentials.json
+      - ./bot:/app/bot
+      - ./alembic:/app/alembic
+      - ./main.py:/app/main.py
+      - ./alembic.ini:/app/alembic.ini
+    command: python main.py
+    profiles: ["dev"]
+    networks:
+      - bot_network
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    profiles: ["dev","prod"]
+    healthcheck:
+      test: ["CMD","redis-cli","ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+    networks:
+      - bot_network
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mydatabase}
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    profiles: ["dev","prod"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+    networks:
+      - bot_network
+    ports:
+      - "5434:5432"
+
+volumes:
+  redis_data:
+  postgres_data:
+
+networks:
+  bot_network:
+    driver: bridge

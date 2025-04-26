@@ -1,28 +1,31 @@
 import asyncio
-import os
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.fsm.storage.base import DefaultKeyBuilder
 from aiogram.fsm.storage.redis import RedisStorage
 from redis.asyncio.client import Redis
 
-from app.database import init_db
-from app.handlers import register_handlers
-from app.middlewares import register_middlewares
-from app.services import ScheduleService, AiService
-from app.schedule import ScheduleParser, ScheduleUpdater
+from bot.config import env_config
+from bot.database import init_db
+from bot.handlers import register_handlers
+from bot.middlewares import register_middlewares
+from bot.services import ScheduleService, AiService
+from bot.schedule import ScheduleParser, ScheduleUpdater
 
 
 async def main():
-    init_db()
+    await init_db()
     schedule_service = ScheduleService()
     ai_service = AiService()
     parser = ScheduleParser(
         "https://docs.google.com/spreadsheets/d/1rlpvp-aGnJor98piGlejZ-talaUclG8aZWZM9wSt6qo/edit?gid=239775900#gid=239775900")
     ScheduleUpdater(schedule_service, parser, interval=600)
 
-    bot = Bot(token=os.getenv("BOT_TOKEN"), default=DefaultBotProperties(parse_mode='HTML'))
-    dp = Dispatcher(storage=RedisStorage(Redis()))
+    bot = Bot(token=env_config.BOT_TOKEN, default=DefaultBotProperties(parse_mode='HTML'))
+    storage = RedisStorage(redis=Redis(host=env_config.REDIS_HOST, port=env_config.REDIS_PORT),
+                           key_builder=DefaultKeyBuilder(with_destiny=True, with_bot_id=True))
+    dp = Dispatcher(storage=storage)
     register_handlers(dp)
     register_middlewares(dp, schedule_service, ai_service)
     await dp.start_polling(bot)
