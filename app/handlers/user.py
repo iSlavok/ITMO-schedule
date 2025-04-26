@@ -6,10 +6,15 @@ from aiogram.filters import or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-from app.enums import UserRole
+from app.callback_data import RatingCD, AddRatingCD
+from app.enums import UserRole, RatingType
 from app.filters import RoleFilter
-from app.keyboards.user import main_keyboard, ranking_order_keyboard, get_pagination_rating_keyboard, \
-    get_rating_keyboard
+from app.keyboards import (
+    get_main_kb,
+    get_rating_kb,
+    get_pagination_rating_kb,
+    get_add_rating_kb
+)
 from app.models import User
 from app.schedule import Lesson
 from app.services import ScheduleService, AiService, RatingService, LogService
@@ -20,7 +25,7 @@ router.callback_query.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole
 
 
 @router.callback_query(
-    F.data == "main_menu",
+    F.data == "main",
     flags={"services": ["schedule", "rating"]}
 )
 async def get_main_menu(callback: CallbackQuery, state: FSMContext, user: User, schedule_service: ScheduleService,
@@ -46,13 +51,13 @@ async def get_rating_menu(message: Message, state: FSMContext, log_service: LogS
 async def show_rating_menu(message: Message, state: FSMContext):
     new_message = await message.answer(
         f"Выберите, какой рейтинг вы хотите посмотреть:",
-        reply_markup=ranking_order_keyboard
+        reply_markup=get_rating_kb()
     )
     await delete_last_message(message, state, new_message.message_id)
 
 
 @router.callback_query(
-    F.data == "rating_menu",
+    F.data == "rating",
 )
 async def get_rating_menu_button(callback: CallbackQuery, state: FSMContext, log_service: LogService):
     with suppress(Exception):
@@ -63,23 +68,24 @@ async def get_rating_menu_button(callback: CallbackQuery, state: FSMContext, log
 
 
 @router.callback_query(
-    F.data.startswith("rating_"),
+    RatingCD.filter(),
     flags={"services": ["rating"]}
 )
-async def show_rating(callback: CallbackQuery, state: FSMContext, rating_service: RatingService, log_service: LogService):
+async def show_rating(callback: CallbackQuery, callback_data: RatingCD, state: FSMContext,
+                      rating_service: RatingService, log_service: LogService):
     with suppress(Exception):
         await callback.answer()
         await callback.message.delete()
     log_service.log_action(callback.from_user.id, f"button {callback.data}")
-    is_best = callback.data.split("_")[1] == "best"
-    page = int(callback.data.split("_")[2])
-    rating = rating_service.get_top_lecturers_with_rank(page, ascending=not is_best)
-    text = "<b>" + ("Лучшие преподаватели:" if is_best else "Худшие преподаватели:") + "</b>\n\n"
+    rating_type = callback_data.type
+    page = callback_data.page
+    rating = rating_service.get_top_lecturers_with_rank(page, ascending=rating_type != RatingType.BEST)
+    text = "<b>" + ("Лучшие преподаватели:" if rating_type == RatingType.BEST else "Худшие преподаватели:") + "</b>\n\n"
     for lecturer, rank, avg_rating, reviews_count in rating:
         text += f"{rank}. {lecturer} — ⭐️{avg_rating} ({reviews_count} оценок)\n"
     new_message = await callback.message.answer(
         text,
-        reply_markup=get_pagination_rating_keyboard(page, rating_service.get_lecturers_page_count(), is_best),
+        reply_markup=get_pagination_rating_kb(page, rating_service.get_lecturers_page_count(), rating_type),
     )
     await delete_last_message(callback.message, state, new_message.message_id)
 
@@ -100,32 +106,34 @@ async def select_rating(message: Message, state: FSMContext, rating_service: Rat
             if rating_service.can_user_rate_lecturer(user.user_id, lecturer.id):
                 new_message = await message.answer(
                     f"Выберите оценку для преподавателя {lecturer.name}:",
-                    reply_markup=get_rating_keyboard(lecturer.id)
+                    reply_markup=get_add_rating_kb(lecturer.id)
                 )
             else:
                 new_message = await message.answer(
                     f"Сегодня вы уже оценили преподавателя {lecturer.name}.",
-                    reply_markup=main_keyboard
+                    reply_markup=get_main_kb()
                 )
             return await delete_last_message(message, state, new_message.message_id)
     new_message = await message.answer(
         "Нет доступного преподавателя для оценки.",
-        reply_markup=main_keyboard
+        reply_markup=get_main_kb()
     )
     await delete_last_message(message, state, new_message.message_id)
 
 
 @router.callback_query(
-    F.data.startswith("add_rating_"),
+    AddRatingCD.filter(),
     flags={"services": ["rating", "schedule"]}
 )
-async def submit_rating(callback: CallbackQuery, state: FSMContext, rating_service: RatingService,
-                        schedule_service: ScheduleService, user: User, log_service: LogService):
+async def submit_rating(callback: CallbackQuery, callback_data: AddRatingCD, state: FSMContext,
+                        rating_service: RatingService, schedule_service: ScheduleService, user: User,
+                        log_service: LogService):
     with suppress(Exception):
         await callback.answer()
         await callback.message.delete()
     log_service.log_action(callback.from_user.id, f"button {callback.data}")
-    lecturer_id, rating = map(int, callback.data.split("_")[2:])
+    lecturer_id = callback_data.lecturer_id
+    rating = callback_data.rating
     last_lecturer = schedule_service.get_last_lecturer(user.group.name)
     if not last_lecturer or rating_service.get_lecturer(last_lecturer).id != lecturer_id:
         new_message = await callback.message.answer("Вы не можете оценить этого преподавателя.")
@@ -134,12 +142,12 @@ async def submit_rating(callback: CallbackQuery, state: FSMContext, rating_servi
     if rating:
         new_message = await callback.message.answer(
             f"Оценка {rating.rating} для преподавателя {rating.lecturer.name} успешно добавлена.",
-            reply_markup=main_keyboard
+            reply_markup=get_main_kb()
         )
     else:
         new_message = await callback.message.answer(
             "Сегодня вы уже оценили этого преподавателя.",
-            reply_markup=main_keyboard
+            reply_markup=get_main_kb()
         )
     await delete_last_message(callback.message, state, new_message.message_id)
 
@@ -178,7 +186,7 @@ async def send_schedule(message: Message, user: User, schedule_service: Schedule
         return
 
     text = schedule_to_text(schedule, day_str, schedule_service, rating_service, is_today=is_today)
-    schedule_message = await message.bot.send_message(message.chat.id, text, reply_markup=main_keyboard)
+    schedule_message = await message.bot.send_message(message.chat.id, text, reply_markup=get_main_kb())
 
     await delete_last_message(message, state, schedule_message.message_id)
 

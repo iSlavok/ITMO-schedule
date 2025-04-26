@@ -1,64 +1,40 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup
+from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 
-main_keyboard = ReplyKeyboardMarkup(
-    resize_keyboard=True,
-    keyboard=[
-        [
-            KeyboardButton(text="Сегодня"),
-            KeyboardButton(text="Завтра"),
-            KeyboardButton(text="Оценить"),
-            KeyboardButton(text="Рейтинг")
-        ],
-    ])
-
-ranking_order_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(text="Лучшие", callback_data="rating_best_1"),
-            InlineKeyboardButton(text="Худшие", callback_data="rating_worst_1")
-        ],
-        [
-            InlineKeyboardButton(text="Назад", callback_data="main_menu")
-        ]
-    ]
-)
+from app.callback_data import RatingCD, AddRatingCD
+from app.enums import RatingType
 
 
-def get_pagination_rating_keyboard(page: int, total_pages: int, is_best: bool = True) -> InlineKeyboardMarkup:
-    buttons = []
+def get_main_kb():
+    builder = ReplyKeyboardBuilder()
+    builder.button(text="Сегодня")
+    builder.button(text="Завтра")
+    builder.button(text="Оценить")
+    builder.button(text="Рейтинг")
+    return builder.as_markup(resize_keyboard=True)
+
+
+def get_rating_kb():
+    builder = InlineKeyboardBuilder()
+    builder.button(text="Лучшие", callback_data=RatingCD(type=RatingType.BEST, page=1))
+    builder.button(text="Худшие", callback_data=RatingCD(type=RatingType.WORST, page=1))
+    builder.button(text="Назад", callback_data="main")
+    return builder.adjust(2).as_markup()
+
+
+def get_pagination_rating_kb(page: int, total_pages: int, rating_type: RatingType) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
     if page > 1:
-        buttons.append(InlineKeyboardButton(text="⬅️", callback_data=f"rating_{'best' if is_best else 'worst'}_{page - 1}"))
+        builder.button(text="⬅️", callback_data=RatingCD(type=rating_type, page=page - 1))
     if page < total_pages:
-        buttons.append(InlineKeyboardButton(text="➡️", callback_data=f"rating_{'best' if is_best else 'worst'}_{page + 1}"))
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            buttons,
-            [
-                InlineKeyboardButton(text="Назад", callback_data="rating_menu"),
-            ]
-        ]
-    )
+        builder.button(text="➡️", callback_data=RatingCD(type=rating_type, page=page + 1))
+    builder.button(text="Назад", callback_data="rating")
+    return builder.adjust(2).as_markup()
 
 
-def get_rating_keyboard(lecturer_id: int):
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(text="⭐️1", callback_data=f"add_rating_{lecturer_id}_1"),
-                InlineKeyboardButton(text="⭐2️", callback_data=f"add_rating_{lecturer_id}_2"),
-                InlineKeyboardButton(text="⭐3️", callback_data=f"add_rating_{lecturer_id}_3"),
-                InlineKeyboardButton(text="⭐4", callback_data=f"add_rating_{lecturer_id}_4"),
-                InlineKeyboardButton(text="⭐5", callback_data=f"add_rating_{lecturer_id}_5"),
-            ],
-            [
-                InlineKeyboardButton(text="⭐️6", callback_data=f"add_rating_{lecturer_id}_6"),
-                InlineKeyboardButton(text="⭐7", callback_data=f"add_rating_{lecturer_id}_7"),
-                InlineKeyboardButton(text="⭐8", callback_data=f"add_rating_{lecturer_id}_8"),
-                InlineKeyboardButton(text="⭐9", callback_data=f"add_rating_{lecturer_id}_9"),
-                InlineKeyboardButton(text="⭐10", callback_data=f"add_rating_{lecturer_id}_10"),
-            ],
-            [
-                InlineKeyboardButton(text="Назад", callback_data="main_menu")
-            ]
-        ]
-    )
+def get_add_rating_kb(lecturer_id: int):
+    builder = InlineKeyboardBuilder()
+    for i in range(1, 11):
+        builder.button(text=f"⭐{i}", callback_data=AddRatingCD(lecturer_id=lecturer_id, rating=i))
+    builder.button(text="Назад", callback_data="main")
+    return builder.adjust(5, 5, 1).as_markup()

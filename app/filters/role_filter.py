@@ -9,8 +9,5 @@ class RoleFilter(BaseFilter):
     def __init__(self, role: UserRole):
         self.role = role
 
-    async def __call__(self, message: Message,  **kwargs) -> bool:
-        user: User | None = kwargs.get('user')
-        if user is None:
-            return False
+    async def __call__(self, message: Message, user: User) -> bool:
         return user.role == self.role

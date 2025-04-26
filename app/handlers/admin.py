@@ -7,7 +7,7 @@ from aiogram.types import Message
 from app.enums import UserRole
 from app.filters import RoleFilter
 from app.handlers.user import delete_last_message
-from app.keyboards.user import main_keyboard
+from app.keyboards.user import get_main_kb
 from app.services import AdminService
 
 router = Router()
@@ -26,5 +26,5 @@ async def users_command(message: Message, state: FSMContext, admin_service: Admi
     text = f"{len(users)} пользователей:\n"
     for user in users:
         text += f"@{user.username} ({user.group.name})\n"
-    new_message = await message.answer(text, reply_markup=main_keyboard)
+    new_message = await message.answer(text, reply_markup=get_main_kb())
     await delete_last_message(message, state, new_message.message_id)
