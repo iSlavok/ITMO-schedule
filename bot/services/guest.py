@@ -7,7 +7,7 @@ class GuestService:
         self._group_repo = group_repo
 
     async def get_all_courses(self):
-        return await self._course_repo.get_all()
+        return await self._course_repo.list_all()
 
     async def get_course_groups(self, course_id):
         return await self._group_repo.get_by_course_id(course_id)

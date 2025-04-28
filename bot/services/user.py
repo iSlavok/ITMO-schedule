@@ -1,22 +1,38 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from bot.enums import UserRole
 from bot.models import User
 from bot.repositories import UserRepository
 
 
 class UserService:
-    def __init__(self, user_repo: UserRepository):
+    def __init__(self, session: AsyncSession, user_repo: UserRepository):
+        self._session = session
         self._user_repo = user_repo
 
-    async def create_user(self, user_id: int, username: str, name: str, role: UserRole, group_id: int = 0) -> User:
-        user = await self.get_user(user_id)
+    async def get_or_create(self, user_id: int, username: str | None, full_name: str) -> User:
+        user = await self._user_repo.get_by_user_id_with_group(user_id)
         if not user:
-            return await self._user_repo.create(user_id, username, name, role, group_id)
+            user = User(
+                user_id=user_id,
+                username=username,
+                name=full_name,
+            )
+            self._user_repo.add(user)
+            await self._session.commit()
+            await self._session.refresh(user)
+        elif user.username != username or user.name != full_name:
+            if user.username != username:
+                user.username = username
+            if user.name != full_name:
+                user.name = full_name
+            await self._session.commit()
+            await self._session.refresh(user)
         return user
 
     async def register_user(self, user: User, group_id: int) -> User:
         user.group_id = group_id
         user.role = UserRole.USER
-        return await self._user_repo.update(user)
-
-    async def get_user(self, user_id):
-        return await self._user_repo.get_with_group(user_id)
+        await self._session.commit()
+        await self._session.refresh(user)
+        return user

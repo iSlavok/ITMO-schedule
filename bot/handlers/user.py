@@ -103,7 +103,7 @@ async def select_rating(message: Message, state: FSMContext, rating_service: Rat
     if last_lecturer:
         lecturer = await rating_service.get_lecturer(last_lecturer)
         if lecturer:
-            if await rating_service.can_user_rate_lecturer(user.user_id, lecturer.id):
+            if await rating_service.can_user_rate_lecturer(user, lecturer.id):
                 new_message = await message.answer(
                     f"Выберите оценку для преподавателя {lecturer.name}:",
                     reply_markup=get_add_rating_kb(lecturer.id)
@@ -139,10 +139,10 @@ async def submit_rating(callback: CallbackQuery, callback_data: AddRatingCD, sta
         new_message = await callback.message.answer("Нет доступного преподавателя для оценки.")
         return await delete_last_message(callback.message, state, new_message.message_id)
     lecturer = await rating_service.get_lecturer(last_lecturer)
-    if lecturer in None or lecturer.id != lecturer_id:
+    if lecturer is None or lecturer.id != lecturer_id:
         new_message = await callback.message.answer("Вы не можете оценить этого преподавателя.")
         return await delete_last_message(callback.message, state, new_message.message_id)
-    rating = await rating_service.create_rating(rating, lecturer_id, callback.from_user.id)
+    rating = await rating_service.create_rating(rating, lecturer_id, user)
     if rating:
         new_message = await callback.message.answer(
             f"Оценка {rating.rating} для преподавателя {lecturer.name} успешно добавлена.",

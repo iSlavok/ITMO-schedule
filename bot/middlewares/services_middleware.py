@@ -24,7 +24,7 @@ class ServicesMiddleware(BaseMiddleware):
         services = {}
         session: AsyncSession = data["session"]
         log_repo = LogRepository(session)
-        services["log_service"] = LogService(log_repo)
+        services["log_service"] = LogService(session, log_repo)
         for service in required:
             if service == "schedule":
                 services["schedule_service"] = self._schedule_service
@@ -37,7 +37,7 @@ class ServicesMiddleware(BaseMiddleware):
             elif service == "rating":
                 lecturer_repo = LecturerRepository(session)
                 rating_repo = RatingRepository(session)
-                services["rating_service"] = RatingService(lecturer_repo, rating_repo)
+                services["rating_service"] = RatingService(session, lecturer_repo, rating_repo)
             elif service == "admin":
                 data["admin_service"] = AdminService(data["user_repo"])
         data.update(services)

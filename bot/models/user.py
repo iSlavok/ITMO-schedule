@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import ForeignKey, Enum, String, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -19,8 +19,8 @@ class User(Base):
         nullable=False,
         default=UserRole.USER
     )
-    group_id: Mapped[int] = mapped_column(ForeignKey("groups.id"))
+    group_id: Mapped[int | None] = mapped_column(ForeignKey("groups.id"), nullable=True)
 
-    group: Mapped["Group"] = relationship("Group", back_populates="users")
+    group: Mapped[Optional["Group"]] = relationship("Group", back_populates="users")
     ratings: Mapped[list["Rating"]] = relationship("Rating", back_populates="user")
     logs: Mapped[list["Log"]] = relationship("Log", back_populates="user")

@@ -2,19 +2,15 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.models import Lecturer, Rating
+from bot.repositories import BaseRepository
+from bot.schemas import LecturerDTO
 
 
-class LecturerRepository:
+class LecturerRepository(BaseRepository[Lecturer]):
     def __init__(self, session: AsyncSession):
-        self.session = session
+        super().__init__(session, Lecturer)
 
-    async def create(self, name: str) -> Lecturer:
-        lecturer = Lecturer(name=name)
-        self.session.add(lecturer)
-        await self.session.commit()
-        return lecturer
-
-    async def get_lecturer(self, name: str) -> Lecturer | None:
+    async def get_by_name(self, name: str) -> Lecturer | None:
         query = select(Lecturer).where(Lecturer.name == name)
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
@@ -26,8 +22,8 @@ class LecturerRepository:
         result = await self.session.execute(query)
         return result.scalar()
 
-    async def get_top_lecturers_with_rank(self, page: int, per_page: int = 10, ascending: bool = False) -> list[
-        tuple[str, int, float, int]]:
+    async def get_top_lecturers_with_rank(self, limit: int = 10, skip: int = 0,
+                                          ascending: bool = False) -> list[LecturerDTO]:
         avg_rating_subq = select(
             Lecturer.id,
             Lecturer.name,
@@ -36,7 +32,6 @@ class LecturerRepository:
         ).join(Rating).group_by(Lecturer.id, Lecturer.name).subquery()
 
         rank_subq = select(
-            avg_rating_subq.c.id,
             avg_rating_subq.c.name,
             avg_rating_subq.c.avg_rating,
             avg_rating_subq.c.reviews_count,
@@ -45,16 +40,15 @@ class LecturerRepository:
             ).label("rank")
         ).subquery()
 
-        query = select(rank_subq).offset((page - 1) * per_page).limit(per_page)
+        query = select(rank_subq).offset(skip).limit(limit)
 
         result = await self.session.execute(query)
-        return [(name, int(rank), float(avg_rating), int(reviews_count)) for id, name, avg_rating, reviews_count, rank
-                in result]
+        return [LecturerDTO(rank=rank, name=name, avg_rating=avg_rating, reviews_count=reviews_count)
+                for name, avg_rating, reviews_count, rank in result]
 
-    async def get_lecturers_page_count(self, per_page: int = 10) -> int:
+    async def get_lecturers_count(self) -> int:
         query = select(func.count(Lecturer.id)).where(
             Lecturer.id.in_(select(Rating.lecturer_id).distinct())
         )
         result = await self.session.execute(query)
-        total_count = result.scalar()
-        return (total_count + per_page - 1) // per_page
+        return result.scalar()

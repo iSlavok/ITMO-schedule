@@ -4,7 +4,6 @@ from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 
 from bot.database import get_session
-from bot.enums import UserRole
 from bot.repositories import UserRepository
 from bot.services import UserService
 
@@ -20,14 +19,14 @@ class UserMiddleware(BaseMiddleware):
             async for session in get_session():
                 data["session"] = session
                 user_service = UserService(
+                    session=session,
                     user_repo=UserRepository(session),
                 )
                 data["user_service"] = user_service
-                user = await user_service.create_user(
+                user = await user_service.get_or_create(
                     user_id=event_from_user.id,
-                    name=event_from_user.full_name,
+                    full_name=event_from_user.full_name,
                     username=event_from_user.username,
-                    role=UserRole.GUEST,
                 )
                 data["user"] = user
                 result = await handler(event, data)

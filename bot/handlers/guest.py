@@ -47,7 +47,8 @@ async def course_select(callback: CallbackQuery, state: FSMContext, guest_servic
     StateFilter(RegisterStates.GROUP_SELECT),
     flags={"services": ["schedule", "rating"]}
 )
-async def group_select(callback: CallbackQuery, state: FSMContext, user: User, user_service: UserService, schedule_service: ScheduleService, rating_service: RatingService):
+async def group_select(callback: CallbackQuery, state: FSMContext, user: User, user_service: UserService,
+                       schedule_service: ScheduleService, rating_service: RatingService):
     group_id = int(callback.data.split("_")[1])
     await user_service.register_user(user, group_id)
     with suppress(Exception):
