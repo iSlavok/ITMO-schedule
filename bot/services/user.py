@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.enums import UserRole
@@ -11,7 +13,7 @@ class UserService:
         self._user_repo = user_repo
 
     async def get_or_create(self, user_id: int, username: str | None, full_name: str) -> User:
-        user = await self._user_repo.get_by_user_id_with_group(user_id)
+        user = await self._user_repo.get_by_user_id_with_group_and_course(user_id)
         if not user:
             user = User(
                 user_id=user_id,
@@ -36,3 +38,13 @@ class UserService:
         await self._session.commit()
         await self._session.refresh(user)
         return user
+
+    async def get_users(self, page: int = 1, per_page: int = 10) -> Sequence[User]:
+        if page < 1:
+            page = 1
+        skip = (page - 1) * per_page
+        users = await self._user_repo.list_all(skip=skip, limit=per_page)
+        return users
+
+    async def get_users_count(self) -> int:
+        return await self._user_repo.get_users_count()

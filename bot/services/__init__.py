@@ -3,8 +3,8 @@ from .user import UserService
 from .guest import GuestService
 from .ai import AiService
 from .rating import RatingService
-from .admin import AdminService
 from .log import LogService
+from .message_manager import MessageManager
 
 __all__ = [
     "ScheduleService",
@@ -12,6 +12,6 @@ __all__ = [
     "GuestService",
     "AiService",
     "RatingService",
-    "AdminService",
     "LogService",
+    "MessageManager",
 ]

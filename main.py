@@ -27,7 +27,7 @@ async def main():
                            key_builder=DefaultKeyBuilder(with_destiny=True, with_bot_id=True))
     dp = Dispatcher(storage=storage)
     register_handlers(dp)
-    register_middlewares(dp, schedule_service, ai_service)
+    register_middlewares(dp, schedule_service, ai_service, bot)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
