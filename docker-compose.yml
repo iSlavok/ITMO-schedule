@@ -11,6 +11,7 @@ services:
         condition: service_healthy
     volumes:
       - ./data:/app/data
+      - ./messages.yaml:/app/messages.yaml
       - ./google-credentials.json:/app/google-credentials.json
     profiles: ["prod"]
     deploy:
@@ -33,6 +34,7 @@ services:
         condition: service_healthy
     volumes:
       - ./data:/app/data
+      - ./messages.yaml:/app/messages.yaml
       - ./google-credentials.json:/app/google-credentials.json
       - ./bot:/app/bot
       - ./alembic:/app/alembic

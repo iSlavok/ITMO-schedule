@@ -1,3 +1,4 @@
+from string import Template
 from typing import Self
 
 from aiogram import Bot
@@ -100,4 +101,7 @@ class MessageManager:
             self._bot_messages_key: [],
             self._user_messages_key: []
         })
-        
+
+    @staticmethod
+    def format_text(text: str, **kwargs) -> str:
+        return Template(text).safe_substitute(**kwargs)

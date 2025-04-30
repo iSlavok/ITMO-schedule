@@ -1,0 +1,10 @@
+admin:
+  users_list:
+    header: |
+      Список пользователей (Всего: $total_count)
+    user: |
+      <b>$number.</b> (ID: <i>$user_id</i>)
+      <b>Группа</b>: $group_name, $course_name
+      <b>Имя:</b> $full_name
+      <b>Юзернейм:</b> @$username
+user: 53
