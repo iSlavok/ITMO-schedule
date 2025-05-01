@@ -1,3 +1,8 @@
+registration:
+  course_request: Выберите курс
+  course_selected: Выбран курс $course_name
+  group_request: Выберите группу
+  group_selected: Выбрана группа $group_name
 admin:
   users_list:
     header: |
@@ -7,4 +12,3 @@ admin:
       <b>Группа</b>: $group_name, $course_name
       <b>Имя:</b> $full_name
       <b>Юзернейм:</b> @$username
-user: 53

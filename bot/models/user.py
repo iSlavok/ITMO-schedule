@@ -17,7 +17,7 @@ class User(Base):
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole, name="user_role_enum", create_constraint=True, native_enum=False),
         nullable=False,
-        default=UserRole.USER
+        default=UserRole.GUEST
     )
     group_id: Mapped[int | None] = mapped_column(ForeignKey("groups.id"), nullable=True)
 

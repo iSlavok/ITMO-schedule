@@ -38,9 +38,9 @@ class MessageManager:
         )
 
     async def send_message(self, text: str, clear_previous: bool = True, **kwargs) -> Message:
+        message = await self.bot.send_message(chat_id=self.chat_id, text=text, **kwargs)
         if clear_previous:
             await self._clear_messages()
-        message = await self.bot.send_message(chat_id=self.chat_id, text=text, **kwargs)
         await self._add_bot_message(message.message_id)
         return message
 
