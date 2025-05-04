@@ -1,6 +1,5 @@
-import time
 from contextlib import suppress
-from datetime import date, timedelta
+
 from aiogram import Router, F
 from aiogram.filters import or_f
 from aiogram.fsm.context import FSMContext
@@ -16,26 +15,11 @@ from bot.keyboards import (
     get_add_rating_kb
 )
 from bot.models import User
-from bot.schedule import Lesson
-from bot.services import ScheduleService, AiService, RatingService, LogService
+from bot.services import ScheduleService, RatingService, LogService
 
 router = Router()
 router.message.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole.ADMIN)))
 router.callback_query.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole.ADMIN)))
-
-
-@router.callback_query(
-    F.data == "main",
-    flags={"services": ["schedule", "rating"]}
-)
-async def get_main_menu(callback: CallbackQuery, state: FSMContext, user: User, schedule_service: ScheduleService,
-                        rating_service: RatingService, log_service: LogService):
-    with suppress(Exception):
-        await callback.answer()
-        await callback.message.delete()
-    await log_service.log_action(callback.from_user.id, f"button {callback.data}")
-    await send_schedule(callback.message, user, schedule_service, rating_service, state, date.today(), "сегодня",
-                        is_today=True)
 
 
 @router.message(
@@ -156,45 +140,6 @@ async def submit_rating(callback: CallbackQuery, callback_data: AddRatingCD, sta
     await delete_last_message(callback.message, state, new_message.message_id)
 
 
-@router.message(
-    flags={"services": ["schedule", "ai", "rating"]},
-)
-async def get_schedule(message: Message, user: User, schedule_service: ScheduleService, ai_service: AiService,
-                       rating_service: RatingService, state: FSMContext, log_service: LogService):
-    with suppress(Exception):
-        await message.delete()
-    await log_service.log_action(message.from_user.id, f"message {message.text}")
-    if message.text == "Сегодня":
-        day = date.today()
-        day_str = "сегодня"
-    elif message.text == "Завтра":
-        day = date.today() + timedelta(days=1)
-        day_str = "завтра"
-    else:
-        start_time = time.perf_counter()
-        day = await ai_service.date_parsing(message.text)
-        duration = time.perf_counter() - start_time
-        await log_service.log_action(message.from_user.id, f"ai {message.text} {duration:.3f}s {day}")
-        if not day:
-            return
-        else:
-            day_str = day.strftime("%Y-%m-%d")
-
-    await send_schedule(message, user, schedule_service, rating_service, state, day, day_str, message.text == "Сегодня")
-
-
-async def send_schedule(message: Message, user: User, schedule_service: ScheduleService, rating_service: RatingService,
-                        state: FSMContext, day: date, day_str: str, is_today: bool = False):
-    schedule = schedule_service.get_schedule(day, user.group.name)
-    if schedule is None:
-        return
-
-    text = await schedule_to_text(schedule, day_str, schedule_service, rating_service, is_today=is_today)
-    schedule_message = await message.bot.send_message(message.chat.id, text, reply_markup=get_main_kb())
-
-    await delete_last_message(message, state, schedule_message.message_id)
-
-
 async def delete_last_message(message: Message, state: FSMContext, new_message_id: int):
     data = await state.get_data()
     old_message = data.get("last_message_id")
@@ -204,68 +149,3 @@ async def delete_last_message(message: Message, state: FSMContext, new_message_i
         except Exception:
             pass
     await state.update_data(last_message_id=new_message_id)
-
-
-async def schedule_to_text(schedule: list[Lesson], day: str, schedule_service: ScheduleService, rating_service: RatingService,
-                     is_today: bool = False):
-    current, is_waiting = 0, False
-    if is_today:
-        current, is_waiting = schedule_service.get_current_lesson()
-    text = (f"📆 <b>Расписание на {day}</b> 📆\n"
-            "════════════════════════")
-    for lesson in schedule:
-        text += await lesson_to_text(lesson, current, is_waiting, rating_service)
-    return text
-
-
-async def lesson_to_text(lesson: Lesson, current_lesson: int, is_waiting: bool, rating_service: RatingService):
-    status_emoji = get_lesson_status_emoji(lesson.number, current_lesson, is_waiting)
-    text = f"\n\n{status_emoji} <b>{times[lesson.number - 1]}</b> | {lesson.number} пара\n"
-    text += f"📚 {lesson.name}"
-    if lesson.type:
-        text += f" — {lesson.type}"
-    text += "\n"
-    if lesson.lecturer:
-        rating = await rating_service.get_lecturer_rating(lesson.lecturer)
-        emoji = get_rating_emoji(rating)
-        text += f"{emoji} {lesson.lecturer}"
-        if rating is not None:
-            text += f" | ⭐️{rating}"
-        text += "\n"
-    if lesson.room:
-        text += f"🚪 Аудитория: <b>{lesson.room}</b>\n"
-    text += "\n———————————————"
-    return text
-
-
-def get_lesson_status_emoji(lesson_number: int, current_lesson: int, is_waiting: bool):
-    if lesson_number == current_lesson:
-        return "🔴" if is_waiting else "🟠"
-    elif lesson_number < current_lesson:
-        return "✅"
-    else:
-        return "🕒"
-
-
-def get_rating_emoji(rating: float):
-    if rating is None or rating >= 4.5:
-        return "👨"
-    elif rating >= 4.0:
-        return "👨🏽"
-    elif rating >= 3.5:
-        return "👨🏾"
-    elif rating >= 2.0:
-        return "🌚"
-    else:
-        return "🤡"
-
-
-times = [
-    "8.10-9.40",
-    "9.50-11.20",
-    "11.30-13.00",
-    "13.30-15.00",
-    "15.30-17.00",
-    "17.10-18.40",
-    "18:40-20:10",
-]

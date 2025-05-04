@@ -7,6 +7,16 @@ class UsersListMessage(BaseModel):
     user: str
 
 
+class LessonScheduleMessage(BaseModel):
+    number: str
+    name: str
+    type: str
+    lecturer: str
+    lecturer_rating: str
+    room: str
+    end: str
+
+
 class AdminMessages(BaseModel):
     users_list: UsersListMessage
 
@@ -18,9 +28,15 @@ class RegistrationMessages(BaseModel):
     group_selected: str
 
 
+class ScheduleMessages(BaseModel):
+    header: str
+    lesson: LessonScheduleMessage
+
+
 class Messages(BaseModel):
     registration: RegistrationMessages
     admin: AdminMessages
+    schedule: ScheduleMessages
 
 
 def load() -> Messages:

@@ -9,8 +9,8 @@ from bot.callback_data import CourseCD, GroupCD
 from bot.config import messages
 from bot.enums import UserRole
 from bot.filters import RoleFilter
-from bot.handlers.user import send_schedule
-from bot.keyboards import get_course_keyboard, get_group_keyboard
+from bot.handlers.schedule_handler import get_schedule_text
+from bot.keyboards import get_course_keyboard, get_group_keyboard, get_main_kb
 from bot.models import User
 from bot.services import GuestService, UserService, ScheduleService, RatingService, MessageManager
 from bot.states import RegisterStates
@@ -59,8 +59,15 @@ async def group_select(callback: CallbackQuery, callback_data: GroupCD, state: F
     await message_manager.send_message(text)
     await user_service.register_user(user, group_id=callback_data.id)
     await state.clear()
-    await send_schedule(callback.message, user, schedule_service, rating_service, state, date.today(), "сегодня",
-                        is_today=True)
+    schedule_text = await get_schedule_text(
+        group_name=callback_data.name,
+        schedule_service=schedule_service,
+        rating_service=rating_service,
+        day=date.today(),
+        day_str="сегодня",
+        is_today=True
+    )
+    await message_manager.send_message(text=schedule_text, reply_markup=get_main_kb())
     await callback.answer()
 
 

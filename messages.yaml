@@ -12,3 +12,18 @@ admin:
       <b>Группа</b>: $group_name, $course_name
       <b>Имя:</b> $full_name
       <b>Юзернейм:</b> @$username
+schedule:
+  header: |
+    📆 <b>Расписание на $day</b> 📆
+    ══════════════════════
+  lesson:
+    number: $status_emoji <b>$time</b> | $number пара
+    name: 📚 $name
+    type: " - $type"
+    lecturer: $emoji $name
+    lecturer_rating: " | ⭐️$rating"
+    room: "🚪 Аудитория: <b>$room</b>"
+    end: | 
+    
+      ———————————————
+    a: v

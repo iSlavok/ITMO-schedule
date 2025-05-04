@@ -1,3 +1,5 @@
+import asyncio
+from collections import defaultdict
 from string import Template
 from typing import Self
 
@@ -6,6 +8,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, CallbackQuery
 
+_user_locks = defaultdict(asyncio.Lock)
+
 
 class MessageManager:
     def __init__(self, bot: Bot, chat_id: int, state: FSMContext, message: Message):
@@ -13,6 +17,7 @@ class MessageManager:
         self.chat_id = chat_id
         self.state = state
         self.message = message
+        self._lock = _user_locks[chat_id]
 
         self._bot_messages_key = "bot_messages"
         self._user_messages_key = "user_messages"
@@ -38,26 +43,28 @@ class MessageManager:
         )
 
     async def send_message(self, text: str, clear_previous: bool = True, **kwargs) -> Message:
-        message = await self.bot.send_message(chat_id=self.chat_id, text=text, **kwargs)
-        if clear_previous:
-            await self._clear_messages()
-        await self._add_bot_message(message.message_id)
-        return message
+        async with self._lock:
+            message = await self.bot.send_message(chat_id=self.chat_id, text=text, **kwargs)
+            if clear_previous:
+                await self._clear_messages()
+            await self._add_bot_message(message.message_id)
+            return message
 
     async def edit_message(self, text: str, **kwargs) -> Message | bool:
-        bot_messages = await self._get_bot_messages()
-        if not bot_messages:
-            return await self.send_message(text, True, **kwargs)
-        try:
-            last_bot_msg_id = bot_messages[-1]
-            return await self.bot.edit_message_text(
-                text=text,
-                chat_id=self.chat_id,
-                message_id=last_bot_msg_id,
-                **kwargs
-            )
-        except TelegramBadRequest:
-            return await self.send_message(text, True, **kwargs)
+        async with self._lock:
+            bot_messages = await self._get_bot_messages()
+            if not bot_messages:
+                return await self.send_message(text, True, **kwargs)
+            try:
+                last_bot_msg_id = bot_messages[-1]
+                return await self.bot.edit_message_text(
+                    text=text,
+                    chat_id=self.chat_id,
+                    message_id=last_bot_msg_id,
+                    **kwargs
+                )
+            except TelegramBadRequest:
+                return await self.send_message(text, True, **kwargs)
 
     async def _get_bot_messages(self) -> list[int]:
         data = await self.state.get_data()
@@ -73,9 +80,10 @@ class MessageManager:
         await self.state.update_data({self._bot_messages_key: messages})
 
     async def _add_user_message(self, message_id: int) -> None:
-        messages = await self._get_user_messages()
-        messages.append(message_id)
-        await self.state.update_data({self._user_messages_key: messages})
+        async with self._lock:
+            messages = await self._get_user_messages()
+            messages.append(message_id)
+            await self.state.update_data({self._user_messages_key: messages})
 
     async def _clear_messages(self) -> None:
         bot_messages = await self._get_bot_messages()
