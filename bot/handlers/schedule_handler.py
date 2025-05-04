@@ -3,6 +3,7 @@ from typing import Iterable
 
 from aiogram import Router, F
 from aiogram.filters import or_f
+from aiogram.types import Message
 
 from bot.config import messages
 from bot.enums import UserRole
@@ -11,6 +12,7 @@ from bot.keyboards import get_main_kb
 from bot.models import User, Group
 from bot.schedule import Lesson
 from bot.services import ScheduleService, RatingService, MessageManager, AiService
+from bot.services.exceptions import AiServiceError
 
 router = Router(name="schedule_router")
 
@@ -57,9 +59,13 @@ async def tomorrow_schedule(_, user: User, schedule_service: ScheduleService, ra
     F.text.as_("date_text"),
     flags={"services": ["schedule", "rating", "ai"]},
 )
-async def schedule_by_date(_, user: User, schedule_service: ScheduleService, rating_service: RatingService,
-                           message_manager: MessageManager, ai_service: AiService, date_text: str):
-    day = await ai_service.date_parsing(date_text)
+async def schedule_by_date(message: Message, user: User, schedule_service: ScheduleService,
+                           rating_service: RatingService, message_manager: MessageManager, ai_service: AiService,
+                           date_text: str):
+    try:
+        day = await ai_service.date_parsing(date_text)
+    except AiServiceError:
+        return await message.delete()
     group: Group = user.group
     schedule_text = await get_schedule_text(
         group_name=group.name,
@@ -69,6 +75,7 @@ async def schedule_by_date(_, user: User, schedule_service: ScheduleService, rat
         day_str=day.strftime("%Y-%m-%d")
     )
     await message_manager.send_message(text=schedule_text, reply_markup=get_main_kb())
+    return None
 
 
 async def get_schedule_text(group_name: str, schedule_service: ScheduleService, rating_service: RatingService,

@@ -2,9 +2,11 @@ import asyncio
 from datetime import date, timedelta
 
 from google import genai
-from google.genai import types
+from google.genai import errors
+from google.genai.types import Content, GenerateContentConfig, GenerateContentResponse, Part
 
 from bot.config import env_config
+from bot.services.exceptions import DateParsingError, ClientError
 from bot.services.schedule import is_even_week
 
 
@@ -14,34 +16,34 @@ class AiService:
             api_key=env_config.GEMINI_API_KEY,
         )
 
-    async def date_parsing(self, message: str) -> date | None:
+    async def date_parsing(self, message: str) -> date:
         today = date.today()
         model = "gemini-2.0-flash"
         contents = [
-            types.Content(
+            Content(
                 role="user",
                 parts=[
-                    types.Part.from_text(text="Завтра"),
+                    Part.from_text(text="Завтра"),
                 ],
             ),
-            types.Content(
+            Content(
                 role="model",
                 parts=[
-                    types.Part.from_text(text=(today + timedelta(days=1)).strftime("%Y-%m-%d")),
+                    Part.from_text(text=(today + timedelta(days=1)).strftime("%Y-%m-%d")),
                 ],
             ),
-            types.Content(
+            Content(
                 role="user",
                 parts=[
-                    types.Part.from_text(text=message),
+                    Part.from_text(text=message),
                 ],
             ),
         ]
-        generate_content_config = types.GenerateContentConfig(
+        generate_content_config = GenerateContentConfig(
             system_instruction=[
-                types.Part.from_text(text=f"""Ты обрабатываешь запросы от пользователей.
-                                              Отвечай только датой в формате: YYYY-MM-DD, четность недели считай с 1 сентября 2024
-                                              Сегодня: {today.strftime("%Y-%m-%d")}, {'четная' if is_even_week(today) else 'нечетная'} неделя"""),
+                Part.from_text(text=f"""Ты обрабатываешь запросы от пользователей.
+                                        Отвечай только датой в формате: YYYY-MM-DD, четность недели считай с 1 сентября 2024
+                                        Сегодня: {today.strftime("%Y-%m-%d")}, {'четная' if is_even_week(today) else 'нечетная'} неделя"""),
             ],
         )
 
@@ -50,11 +52,13 @@ class AiService:
             response = await loop.run_in_executor(None, self.call_generate_content, model, contents,
                                                   generate_content_config)
             return date.fromisoformat(response.text.strip())
+        except errors.ClientError as e:
+            raise ClientError(e)
         except ValueError:
-            return None
+            raise DateParsingError
 
-    def call_generate_content(self, model: str, contents: list[types.Content],
-                              generate_content_config: types.GenerateContentConfig) -> types.GenerateContentResponse:
+    def call_generate_content(self, model: str, contents: list[Content],
+                              generate_content_config: GenerateContentConfig) -> GenerateContentResponse:
         return self._client.models.generate_content(
             model=model,
             contents=contents,

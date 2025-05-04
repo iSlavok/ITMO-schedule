@@ -12,7 +12,7 @@ from bot.filters import RoleFilter
 from bot.handlers.schedule_handler import get_schedule_text
 from bot.keyboards import get_course_keyboard, get_group_keyboard, get_main_kb
 from bot.models import User
-from bot.services import GuestService, UserService, ScheduleService, RatingService, MessageManager
+from bot.services import GuestService, ScheduleService, RatingService, MessageManager
 from bot.states import RegisterStates
 
 router = Router()
@@ -50,14 +50,14 @@ async def course_select(callback: CallbackQuery, callback_data: CourseCD, state:
 @router.callback_query(
     GroupCD.filter(),
     StateFilter(RegisterStates.GROUP_SELECT),
-    flags={"services": ["schedule", "rating"]}
+    flags={"services": ["guest", "schedule", "rating"]}
 )
 async def group_select(callback: CallbackQuery, callback_data: GroupCD, state: FSMContext, user: User,
-                       user_service: UserService, schedule_service: ScheduleService, rating_service: RatingService,
+                       guest_service: GuestService, schedule_service: ScheduleService, rating_service: RatingService,
                        message_manager: MessageManager):
     text = MessageManager.format_text(messages.registration.group_selected, group_name=callback_data.name)
     await message_manager.send_message(text)
-    await user_service.register_user(user, group_id=callback_data.id)
+    await guest_service.register_user(user, group_id=callback_data.id)
     await state.clear()
     schedule_text = await get_schedule_text(
         group_name=callback_data.name,
