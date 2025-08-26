@@ -65,20 +65,20 @@ class ScheduleService:
             return last_lesson.lecturer
         return None
 
-    def _get_dated_schedule(self, target_date: date, group: str, weekday: Weekday, is_even_week: bool) -> list[Lesson]:
+    def _get_dated_schedule(self, target_date: date, group: str, weekday: Weekday, is_even_week_: bool) -> list[Lesson]:
         lessons = []
         if group in self._dated_schedule.groups:
             for lesson in self._dated_schedule.groups[group]:
                 if lesson.date == target_date:
                     lessons.append(lesson.lesson)
                 elif lesson.date_type == DateType.AFTER and target_date < lesson.date:
-                    if lesson.week == Week.ALL or (lesson.week == Week.EVEN and is_even_week) or (
-                            lesson.week == Week.ODD and not is_even_week):
+                    if lesson.week == Week.ALL or (lesson.week == Week.EVEN and is_even_week_) or (
+                            lesson.week == Week.ODD and not is_even_week_):
                         if lesson.weekday == weekday:
                             lessons.append(lesson.lesson)
                 elif lesson.date_type == DateType.BEFORE and target_date > lesson.date:
-                    if lesson.week == Week.ALL or (lesson.week == Week.EVEN and is_even_week) or (
-                            lesson.week == Week.ODD and not is_even_week):
+                    if lesson.week == Week.ALL or (lesson.week == Week.EVEN and is_even_week_) or (
+                            lesson.week == Week.ODD and not is_even_week_):
                         if lesson.weekday == weekday:
                             lessons.append(lesson.lesson)
         return lessons

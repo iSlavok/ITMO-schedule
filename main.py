@@ -19,7 +19,7 @@ async def main():
     schedule_service = ScheduleService()
     ai_service = AiService()
     parser = ScheduleParser(
-        "https://docs.google.com/spreadsheets/d/1rlpvp-aGnJor98piGlejZ-talaUclG8aZWZM9wSt6qo/edit?gid=239775900#gid=239775900")
+        "https://docs.google.com/spreadsheets/d/1heK_XfQjFycJY7yYjaYefjYcDbZ5_TtIkNTMyKQG1ek")
     ScheduleUpdater(schedule_service, parser, interval=600)
 
     bot = Bot(token=env_config.BOT_TOKEN, default=DefaultBotProperties(parse_mode='HTML'))
