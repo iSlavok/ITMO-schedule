@@ -43,7 +43,7 @@ class UserService:
         if page < 1:
             page = 1
         skip = (page - 1) * per_page
-        users = await self._user_repo.list_all(skip=skip, limit=per_page)
+        users = await self._user_repo.list_all_with_group_and_course(skip=skip, limit=per_page)
         return users
 
     async def get_users_count(self) -> int:
