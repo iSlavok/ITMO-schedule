@@ -20,7 +20,7 @@ router.callback_query.filter(RoleFilter(UserRole.ADMIN))
 @router.callback_query(F.data == "users_list")
 @router.message(Command(commands=["users_list", "users"]))
 async def users_list_open(event: Message | CallbackQuery, user_service: UserService, message_manager: MessageManager):
-    users = await user_service.get_users(page=1, per_page=10)
+    users = await user_service.get_users_with_group_and_course(page=1, per_page=10)
     total_count = await user_service.get_users_count()
     total_pages = (total_count // 10) + (1 if total_count % 10 > 0 else 0)
     await message_manager.send_message(
@@ -34,7 +34,7 @@ async def users_list_open(event: Message | CallbackQuery, user_service: UserServ
 @router.callback_query(UsersListPageCD.filter())
 async def users_list_page(callback: CallbackQuery, callback_data: UsersListPageCD, user_service: UserService,
                           message_manager: MessageManager):
-    users = await user_service.get_users(page=callback_data.page, per_page=10)
+    users = await user_service.get_users_with_group_and_course(page=callback_data.page, per_page=10)
     total_count = await user_service.get_users_count()
     total_pages = (total_count // 10) + (1 if total_count % 10 > 0 else 0)
     await message_manager.edit_message(

@@ -34,12 +34,17 @@ class UserRepository(BaseRepository[User]):
         result = await self.session.execute(statement)
         return result.scalar_one_or_none()
 
-    async def list_all(self, skip: int = 0, limit: int = 100) -> Sequence[User]:
+    async def list_all_with_group_and_course(self, skip: int = 0, limit: int = 100) -> Sequence[User]:
         statement = (
             select(self.model)
             .offset(skip)
             .limit(limit)
             .order_by(self.model.created_at)
+            .options(
+                joinedload(User.group).options(
+                    joinedload(Group.course)
+                )
+            )
         )
         result = await self.session.execute(statement)
         return result.scalars().all()

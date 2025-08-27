@@ -31,9 +31,16 @@ class ScheduleParser:
         }
         self._lesson_replace = [
             (re.compile(r"лабораторные"), "лабораторная"),
+            (re.compile(r"лаб"), "лабораторная"),
+            (re.compile(r"лекции"), "лекция"),
+            (re.compile(r"парктика"), "практика"),
+            (re.compile(r"Линейная\nалгебра"), "Линейная алгебра"),
             (re.compile(r"\bКривосенко Ю\.(?!С)"), "Кривосенко Ю.С."),
             (re.compile(r"\bКоробков М\.(?!П)"), "Коробков М.П."),
             (re.compile(r"\bУздин В.М(?!\.)"), "Уздин В.М."),
+            (re.compile(r"\bГросман М\.(?!В)"), "Гросман Д.В."),
+            (re.compile(r"\bСвинцов М(?:\.?\s*В)?\.?"), "Свинцов М.В."),
+            (re.compile(r"Сминов А.В."), "Смирнов А.В."),
             (re.compile(r"Математический анализ"), "Матанализ"),
             (re.compile(r"Физическая химия"), "Физхимия"),
             (re.compile(r"АНГЛИЙСКИЙ ЯЗЫК"), "Английский язык"),
@@ -55,6 +62,10 @@ class ScheduleParser:
         self._lecturer_by_name = {
             "Физхимия": "Королев Д.А.",
         }
+        self._skip_words = [
+            "с ноября",
+            "ноябрь/декабрь",
+        ]
 
     def parse(self) -> dict:
         self._parse_google_sheet()
@@ -138,7 +149,8 @@ class ScheduleParser:
             for j, value in enumerate(row[3:], 3):
                 if j % 2 == 0:
                     continue
-                if re.search(r'(?<!-)\b(?:[1-9]|[1-9]\d)\b', value):
+                if (re.search(r'(?<!-)\b(?:[1-9]|[1-9]\d)\b', value)
+                        or any(skip_word in value.lower() for skip_word in self._skip_words)):
                     continue
                 for pattern, repl in self._lesson_replace:
                     value = pattern.sub(repl, value)
@@ -187,6 +199,7 @@ class ScheduleParser:
         name = re.sub(r'\s+', ' ', name).strip()
         name = name if name != "" else None
         lecturer = re.sub(r'\s+', ' ', lecturer).strip(" ,\n")
+        lecturer = lecturer.lstrip(" .,")
         lecturer = lecturer if lecturer != "" else None
         if not lecturer and name:
             for _lecturer in self._lecturer_in_name:

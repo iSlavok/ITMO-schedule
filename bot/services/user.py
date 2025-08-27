@@ -39,7 +39,7 @@ class UserService:
         await self._session.refresh(user)
         return user
 
-    async def get_users(self, page: int = 1, per_page: int = 10) -> Sequence[User]:
+    async def get_users_with_group_and_course(self, page: int = 1, per_page: int = 10) -> Sequence[User]:
         if page < 1:
             page = 1
         skip = (page - 1) * per_page
