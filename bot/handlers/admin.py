@@ -47,14 +47,14 @@ async def users_list_page(callback: CallbackQuery, callback_data: UsersListPageC
 def get_users_list_text(users: Sequence[User], total_count: int, skip_count: int = 0) -> str:
     text = MessageManager.format_text(messages.admin.users_list.header, total_count=total_count)
     for i, user in enumerate(users, start=1):
-        group = cast(Group, user.group)
-        course = cast(Course, group.course)
+        group_name = user.group.name if user.group else "Не выбрана"
+        course_name = user.group.course.name if user.group else ""
         text += "\n" + MessageManager.format_text(
             messages.admin.users_list.user,
             number=i + skip_count,
             user_id=user.user_id,
-            group_name=group.name,
-            course_name=course.name,
+            group_name=group_name,
+            course_name=course_name,
             full_name=user.name,
             username=user.username,
         )
