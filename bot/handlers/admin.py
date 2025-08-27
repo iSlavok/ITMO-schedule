@@ -6,11 +6,15 @@ from aiogram.types import CallbackQuery, Message
 
 from bot.callback_data import UsersListPageCD
 from bot.config import messages
+from bot.enums import UserRole
+from bot.filters import RoleFilter
 from bot.keyboards import get_users_list_kb
 from bot.models import User, Group, Course
 from bot.services import UserService, MessageManager
 
 router = Router(name="admin_router")
+router.message.filter(RoleFilter(UserRole.ADMIN))
+router.callback_query.filter(RoleFilter(UserRole.ADMIN))
 
 
 @router.callback_query(F.data == "users_list")

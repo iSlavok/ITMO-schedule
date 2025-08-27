@@ -22,11 +22,12 @@ class ScheduleParser:
             "ЧЕТВЕРГ": "thursday",
             "ПЯТНИЦА": "friday",
             "СУББОТА": "saturday",
-            "НЕЧЕТНАЯ НЕДЕЛЯ": "odd_week",
-            "ЧЕТНАЯ НЕДЕЛЯ": "even_week",
+            "нечетная неделя": "odd_week",
+            "четная неделя": "even_week",
             "радио": "z34433",
             "Z3300\nБеспроводные технологии": "z3300Б",
-            "Z3300\nТелеком": "z3300Т"
+            "Z3300\nТелеком": "z3300Т",
+            "3244-3345": "3244-3245",
         }
         self._lesson_replace = [
             (re.compile(r"лабораторные"), "лабораторная"),
@@ -124,7 +125,7 @@ class ScheduleParser:
 
     def _extract_data(self) -> None:
         self._data = {}
-        for i, row in enumerate(self._values[2:], 2):
+        for i, row in enumerate(self._values[3:], 3):
             year = row[0].strip()
             week = row[1].strip()
             group = row[2].strip().split("\n")[0].strip()

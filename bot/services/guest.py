@@ -6,10 +6,8 @@ from bot.repositories import CourseRepository, GroupRepository, UserRepository
 
 
 class GuestService:
-    def __init__(self, session: AsyncSession, user_repo: UserRepository, course_repo: CourseRepository,
-                 group_repo: GroupRepository):
+    def __init__(self, session: AsyncSession, course_repo: CourseRepository, group_repo: GroupRepository):
         self._session = session
-        self._user_repo = user_repo
         self._course_repo = course_repo
         self._group_repo = group_repo
 

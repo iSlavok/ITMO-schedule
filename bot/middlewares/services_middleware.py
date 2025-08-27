@@ -34,7 +34,11 @@ class ServicesMiddleware(BaseMiddleware):
             elif service == "guest":
                 course_repo = CourseRepository(session)
                 group_repo = GroupRepository(session)
-                services["guest_service"] = GuestService(course_repo, group_repo)
+                services["guest_service"] = GuestService(
+                    session=session,
+                    course_repo=course_repo,
+                    group_repo=group_repo
+                )
             elif service == "rating":
                 lecturer_repo = LecturerRepository(session)
                 rating_repo = RatingRepository(session)
