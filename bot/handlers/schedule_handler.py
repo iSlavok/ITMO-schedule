@@ -24,6 +24,10 @@ router.callback_query.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole
     F.text == "Сегодня",
     flags={"services": ["schedule", "rating"]},
 )
+@router.callback_query(
+    F.data == "main",
+    flags={"services": ["schedule", "rating"]},
+)
 async def today_schedule(_, user: User, schedule_service: ScheduleService, rating_service: RatingService,
                          message_manager: MessageManager):
     group: Group = user.group

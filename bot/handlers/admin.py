@@ -9,7 +9,7 @@ from bot.config import messages
 from bot.enums import UserRole
 from bot.filters import RoleFilter
 from bot.keyboards import get_users_list_kb
-from bot.models import User, Group, Course
+from bot.models import User
 from bot.services import UserService, MessageManager
 
 router = Router(name="admin_router")
