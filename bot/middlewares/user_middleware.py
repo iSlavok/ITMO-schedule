@@ -16,7 +16,7 @@ class UserMiddleware(BaseMiddleware):
                        data: dict[str, Any]) -> Any:
         event_from_user = data["event_from_user"]
         if event_from_user:
-            async for session in get_session():
+            async with get_session() as session:
                 data["session"] = session
                 user_service = UserService(
                     session=session,

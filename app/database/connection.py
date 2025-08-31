@@ -1,9 +1,11 @@
+from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from app.config import env_config
+from app.database import Base
 
 database_url = URL.create(
     drivername=env_config.DB_DRIVER,
@@ -17,7 +19,9 @@ database_url = URL.create(
 async_engine = create_async_engine(
     database_url,
     echo=False,
-    future=True
+    future=True,
+    pool_size=env_config.DB_POOL_SIZE,
+    pool_pre_ping=True
 )
 
 async_session_factory = async_sessionmaker(
@@ -27,7 +31,8 @@ async_session_factory = async_sessionmaker(
 )
 
 
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
+@asynccontextmanager
+async def get_session() -> AsyncGenerator[AsyncSession]:
     async with async_session_factory() as session:
         try:
             yield session
@@ -36,7 +41,10 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
             raise e
 
 
-async def init_db():
-    from app.database import Base
+async def init_db() -> None:
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+
+async def close_db() -> None:
+    await async_engine.dispose()
