@@ -6,12 +6,13 @@ from aiogram.fsm.storage.base import DefaultKeyBuilder
 from aiogram.fsm.storage.redis import RedisStorage
 from redis.asyncio.client import Redis
 
-from bot.config import env_config
-from bot.database import init_db
+from app.config import env_config
+from app.database import init_db
+from app.services.ai import AiService
+from app.services.schedule import ScheduleService
 from bot.handlers import register_handlers
 from bot.middlewares import register_middlewares
-from bot.services import ScheduleService, AiService
-from bot.schedule import ScheduleParser, ScheduleUpdater
+from app.schedule import ScheduleParser, ScheduleUpdater
 
 
 async def main():

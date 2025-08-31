@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from .schedule_parser import ScheduleParser
 
 if TYPE_CHECKING:
-    from bot.services import ScheduleService
+    from app.services.schedule import ScheduleService
 
 
 class ScheduleUpdater:

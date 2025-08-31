@@ -3,8 +3,8 @@ from datetime import date
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.models import Rating, User
-from bot.repositories import BaseRepository
+from app.models import Rating, User
+from app.repositories import BaseRepository
 
 
 class RatingRepository(BaseRepository[Rating]):

@@ -2,8 +2,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from bot.models import Course
-from bot.repositories import BaseRepository
+from app.models import Course
+from app.repositories import BaseRepository
 
 
 class CourseRepository(BaseRepository[Course]):

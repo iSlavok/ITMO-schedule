@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
-from bot.config import env_config
+from app.config import env_config
 
 database_url = URL.create(
     drivername=env_config.DB_DRIVER,
@@ -37,6 +37,6 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db():
-    from bot.database import Base
+    from app.database import Base
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

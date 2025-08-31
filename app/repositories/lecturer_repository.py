@@ -1,9 +1,9 @@
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.models import Lecturer, Rating
-from bot.repositories import BaseRepository
-from bot.schemas import LecturerDTO
+from app.models import Lecturer, Rating
+from app.repositories import BaseRepository
+from app.schemas import LecturerDTO
 
 
 class LecturerRepository(BaseRepository[Lecturer]):

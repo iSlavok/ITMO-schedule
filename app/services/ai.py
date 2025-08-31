@@ -5,9 +5,9 @@ from google import genai
 from google.genai import errors
 from google.genai.types import Content, GenerateContentConfig, GenerateContentResponse, Part
 
-from bot.config import env_config
-from bot.services.exceptions import DateParsingError, ClientError
-from bot.services.schedule import is_even_week
+from app.config import env_config
+from app.services.exceptions import DateParsingError, ClientError
+from app.services.schedule import is_even_week
 
 
 class AiService:

@@ -3,8 +3,8 @@ from typing import Sequence
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.models import Group
-from bot.repositories import BaseRepository
+from app.models import Group
+from app.repositories import BaseRepository
 
 
 class GroupRepository(BaseRepository[Group]):

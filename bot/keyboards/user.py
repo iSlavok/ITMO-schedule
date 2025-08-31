@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 
 from bot.callback_data import RatingCD, AddRatingCD
-from bot.enums import RatingType
+from app.enums import RatingType
 
 
 def get_main_kb():

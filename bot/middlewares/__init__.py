@@ -1,9 +1,10 @@
 from aiogram import Dispatcher, Bot
 
+from app.services.ai import AiService
+from app.services.schedule import ScheduleService
 from .user_middleware import UserMiddleware
 from .services_middleware import ServicesMiddleware
 from .message_manager_middleware import MessageManagerMiddleware
-from bot.services import ScheduleService, AiService
 
 
 def register_middlewares(dp: Dispatcher, schedule_service: ScheduleService, ai_service: AiService, bot: Bot):

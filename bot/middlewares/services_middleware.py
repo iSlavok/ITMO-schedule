@@ -5,8 +5,12 @@ from aiogram.types import Message
 from aiogram.dispatcher.flags import get_flag
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.repositories import GroupRepository, CourseRepository, LecturerRepository, RatingRepository, LogRepository
-from bot.services import GuestService, ScheduleService, AiService, RatingService, LogService
+from app.repositories import GroupRepository, CourseRepository, LecturerRepository, RatingRepository, LogRepository
+from app.services.ai import AiService
+from app.services.guest import GuestService
+from app.services.log import LogService
+from app.services.rating import RatingService
+from app.services.schedule import ScheduleService
 
 
 class ServicesMiddleware(BaseMiddleware):

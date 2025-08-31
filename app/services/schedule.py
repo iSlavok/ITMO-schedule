@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, date, UTC
 
-from bot.repositories import ScheduleRepository
-from bot.schedule import Schedule, Week, Weekday, DateType, Lesson
+from app.repositories import ScheduleRepository
+from app.schedule import Schedule, Week, Weekday, DateType, Lesson
 
 
 class ScheduleService:

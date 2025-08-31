@@ -1,16 +1,17 @@
-from typing import Sequence, cast
+from typing import Sequence
 
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
+from bot.services import MessageManager
+from app.services.user import UserService
 from bot.callback_data import UsersListPageCD
 from bot.config import messages
-from bot.enums import UserRole
+from app.enums import UserRole
 from bot.filters import RoleFilter
 from bot.keyboards import get_users_list_kb
-from bot.models import User
-from bot.services import UserService, MessageManager
+from app.models import User
 
 router = Router(name="admin_router")
 router.message.filter(RoleFilter(UserRole.ADMIN))

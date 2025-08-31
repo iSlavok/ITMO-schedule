@@ -2,9 +2,9 @@ from typing import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.enums import UserRole
-from bot.models import User
-from bot.repositories import UserRepository
+from app.enums import UserRole
+from app.models import User
+from app.repositories import UserRepository
 
 
 class UserService:

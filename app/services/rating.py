@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.models import Lecturer, Rating, User
-from bot.repositories import LecturerRepository, RatingRepository
+from app.models import Lecturer, Rating, User
+from app.repositories import LecturerRepository, RatingRepository
 
 
 class RatingService:

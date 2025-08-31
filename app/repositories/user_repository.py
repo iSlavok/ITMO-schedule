@@ -4,8 +4,8 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
-from bot.models import User, Group
-from bot.repositories import BaseRepository
+from app.models import User, Group
+from app.repositories import BaseRepository
 
 
 class UserRepository(BaseRepository[User]):

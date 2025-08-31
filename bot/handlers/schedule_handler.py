@@ -5,14 +5,17 @@ from aiogram import Router, F
 from aiogram.filters import or_f
 from aiogram.types import Message
 
+from app.services.ai import AiService
+from app.services.rating import RatingService
+from app.services.schedule import ScheduleService
 from bot.config import messages
-from bot.enums import UserRole
+from app.enums import UserRole
 from bot.filters import RoleFilter
 from bot.keyboards import get_main_kb
-from bot.models import User, Group
-from bot.schedule import Lesson
-from bot.services import ScheduleService, RatingService, MessageManager, AiService
-from bot.services.exceptions import AiServiceError
+from app.models import User, Group
+from app.schedule import Lesson
+from bot.services import MessageManager
+from app.services.exceptions import AiServiceError
 
 router = Router(name="schedule_router")
 

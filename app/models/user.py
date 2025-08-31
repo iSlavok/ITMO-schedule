@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING, Optional
 from sqlalchemy import ForeignKey, Enum, String, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from bot.database import Base
-from bot.enums import UserRole
+from app.database import Base
+from app.enums import UserRole
 
 if TYPE_CHECKING:
     from . import Group, Rating, Log

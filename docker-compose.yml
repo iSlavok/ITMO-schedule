@@ -37,6 +37,7 @@ services:
       - ./messages.yaml:/app/messages.yaml
       - ./google-credentials.json:/app/google-credentials.json
       - ./bot:/app/bot
+      - ./app:/app/app
       - ./alembic:/app/alembic
       - ./main.py:/app/main.py
       - ./alembic.ini:/app/alembic.ini

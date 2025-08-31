@@ -5,8 +5,11 @@ from aiogram.filters import or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
+from app.services.log import LogService
+from app.services.rating import RatingService
+from app.services.schedule import ScheduleService
 from bot.callback_data import RatingCD, AddRatingCD
-from bot.enums import UserRole, RatingType
+from app.enums import UserRole, RatingType
 from bot.filters import RoleFilter
 from bot.keyboards import (
     get_main_kb,
@@ -14,8 +17,7 @@ from bot.keyboards import (
     get_pagination_rating_kb,
     get_add_rating_kb
 )
-from bot.models import User
-from bot.services import ScheduleService, RatingService, LogService
+from app.models import User
 
 router = Router()
 router.message.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole.ADMIN)))

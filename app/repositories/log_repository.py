@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.models import Log
-from bot.repositories import BaseRepository
+from app.models import Log
+from app.repositories import BaseRepository
 
 
 class LogRepository(BaseRepository[Log]):

@@ -3,9 +3,9 @@ from typing import Callable, Any, Awaitable
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 
-from bot.database import get_session
-from bot.repositories import UserRepository
-from bot.services import UserService
+from app.database import get_session
+from app.repositories import UserRepository
+from app.services.user import UserService
 
 
 class UserMiddleware(BaseMiddleware):

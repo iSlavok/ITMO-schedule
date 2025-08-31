@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.enums import UserRole
-from bot.models import User
-from bot.repositories import CourseRepository, GroupRepository, UserRepository
+from app.enums import UserRole
+from app.models import User
+from app.repositories import CourseRepository, GroupRepository
 
 
 class GuestService:

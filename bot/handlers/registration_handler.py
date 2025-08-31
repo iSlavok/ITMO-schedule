@@ -5,14 +5,17 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
+from app.services.guest import GuestService
+from app.services.rating import RatingService
+from app.services.schedule import ScheduleService
 from bot.callback_data import CourseCD, GroupCD
 from bot.config import messages
-from bot.enums import UserRole
+from app.enums import UserRole
 from bot.filters import RoleFilter
 from bot.handlers.schedule_handler import get_schedule_text
 from bot.keyboards import get_course_keyboard, get_group_keyboard, get_main_kb
-from bot.models import User
-from bot.services import GuestService, ScheduleService, RatingService, MessageManager
+from app.models import User
+from bot.services import MessageManager
 from bot.states import RegisterStates
 
 router = Router()

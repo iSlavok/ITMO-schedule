@@ -1,6 +1,6 @@
 import json
 
-from bot.schedule import DatedSchedule, Schedule
+from app.schedule import DatedSchedule, Schedule
 
 
 class ScheduleRepository:

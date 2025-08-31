@@ -4,7 +4,7 @@ from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.callback_data import CourseCD, GroupCD
-from bot.models import Course, Group
+from app.models import Course, Group
 
 
 def get_course_keyboard(courses: Iterable[Course]) -> InlineKeyboardMarkup:
