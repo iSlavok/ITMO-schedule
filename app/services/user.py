@@ -2,7 +2,6 @@ from typing import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.enums import UserRole
 from app.models import User
 from app.repositories import UserRepository
 
@@ -30,13 +29,6 @@ class UserService:
                 user.name = full_name
             await self._session.commit()
             await self._session.refresh(user)
-        return user
-
-    async def register_user(self, user: User, group_id: int) -> User:
-        user.group_id = group_id
-        user.role = UserRole.USER
-        await self._session.commit()
-        await self._session.refresh(user)
         return user
 
     async def get_users_with_group_and_course(self, page: int = 1, per_page: int = 10) -> Sequence[User]:

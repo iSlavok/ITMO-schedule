@@ -4,11 +4,3 @@ class ServiceError(Exception):
 
 class AiServiceError(ServiceError):
     pass
-
-
-class ClientError(AiServiceError):
-    pass
-
-
-class DateParsingError(AiServiceError):
-    pass

@@ -13,16 +13,10 @@ class RatingService:
         self._lecturer_repository = lecturer_repository
         self._rating_repository = rating_repository
 
-    async def create_lecturer(self, name: str) -> Lecturer:
-        lecturer = Lecturer(name=name)
-        self._session.add(lecturer)
-        await self._session.commit()
-        return lecturer
-
-    async def get_lecturer(self, name: str) -> Lecturer | None:
+    async def get_lecturer_by_name(self, name: str) -> Lecturer | None:
         return await self._lecturer_repository.get_by_name(name)
 
-    async def get_lecturer_rating(self, name: str) -> float:
+    async def get_lecturer_rating(self, name: str) -> float | None:
         rating = await self._lecturer_repository.get_average_rating(name)
         return round(rating, 1) if rating is not None else None
 
@@ -48,7 +42,7 @@ class RatingService:
 
     async def create_rating(self, rating: int, lecturer_id: int, user: User) -> Rating | bool:
         if not await self.can_user_rate_lecturer(user, lecturer_id):
-            return False
+            return False  # TODO(iSlavok): create custom exception
         rating = Rating(
             rating=rating,
             lecturer_id=lecturer_id,

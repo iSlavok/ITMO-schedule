@@ -13,7 +13,7 @@ class EnvConfig(BaseSettings):
     REDIS_HOST: str = "redis"
     REDIS_PORT: int = 6379
     BOT_TOKEN: SecretStr
-    GEMINI_API_KEY: SecretStr
+    GOOGLE_API_KEY: SecretStr
 
 
 env_config = EnvConfig()

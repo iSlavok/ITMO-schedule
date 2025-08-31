@@ -5,7 +5,8 @@ from app.repositories import LogRepository
 
 
 class LogService:
-    def __init__(self, session: AsyncSession, log_repository: LogRepository):
+    def __init__(self, session: AsyncSession,
+                 log_repository: LogRepository):
         self._session = session
         self._log_repository = log_repository
 

@@ -21,11 +21,11 @@ class ScheduleUpdater:
     def _update_loop(self):
         while True:
             start_time = datetime.datetime.now()
-            # try:
-            self._update_schedule()
-            print(f"[{datetime.datetime.now()}] Расписание обновлено.")
-            # except Exception as e:
-            #     print(f"[{datetime.datetime.now()}] Ошибка при обновлении расписания: {str(e)}")
+            try:
+                self._update_schedule()
+                print(f"[{datetime.datetime.now()}] Расписание обновлено.")
+            except Exception as e:
+                print(f"[{datetime.datetime.now()}] Ошибка при обновлении расписания: {str(e)}")
             time.sleep(self.interval-(datetime.datetime.now()-start_time).total_seconds())
 
     def _update_schedule(self):
