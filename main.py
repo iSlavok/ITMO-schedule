@@ -7,7 +7,7 @@ from aiogram.fsm.storage.redis import RedisStorage
 from redis.asyncio.client import Redis
 
 from app.config import env_config
-from app.database import init_db
+from app.database import init_db, close_db
 from app.services.ai import AiService
 from app.services.schedule import ScheduleService
 from bot.handlers import register_handlers
@@ -30,6 +30,7 @@ async def main():
     register_handlers(dp)
     register_middlewares(dp, schedule_service, ai_service, bot)
     await dp.start_polling(bot)
+    await close_db()
 
 if __name__ == "__main__":
     asyncio.run(main())
