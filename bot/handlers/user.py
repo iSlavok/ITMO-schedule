@@ -1,4 +1,5 @@
 from contextlib import suppress
+from typing import cast
 
 from aiogram import Router, F
 from aiogram.filters import or_f
@@ -17,7 +18,7 @@ from bot.keyboards import (
     get_pagination_rating_kb,
     get_add_rating_kb
 )
-from app.models import User
+from app.models import User, Group
 
 router = Router()
 router.message.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole.ADMIN)))
@@ -86,7 +87,8 @@ async def select_rating(message: Message, state: FSMContext, rating_service: Rat
     with suppress(Exception):
         await message.delete()
     await log_service.log_action(message.from_user.id, f"message {message.text}")
-    last_lecturer = schedule_service.get_last_lecturer(user.group.name)
+    group = cast(Group, user.group)
+    last_lecturer = schedule_service.get_last_lecturer(group.name)
     if last_lecturer:
         lecturer = await rating_service.get_lecturer_by_name(last_lecturer)
         if lecturer:
@@ -106,6 +108,7 @@ async def select_rating(message: Message, state: FSMContext, rating_service: Rat
         reply_markup=get_main_kb()
     )
     await delete_last_message(message, state, new_message.message_id)
+    return None
 
 
 @router.callback_query(
@@ -121,7 +124,8 @@ async def submit_rating(callback: CallbackQuery, callback_data: AddRatingCD, sta
     await log_service.log_action(callback.from_user.id, f"button {callback.data}")
     lecturer_id = callback_data.lecturer_id
     rating = callback_data.rating
-    last_lecturer = schedule_service.get_last_lecturer(user.group.name)
+    group = cast(Group, user.group)
+    last_lecturer = schedule_service.get_last_lecturer(group.name)
     if not last_lecturer:
         new_message = await callback.message.answer("Нет доступного преподавателя для оценки.")
         return await delete_last_message(callback.message, state, new_message.message_id)
@@ -141,6 +145,7 @@ async def submit_rating(callback: CallbackQuery, callback_data: AddRatingCD, sta
             reply_markup=get_main_kb()
         )
     await delete_last_message(callback.message, state, new_message.message_id)
+    return None
 
 
 async def delete_last_message(message: Message, state: FSMContext, new_message_id: int):

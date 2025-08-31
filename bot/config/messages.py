@@ -39,10 +39,10 @@ class Messages(BaseModel):
     schedule: ScheduleMessages
 
 
-def load() -> Messages:
+def load_messages() -> Messages:
     with open("messages.yaml", "r", encoding="utf-8") as file:
         data = yaml.safe_load(file)
         return Messages(**data)
 
 
-messages = load()
+messages = load_messages()

@@ -1,7 +1,7 @@
-from typing import Callable, Dict, Any, Awaitable
+from typing import Callable, Any, Awaitable
 
 from aiogram import BaseMiddleware
-from aiogram.types import Message
+from aiogram.types import TelegramObject
 from aiogram.dispatcher.flags import get_flag
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,12 +19,8 @@ class ServicesMiddleware(BaseMiddleware):
         self._ai_service = ai_service
         super().__init__()
 
-    async def __call__(
-            self,
-            handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
-            event: Message,
-            data: Dict[str, Any]
-    ) -> Any:
+    async def __call__(self, handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]], event: TelegramObject,
+                       data: dict[str, Any]) -> dict[str, Any]:
         required = get_flag(data, "services", default=[])
         services = {}
         session: AsyncSession = data["session"]
