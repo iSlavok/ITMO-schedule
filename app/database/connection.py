@@ -1,8 +1,8 @@
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from sqlalchemy import URL
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.config import env_config
 from app.database import Base
@@ -21,13 +21,13 @@ async_engine = create_async_engine(
     echo=False,
     future=True,
     pool_size=env_config.DB_POOL_SIZE,
-    pool_pre_ping=True
+    pool_pre_ping=True,
 )
 
 async_session_factory = async_sessionmaker(
     bind=async_engine,
     class_=AsyncSession,
-    expire_on_commit=False
+    expire_on_commit=False,
 )
 
 
@@ -36,9 +36,9 @@ async def get_session() -> AsyncGenerator[AsyncSession]:
     async with async_session_factory() as session:
         try:
             yield session
-        except Exception as e:
+        except Exception:
             await session.rollback()
-            raise e
+            raise
 
 
 async def init_db() -> None:

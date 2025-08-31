@@ -1,24 +1,19 @@
 from contextlib import suppress
 from typing import cast
 
-from aiogram import Router, F
+from aiogram import F, Router
 from aiogram.filters import or_f
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import CallbackQuery, Message
 
+from app.enums import RatingType, UserRole
+from app.models import Group, User
 from app.services.log import LogService
 from app.services.rating import RatingService
 from app.services.schedule import ScheduleService
-from bot.callback_data import RatingCD, AddRatingCD
-from app.enums import UserRole, RatingType
+from bot.callback_data import AddRatingCD, RatingCD
 from bot.filters import RoleFilter
-from bot.keyboards import (
-    get_main_kb,
-    get_rating_kb,
-    get_pagination_rating_kb,
-    get_add_rating_kb
-)
-from app.models import User, Group
+from bot.keyboards import get_add_rating_kb, get_main_kb, get_pagination_rating_kb, get_rating_kb
 
 router = Router()
 router.message.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole.ADMIN)))
@@ -26,19 +21,19 @@ router.callback_query.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole
 
 
 @router.message(
-    F.text == "Рейтинг"
+    F.text == "Рейтинг",
 )
-async def get_rating_menu(message: Message, state: FSMContext, log_service: LogService):
+async def get_rating_menu(message: Message, state: FSMContext, log_service: LogService) -> None:
     with suppress(Exception):
         await message.delete()
     await log_service.log_action(message.from_user.id, f"message {message.text}")
     await show_rating_menu(message, state)
 
 
-async def show_rating_menu(message: Message, state: FSMContext):
+async def show_rating_menu(message: Message, state: FSMContext) -> None:
     new_message = await message.answer(
-        f"Выберите, какой рейтинг вы хотите посмотреть:",
-        reply_markup=get_rating_kb()
+        "Выберите, какой рейтинг вы хотите посмотреть:",
+        reply_markup=get_rating_kb(),
     )
     await delete_last_message(message, state, new_message.message_id)
 
@@ -46,7 +41,7 @@ async def show_rating_menu(message: Message, state: FSMContext):
 @router.callback_query(
     F.data == "rating",
 )
-async def get_rating_menu_button(callback: CallbackQuery, state: FSMContext, log_service: LogService):
+async def get_rating_menu_button(callback: CallbackQuery, state: FSMContext, log_service: LogService) -> None:
     with suppress(Exception):
         await callback.answer()
         await callback.message.delete()
@@ -56,10 +51,10 @@ async def get_rating_menu_button(callback: CallbackQuery, state: FSMContext, log
 
 @router.callback_query(
     RatingCD.filter(),
-    flags={"services": ["rating"]}
+    flags={"services": ["rating"]},
 )
 async def show_rating(callback: CallbackQuery, callback_data: RatingCD, state: FSMContext,
-                      rating_service: RatingService, log_service: LogService):
+                      rating_service: RatingService, log_service: LogService) -> None:
     with suppress(Exception):
         await callback.answer()
         await callback.message.delete()
@@ -80,14 +75,14 @@ async def show_rating(callback: CallbackQuery, callback_data: RatingCD, state: F
 
 @router.message(
     F.text == "Оценить",
-    flags={"services": ["rating", "schedule"]}
+    flags={"services": ["rating", "schedule"]},
 )
-async def select_rating(message: Message, state: FSMContext, rating_service: RatingService,
-                        schedule_service: ScheduleService, user: User, log_service: LogService):
+async def select_rating(message: Message, state: FSMContext, rating_service: RatingService,  # noqa: PLR0913
+                        schedule_service: ScheduleService, user: User, log_service: LogService) -> None:
     with suppress(Exception):
         await message.delete()
     await log_service.log_action(message.from_user.id, f"message {message.text}")
-    group = cast(Group, user.group)
+    group = cast("Group", user.group)
     last_lecturer = schedule_service.get_last_lecturer(group.name)
     if last_lecturer:
         lecturer = await rating_service.get_lecturer_by_name(last_lecturer)
@@ -95,17 +90,17 @@ async def select_rating(message: Message, state: FSMContext, rating_service: Rat
             if await rating_service.can_user_rate_lecturer(user, lecturer.id):
                 new_message = await message.answer(
                     f"Выберите оценку для преподавателя {lecturer.name}:",
-                    reply_markup=get_add_rating_kb(lecturer.id)
+                    reply_markup=get_add_rating_kb(lecturer.id),
                 )
             else:
                 new_message = await message.answer(
                     f"Сегодня вы уже оценили преподавателя {lecturer.name}.",
-                    reply_markup=get_main_kb()
+                    reply_markup=get_main_kb(),
                 )
             return await delete_last_message(message, state, new_message.message_id)
     new_message = await message.answer(
         "Нет доступного преподавателя для оценки.",
-        reply_markup=get_main_kb()
+        reply_markup=get_main_kb(),
     )
     await delete_last_message(message, state, new_message.message_id)
     return None
@@ -113,18 +108,18 @@ async def select_rating(message: Message, state: FSMContext, rating_service: Rat
 
 @router.callback_query(
     AddRatingCD.filter(),
-    flags={"services": ["rating", "schedule"]}
+    flags={"services": ["rating", "schedule"]},
 )
-async def submit_rating(callback: CallbackQuery, callback_data: AddRatingCD, state: FSMContext,
+async def submit_rating(callback: CallbackQuery, callback_data: AddRatingCD, state: FSMContext,  # noqa: PLR0913
                         rating_service: RatingService, schedule_service: ScheduleService, user: User,
-                        log_service: LogService):
+                        log_service: LogService) -> None:
     with suppress(Exception):
         await callback.answer()
         await callback.message.delete()
     await log_service.log_action(callback.from_user.id, f"button {callback.data}")
     lecturer_id = callback_data.lecturer_id
     rating = callback_data.rating
-    group = cast(Group, user.group)
+    group = cast("Group", user.group)
     last_lecturer = schedule_service.get_last_lecturer(group.name)
     if not last_lecturer:
         new_message = await callback.message.answer("Нет доступного преподавателя для оценки.")
@@ -137,23 +132,21 @@ async def submit_rating(callback: CallbackQuery, callback_data: AddRatingCD, sta
     if rating:
         new_message = await callback.message.answer(
             f"Оценка {rating.rating} для преподавателя {lecturer.name} успешно добавлена.",
-            reply_markup=get_main_kb()
+            reply_markup=get_main_kb(),
         )
     else:
         new_message = await callback.message.answer(
             "Сегодня вы уже оценили этого преподавателя.",
-            reply_markup=get_main_kb()
+            reply_markup=get_main_kb(),
         )
     await delete_last_message(callback.message, state, new_message.message_id)
     return None
 
 
-async def delete_last_message(message: Message, state: FSMContext, new_message_id: int):
+async def delete_last_message(message: Message, state: FSMContext, new_message_id: int) -> None:
     data = await state.get_data()
     old_message = data.get("last_message_id")
     if old_message:
-        try:
+        with suppress(Exception):
             await message.bot.delete_message(chat_id=message.chat.id, message_id=old_message)
-        except Exception:
-            pass
     await state.update_data(last_message_id=new_message_id)

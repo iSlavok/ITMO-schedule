@@ -6,7 +6,7 @@ from app.models import User
 
 
 class RoleFilter(BaseFilter):
-    def __init__(self, role: UserRole):
+    def __init__(self, role: UserRole) -> None:
         self.role = role
 
     async def __call__(self, message: Message, user: User) -> bool:

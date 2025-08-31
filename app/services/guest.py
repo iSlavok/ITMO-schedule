@@ -1,16 +1,16 @@
-from typing import Sequence
+from collections.abc import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.enums import UserRole
-from app.models import User, Group, Course
+from app.models import Course, Group, User
 from app.repositories import CourseRepository, GroupRepository
 
 
 class GuestService:
     def __init__(self, session: AsyncSession,
                  course_repo: CourseRepository,
-                 group_repo: GroupRepository):
+                 group_repo: GroupRepository) -> None:
         self._session = session
         self._course_repo = course_repo
         self._group_repo = group_repo

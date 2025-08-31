@@ -1,13 +1,11 @@
+# noqa: INP001
 import asyncio
 from logging.config import fileConfig
 
+from sqlalchemy.engine.base import Connection
+
 from alembic import context
-
-from dotenv import load_dotenv
-load_dotenv()
-
-from bot.database import Base, async_engine
-from bot.models import *
+from app.database import Base, async_engine
 
 config = context.config
 
@@ -21,7 +19,7 @@ def run_migrations_offline() -> None:
     pass
 
 
-def do_run_migrations(connection):
+def do_run_migrations(connection: Connection) -> None:
     context.configure(connection=connection, target_metadata=target_metadata)
 
     with context.begin_transaction():

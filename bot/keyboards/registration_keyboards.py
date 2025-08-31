@@ -1,10 +1,10 @@
-from typing import Iterable
+from collections.abc import Iterable
 
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.callback_data import CourseCD, GroupCD
 from app.models import Course, Group
+from bot.callback_data import CourseCD, GroupCD
 
 
 def get_course_keyboard(courses: Iterable[Course]) -> InlineKeyboardMarkup:

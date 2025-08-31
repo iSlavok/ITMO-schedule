@@ -1,15 +1,15 @@
-from typing import Sequence
+from collections.abc import Sequence
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.orm import joinedload, selectinload
 
-from app.models import User, Group
+from app.models import Group, User
 from app.repositories import BaseRepository
 
 
 class UserRepository(BaseRepository[User]):
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, User)
 
     async def get_by_user_id_with_group(self, user_id: int) -> User | None:
@@ -27,8 +27,8 @@ class UserRepository(BaseRepository[User]):
             .where(User.user_id == user_id)
             .options(
                 joinedload(User.group).options(
-                    joinedload(Group.course)
-                )
+                    joinedload(Group.course),
+                ),
             )
         )
         result = await self.session.execute(statement)
@@ -42,8 +42,8 @@ class UserRepository(BaseRepository[User]):
             .order_by(self.model.created_at)
             .options(
                 joinedload(User.group).options(
-                    joinedload(Group.course)
-                )
+                    joinedload(Group.course),
+                ),
             )
         )
         result = await self.session.execute(statement)

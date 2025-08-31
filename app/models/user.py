@@ -1,13 +1,13 @@
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import ForeignKey, Enum, String, BigInteger
+from sqlalchemy import BigInteger, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.enums import UserRole
 
 if TYPE_CHECKING:
-    from . import Group, Rating, Log
+    from . import Group, Log, Rating
 
 
 class User(Base):
@@ -17,7 +17,7 @@ class User(Base):
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole, name="user_role_enum", create_constraint=True, native_enum=False),
         nullable=False,
-        default=UserRole.GUEST
+        default=UserRole.GUEST,
     )
     group_id: Mapped[int | None] = mapped_column(ForeignKey("groups.id"), nullable=True)
 

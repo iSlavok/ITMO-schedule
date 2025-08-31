@@ -1,26 +1,29 @@
-from datetime import date, timedelta
-from typing import Iterable
+from collections.abc import Iterable
+from datetime import date, datetime, timedelta
 
-from aiogram import Router, F
+import pytz
+from aiogram import F, Router
 from aiogram.filters import or_f
-from aiogram.types import Message
+from aiogram.types import CallbackQuery, Message
 
+from app.enums import UserRole
+from app.models import Group, User
+from app.schedule import Lesson
 from app.services.ai import AiService
+from app.services.exceptions import AiServiceError
 from app.services.rating import RatingService
 from app.services.schedule import ScheduleService
 from bot.config import messages
-from app.enums import UserRole
 from bot.filters import RoleFilter
 from bot.keyboards import get_main_kb
-from app.models import User, Group
-from app.schedule import Lesson
 from bot.services import MessageManager
-from app.services.exceptions import AiServiceError
 
 router = Router(name="schedule_router")
 
 router.message.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole.ADMIN)))
 router.callback_query.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole.ADMIN)))
+
+MSK_TZ = pytz.timezone("Europe/Moscow")
 
 
 @router.message(
@@ -31,16 +34,16 @@ router.callback_query.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole
     F.data == "main",
     flags={"services": ["schedule", "rating"]},
 )
-async def today_schedule(_, user: User, schedule_service: ScheduleService, rating_service: RatingService,
-                         message_manager: MessageManager):
+async def today_schedule(_: Message | CallbackQuery, user: User, schedule_service: ScheduleService,
+                         rating_service: RatingService, message_manager: MessageManager) -> None:
     group: Group = user.group
     schedule_text = await get_schedule_text(
         group_name=group.name,
         schedule_service=schedule_service,
         rating_service=rating_service,
-        day=date.today(),
+        day=datetime.now(tz=MSK_TZ).date(),
         day_str="сегодня",
-        is_today=True
+        is_today=True,
     )
     await message_manager.send_message(text=schedule_text, reply_markup=get_main_kb())
 
@@ -49,15 +52,15 @@ async def today_schedule(_, user: User, schedule_service: ScheduleService, ratin
     F.text == "Завтра",
     flags={"services": ["schedule", "rating"]},
 )
-async def tomorrow_schedule(_, user: User, schedule_service: ScheduleService, rating_service: RatingService,
-                            message_manager: MessageManager):
+async def tomorrow_schedule(_: Message, user: User, schedule_service: ScheduleService, rating_service: RatingService,
+                            message_manager: MessageManager) -> None:
     group: Group = user.group
     schedule_text = await get_schedule_text(
         group_name=group.name,
         schedule_service=schedule_service,
         rating_service=rating_service,
-        day=date.today() + timedelta(days=1),
-        day_str="завтра"
+        day=datetime.now(tz=MSK_TZ).date() + timedelta(days=1),
+        day_str="завтра",
     )
     await message_manager.send_message(text=schedule_text, reply_markup=get_main_kb())
 
@@ -66,35 +69,37 @@ async def tomorrow_schedule(_, user: User, schedule_service: ScheduleService, ra
     F.text.as_("date_text"),
     flags={"services": ["schedule", "rating", "ai"]},
 )
-async def schedule_by_date(message: Message, user: User, schedule_service: ScheduleService,
+async def schedule_by_date(message: Message, user: User, schedule_service: ScheduleService,  # noqa: PLR0913
                            rating_service: RatingService, message_manager: MessageManager, ai_service: AiService,
-                           date_text: str):
+                           date_text: str) -> None:
     try:
         day = await ai_service.date_parsing(date_text)
     except AiServiceError:
-        return await message.delete()
+        await message.delete()
+        return
     group: Group = user.group
     schedule_text = await get_schedule_text(
         group_name=group.name,
         schedule_service=schedule_service,
         rating_service=rating_service,
         day=day,
-        day_str=day.strftime("%Y-%m-%d")
+        day_str=day.strftime("%Y-%m-%d"),
     )
     await message_manager.send_message(text=schedule_text, reply_markup=get_main_kb())
-    return None
+    return
 
 
-async def get_schedule_text(group_name: str, schedule_service: ScheduleService, rating_service: RatingService,
-                            day: date, day_str: str, is_today: bool = False) -> str:
+async def get_schedule_text(group_name: str, schedule_service: ScheduleService, rating_service: RatingService,  # noqa: PLR0913
+                            day: date, day_str: str, *, is_today: bool = False) -> str:
     schedule = schedule_service.get_schedule(day, group_name)
     if schedule is None:
-        raise ValueError("Schedule not found")
+        msg = "Schedule not found"
+        raise ValueError(msg)
     return await _schedule_to_text(schedule, day_str, schedule_service, rating_service, is_today=is_today)
 
 
 async def _schedule_to_text(schedule: Iterable[Lesson], day: str, schedule_service: ScheduleService,
-                            rating_service: RatingService, is_today: bool = False) -> str:
+                            rating_service: RatingService, *, is_today: bool = False) -> str:
     current, is_waiting = 0, False
     if is_today:
         current, is_waiting = schedule_service.get_current_lesson()
@@ -105,7 +110,8 @@ async def _schedule_to_text(schedule: Iterable[Lesson], day: str, schedule_servi
     return text
 
 
-async def _lesson_to_text(lesson: Lesson, current_lesson: int, is_waiting: bool, rating_service: RatingService) -> str:
+async def _lesson_to_text(lesson: Lesson, current_lesson: int, rating_service: RatingService, *,
+                          is_waiting: bool) -> str:
     lesson_message = messages.schedule.lesson
     status_emoji = _get_lesson_status_emoji(lesson_number=lesson.number, current_lesson=current_lesson,
                                             is_waiting=is_waiting)
@@ -128,26 +134,24 @@ async def _lesson_to_text(lesson: Lesson, current_lesson: int, is_waiting: bool,
     return text
 
 
-def _get_lesson_status_emoji(lesson_number: int, current_lesson: int, is_waiting: bool) -> str:
+def _get_lesson_status_emoji(lesson_number: int, current_lesson: int, *, is_waiting: bool) -> str:
     if lesson_number == current_lesson:
         return "🔴" if is_waiting else "🟠"
-    elif lesson_number < current_lesson:
+    if lesson_number < current_lesson:
         return "✅"
-    else:
-        return "🕒"
+    return "🕒"
 
 
 def _get_rating_emoji(rating: float | None) -> str:
-    if rating is None or rating >= 4.5:
+    if rating is None or rating >= 4.5:  # noqa: PLR2004
         return "👨"
-    elif rating >= 4.0:
+    if rating >= 4.0:  # noqa: PLR2004
         return "👨🏽"
-    elif rating >= 3.5:
+    if rating >= 3.5:  # noqa: PLR2004
         return "👨🏾"
-    elif rating >= 2.0:
+    if rating >= 2.0:  # noqa: PLR2004
         return "🌚"
-    else:
-        return "🤡"
+    return "🤡"
 
 
 _times: list[str] = [

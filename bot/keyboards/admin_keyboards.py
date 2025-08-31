@@ -1,9 +1,10 @@
+from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.callback_data import UsersListPageCD
 
 
-def get_users_list_kb(page: int, total_pages: int):
+def get_users_list_kb(page: int, total_pages: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     page_buttons = 0
     if page > 1:

@@ -65,9 +65,9 @@ class DatedLesson(BaseModel):
 
     @model_validator(mode="after")
     def validate(self) -> "DatedLesson":
-        if self.date_type != DateType.EXACT:
-            if self.week is None or self.weekday is None:
-                raise ValueError("week and weekday must be set if date_type is not exact")
+        if self.date_type != DateType.EXACT and (self.week is None or self.weekday is None):
+            msg = "week and weekday must be set if date_type is not exact"
+            raise ValueError(msg)
         return self
 
 

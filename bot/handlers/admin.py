@@ -1,17 +1,17 @@
-from typing import Sequence
+from collections.abc import Sequence
 
-from aiogram import Router, F
+from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
-from bot.services import MessageManager
+from app.enums import UserRole
+from app.models import User
 from app.services.user import UserService
 from bot.callback_data import UsersListPageCD
 from bot.config import messages
-from app.enums import UserRole
 from bot.filters import RoleFilter
 from bot.keyboards import get_users_list_kb
-from app.models import User
+from bot.services import MessageManager
 
 router = Router(name="admin_router")
 router.message.filter(RoleFilter(UserRole.ADMIN))
@@ -20,7 +20,8 @@ router.callback_query.filter(RoleFilter(UserRole.ADMIN))
 
 @router.callback_query(F.data == "users_list")
 @router.message(Command(commands=["users_list", "users"]))
-async def users_list_open(event: Message | CallbackQuery, user_service: UserService, message_manager: MessageManager):
+async def users_list_open(event: Message | CallbackQuery, user_service: UserService,
+                          message_manager: MessageManager) -> None:
     users = await user_service.get_users_with_group_and_course(page=1, per_page=10)
     total_count = await user_service.get_users_count()
     total_pages = (total_count // 10) + (1 if total_count % 10 > 0 else 0)
@@ -34,7 +35,7 @@ async def users_list_open(event: Message | CallbackQuery, user_service: UserServ
 
 @router.callback_query(UsersListPageCD.filter())
 async def users_list_page(callback: CallbackQuery, callback_data: UsersListPageCD, user_service: UserService,
-                          message_manager: MessageManager):
+                          message_manager: MessageManager) -> None:
     users = await user_service.get_users_with_group_and_course(page=callback_data.page, per_page=10)
     total_count = await user_service.get_users_count()
     total_pages = (total_count // 10) + (1 if total_count % 10 > 0 else 0)

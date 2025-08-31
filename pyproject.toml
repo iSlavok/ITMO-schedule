@@ -1,0 +1,53 @@
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+fix = false
+exclude = [".venv", "__pycache__", "*test*", "alembic/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "UP", "I", "SIM", "C4", "RUF", "ANN", "N", "S", "T", "Q", "A", "R", "B9", "W", "PL", "ISC",
+    "PIE", "PGH", "TID", "COM", "RET", "PTH", "G", "FA", "ERA", "TRY", "RSE", "SLF", "EXE", "NPY", "PD", "PERF", "PYI",
+    "EM", "INP", "PT", "DTZ", "LOG", "BLE", "TCH", "FBT", "ASYNC", "TD"]
+ignore = [
+    "RUF001",
+    "TRY301",
+    "BLE001",
+    "TD002",
+    "TD003",
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --cov --cov-report=html --cov-report=term-missing"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.coverage.run]
+source = ["app", "bot"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "if TYPE_CHECKING:",
+#    "if __name__ == .__main__.:",
+]
+omit = [
+    "*/__init__.py",
+    "app/database/*",
+    "app/config/*",
+    "*/tests/*",
+    "*/venv/*",
+]
+fail_under = 80
+show_missing = true
+skip_empty = true
+
+[tool.pyright]
+pythonVersion = "3.13"
+exclude = [
+    "**/__pycache__",
+    ".venv",
+    "**/tests",
+]

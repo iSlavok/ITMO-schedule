@@ -1,4 +1,5 @@
-from typing import Callable, Any, Awaitable
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
@@ -9,7 +10,7 @@ from app.services.user import UserService
 
 
 class UserMiddleware(BaseMiddleware):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     async def __call__(self, handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]], event: TelegramObject,
@@ -29,6 +30,5 @@ class UserMiddleware(BaseMiddleware):
                     username=event_from_user.username,
                 )
                 data["user"] = user
-                result = await handler(event, data)
-                return result
+                return await handler(event, data)
         return await handler(event, data)

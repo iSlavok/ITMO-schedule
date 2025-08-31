@@ -1,4 +1,4 @@
-from typing import Sequence
+from collections.abc import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,7 +7,7 @@ from app.repositories import UserRepository
 
 
 class UserService:
-    def __init__(self, session: AsyncSession, user_repo: UserRepository):
+    def __init__(self, session: AsyncSession, user_repo: UserRepository) -> None:
         self._session = session
         self._user_repo = user_repo
 
@@ -32,11 +32,9 @@ class UserService:
         return user
 
     async def get_users_with_group_and_course(self, page: int = 1, per_page: int = 10) -> Sequence[User]:
-        if page < 1:
-            page = 1
+        page = max(page, 1)
         skip = (page - 1) * per_page
-        users = await self._user_repo.list_all_with_group_and_course(skip=skip, limit=per_page)
-        return users
+        return await self._user_repo.list_all_with_group_and_course(skip=skip, limit=per_page)
 
     async def get_users_count(self) -> int:
         return await self._user_repo.get_users_count()

@@ -1,9 +1,14 @@
+from .models import DatedSchedule, DateType, Lesson, Schedule, Week, Weekday
 from .schedule_parser import ScheduleParser
 from .schedule_updater import ScheduleUpdater
-from .models import Schedule, DatedSchedule, Week, Weekday, DateType, Lesson
 
 __all__ = [
+    "DateType",
+    "DatedSchedule",
+    "Lesson",
+    "Schedule",
     "ScheduleParser",
     "ScheduleUpdater",
-    "Schedule", "DatedSchedule", "Week", "Weekday", "DateType", "Lesson",
+    "Week",
+    "Weekday",
 ]

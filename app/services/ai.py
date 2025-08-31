@@ -1,18 +1,21 @@
-from datetime import date
+from datetime import date, datetime
 
+import pytz
 from google import genai
-from google.genai.types import GenerateContentConfig, ThinkingConfig, AutomaticFunctionCallingConfig
+from google.genai.types import AutomaticFunctionCallingConfig, GenerateContentConfig, ThinkingConfig
 
 from app.schemas import AiDateResponse
 from app.services.schedule import is_even_week
 
+MSK_TZ = pytz.timezone("Europe/Moscow")
+
 
 class AiService:
-    def __init__(self):
+    def __init__(self) -> None:
         self._client = genai.Client().aio
 
     async def date_parsing(self, message: str) -> date:
-        today = date.today()
+        today = datetime.now(tz=MSK_TZ).date()
         model = "gemini-2.5-flash-lite"
         generate_content_config = GenerateContentConfig(
             system_instruction=(

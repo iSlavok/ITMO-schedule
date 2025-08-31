@@ -1,6 +1,6 @@
-from typing import Sequence
+from collections.abc import Sequence
 
-from sqlalchemy import select, func, Row
+from sqlalchemy import Row, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Lecturer, Rating
@@ -8,7 +8,7 @@ from app.repositories import BaseRepository
 
 
 class LecturerRepository(BaseRepository[Lecturer]):
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, Lecturer)
 
     async def get_by_name(self, name: str) -> Lecturer | None:
@@ -28,19 +28,19 @@ class LecturerRepository(BaseRepository[Lecturer]):
         result = await self.session.execute(statement)
         return result.scalar_one_or_none()
 
-    async def get_top_lecturers_with_rank(self, limit: int = 10, skip: int = 0,
+    async def get_top_lecturers_with_rank(self, limit: int = 10, skip: int = 0, *,
                                           ascending: bool = False) -> Sequence[Row[tuple[str, float, int, int]]]:
         avg_rating_subquery = (
             select(
                 Lecturer.id,
                 Lecturer.name,
                 func.avg(Rating.rating).label("avg_rating"),
-                func.count(Rating.id).label("reviews_count")
+                func.count(Rating.id).label("reviews_count"),
             )
             .join(Rating)
             .group_by(
                 Lecturer.id,
-                Lecturer.name
+                Lecturer.name,
             )
             .subquery()
         )
@@ -53,9 +53,9 @@ class LecturerRepository(BaseRepository[Lecturer]):
                 func.row_number()
                 .over(
                     order_by=avg_rating_subquery.c.avg_rating.asc() if ascending else
-                    avg_rating_subquery.c.avg_rating.desc()
+                    avg_rating_subquery.c.avg_rating.desc(),
                 )
-                .label("rank")
+                .label("rank"),
             )
             .subquery()
         )
@@ -75,8 +75,8 @@ class LecturerRepository(BaseRepository[Lecturer]):
             .where(
                 Lecturer.id.in_(
                     select(Rating.lecturer_id)
-                    .distinct()
-                )
+                    .distinct(),
+                ),
             )
         )
         result = await self.session.execute(statement)

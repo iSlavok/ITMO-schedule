@@ -1,20 +1,23 @@
-from typing import Callable, Any, Awaitable
+from collections.abc import Awaitable, Callable
+from typing import TYPE_CHECKING, Any
 
 from aiogram import BaseMiddleware
-from aiogram.types import TelegramObject
 from aiogram.dispatcher.flags import get_flag
-from sqlalchemy.ext.asyncio import AsyncSession
+from aiogram.types import TelegramObject
 
-from app.repositories import GroupRepository, CourseRepository, LecturerRepository, RatingRepository, LogRepository
+from app.repositories import CourseRepository, GroupRepository, LecturerRepository, LogRepository, RatingRepository
 from app.services.ai import AiService
 from app.services.guest import GuestService
 from app.services.log import LogService
 from app.services.rating import RatingService
 from app.services.schedule import ScheduleService
 
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
 
 class ServicesMiddleware(BaseMiddleware):
-    def __init__(self, schedule_service: ScheduleService, ai_service: AiService):
+    def __init__(self, schedule_service: ScheduleService, ai_service: AiService) -> None:
         self._schedule_service = schedule_service
         self._ai_service = ai_service
         super().__init__()
@@ -37,7 +40,7 @@ class ServicesMiddleware(BaseMiddleware):
                 services["guest_service"] = GuestService(
                     session=session,
                     course_repo=course_repo,
-                    group_repo=group_repo
+                    group_repo=group_repo,
                 )
             elif service == "rating":
                 lecturer_repo = LecturerRepository(session)

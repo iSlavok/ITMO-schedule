@@ -1,11 +1,11 @@
-from .rating_cd import RatingCD, AddRatingCD
 from .admin_cd import UsersListPageCD
+from .rating_cd import AddRatingCD, RatingCD
 from .registration_cd import CourseCD, GroupCD
 
 __all__ = [
-    "RatingCD",
     "AddRatingCD",
-    "UsersListPageCD",
     "CourseCD",
     "GroupCD",
+    "RatingCD",
+    "UsersListPageCD",
 ]

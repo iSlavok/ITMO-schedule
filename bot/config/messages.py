@@ -1,5 +1,7 @@
-from pydantic import BaseModel
+from pathlib import Path
+
 import yaml
+from pydantic import BaseModel
 
 
 class UsersListMessage(BaseModel):
@@ -40,7 +42,8 @@ class Messages(BaseModel):
 
 
 def load_messages() -> Messages:
-    with open("messages.yaml", "r", encoding="utf-8") as file:
+    path = Path("messages.yaml")
+    with path.open(encoding="utf-8") as file:
         data = yaml.safe_load(file)
         return Messages(**data)
 
