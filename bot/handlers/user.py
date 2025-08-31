@@ -67,8 +67,9 @@ async def show_rating(callback: CallbackQuery, callback_data: RatingCD, state: F
     page = callback_data.page
     rating = await rating_service.get_top_lecturers_with_rank(page, ascending=rating_type != RatingType.BEST)
     text = "<b>" + ("Лучшие преподаватели:" if rating_type == RatingType.BEST else "Худшие преподаватели:") + "</b>\n\n"
-    for lecturer, rank, avg_rating, reviews_count in rating:
-        text += f"{rank}. {lecturer} — ⭐️{avg_rating} ({reviews_count} оценок)\n"
+    for lecturer in rating:
+        text += (f"{lecturer.rank}. {lecturer.name} — ⭐️{round(lecturer.avg_rating, 2)} "
+                 f"({lecturer.reviews_count} оценок)\n")
     new_message = await callback.message.answer(
         text,
         reply_markup=get_pagination_rating_kb(page, await rating_service.get_lecturers_page_count(), rating_type),

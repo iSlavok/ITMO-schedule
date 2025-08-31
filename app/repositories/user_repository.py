@@ -53,4 +53,5 @@ class UserRepository(BaseRepository[User]):
         statement = (
             select(func.count(self.model.id))
         )
-        return await self.session.scalar(statement) or 0
+        result = await self.session.execute(statement)
+        return result.scalar_one()

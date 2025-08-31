@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Lecturer, Rating, User
 from app.repositories import LecturerRepository, RatingRepository
+from app.schemas import LecturerDTO
 
 
 class RatingService:
@@ -25,12 +26,25 @@ class RatingService:
         rating = await self._lecturer_repository.get_average_rating(name)
         return round(rating, 1) if rating is not None else None
 
-    async def get_top_lecturers_with_rank(self, page: int, per_page: int = 10, ascending: bool = False) -> list[
-        tuple[str, int, float, int]]:
-        lecturers = await self._lecturer_repository.get_top_lecturers_with_rank(limit=per_page,
-                                                                                skip=(page - 1) * per_page,
-                                                                                ascending=ascending)
-        return [(lecturer.name, lecturer.rank, round(lecturer.avg_rating, 2), lecturer.reviews_count) for lecturer in lecturers]
+    async def get_top_lecturers_with_rank(self, page: int, per_page: int = 10,
+                                          ascending: bool = False) -> list[LecturerDTO]:
+        lecturers = await self._lecturer_repository.get_top_lecturers_with_rank(
+            limit=per_page,
+            skip=(page - 1) * per_page,
+            ascending=ascending
+        )
+        lecturer_tuples = [
+            lecturer.tuple()
+            for lecturer in lecturers
+        ]
+        return [
+            LecturerDTO(
+                name=lecturer[0],
+                avg_rating=lecturer[1],
+                reviews_count=lecturer[2],
+                rank=lecturer[3],
+            ) for lecturer in lecturer_tuples
+        ]
 
     async def create_rating(self, rating: int, lecturer_id: int, user: User) -> Rating | bool:
         if not await self.can_user_rate_lecturer(user, lecturer_id):
@@ -49,4 +63,4 @@ class RatingService:
         return count // per_page + (1 if count % per_page > 0 else 0)
 
     async def can_user_rate_lecturer(self, user: User, lecturer_id: int) -> bool:
-        return await self._rating_repository.can_user_rate_lecturer(user, lecturer_id)
+        return await self._rating_repository.can_user_rate_lecturer(user.user_id, lecturer_id)

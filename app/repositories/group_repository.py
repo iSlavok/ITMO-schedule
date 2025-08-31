@@ -12,6 +12,9 @@ class GroupRepository(BaseRepository[Group]):
         super().__init__(session, Group)
 
     async def get_by_course_id(self, course_id: int) -> Sequence[Group]:
-        query = select(Group).where(Group.course_id == course_id)
-        result = await self.session.execute(query)
+        statement = (
+            select(Group)
+            .where(Group.course_id == course_id)
+        )
+        result = await self.session.execute(statement)
         return result.scalars().all()
