@@ -10,7 +10,7 @@ database_url = URL.create(
     host=env_config.DB_HOST,
     port=env_config.DB_PORT,
     username=env_config.DB_USER,
-    password=env_config.DB_PASS,
+    password=env_config.DB_PASS.get_secret_value(),
     database=env_config.DB_NAME,
 )
 

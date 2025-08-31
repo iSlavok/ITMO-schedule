@@ -13,7 +13,7 @@ from app.services.schedule import is_even_week
 class AiService:
     def __init__(self):
         self._client = genai.Client(
-            api_key=env_config.GEMINI_API_KEY,
+            api_key=env_config.GEMINI_API_KEY.get_secret_value(),
         )
 
     async def date_parsing(self, message: str) -> date:

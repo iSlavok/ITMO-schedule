@@ -23,7 +23,7 @@ async def main():
         "https://docs.google.com/spreadsheets/d/1heK_XfQjFycJY7yYjaYefjYcDbZ5_TtIkNTMyKQG1ek")
     ScheduleUpdater(schedule_service, parser, interval=600)
 
-    bot = Bot(token=env_config.BOT_TOKEN, default=DefaultBotProperties(parse_mode='HTML'))
+    bot = Bot(token=env_config.BOT_TOKEN.get_secret_value(), default=DefaultBotProperties(parse_mode='HTML'))
     storage = RedisStorage(redis=Redis(host=env_config.REDIS_HOST, port=env_config.REDIS_PORT),
                            key_builder=DefaultKeyBuilder(with_destiny=True, with_bot_id=True))
     dp = Dispatcher(storage=storage)
