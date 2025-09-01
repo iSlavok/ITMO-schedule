@@ -3,6 +3,8 @@ import threading
 import time
 from datetime import UTC, datetime
 
+from loguru import logger
+
 from app.schedule import ScheduleParser
 from app.services.schedule import ScheduleService
 
@@ -15,8 +17,12 @@ class ScheduleUpdater:
         self._thread: threading.Thread | None = None
 
     def update_schedule(self) -> None:
-        data = self._schedule_parser.parse()
-        self._schedule_service.schedule = data
+        try:
+            data = self._schedule_parser.parse()
+            self._schedule_service.schedule = data
+            logger.success("Schedule updated successfully")
+        except Exception as e:
+            logger.warning(f"Failed to update schedule: {e}")
 
     def start_update_loop(self) -> None:
         if self._thread is None or not self._thread.is_alive():

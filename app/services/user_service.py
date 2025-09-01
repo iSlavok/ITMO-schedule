@@ -1,9 +1,8 @@
-from collections.abc import Sequence
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User
 from app.repositories import UserRepository
+from app.schemas import UserDTO
 
 
 class UserService:
@@ -31,10 +30,16 @@ class UserService:
             await self._session.refresh(user)
         return user
 
-    async def get_users_with_group_and_course(self, page: int = 1, per_page: int = 10) -> Sequence[User]:
-        page = max(page, 1)
+    async def get_users_with_group_and_course(self, page: int, per_page: int) -> list[UserDTO]:
+        if page < 1:
+            msg = "Page must be greater than 0"
+            raise ValueError(msg)  # TODO(iSlavok): replace with custom exception
         skip = (page - 1) * per_page
-        return await self._user_repo.list_all_with_group_and_course(skip=skip, limit=per_page)
+        users = await self._user_repo.list_all_with_group_and_course(skip=skip, limit=per_page)
+        return [
+            UserDTO.model_validate(user)
+            for user in users
+        ]
 
     async def get_users_count(self) -> int:
         return await self._user_repo.get_users_count()

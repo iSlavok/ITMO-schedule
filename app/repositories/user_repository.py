@@ -42,7 +42,9 @@ class UserRepository(BaseRepository[User]):
 
     async def get_users_count(self) -> int:
         statement = (
-            select(func.count(self.model.id))
+            select(
+                func.count(self.model.id),
+            )
         )
         result = await self.session.execute(statement)
         return result.scalar_one()
