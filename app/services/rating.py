@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Lecturer, Rating, User
+from app.models import Lecturer, Rating
 from app.repositories import LecturerRepository, RatingRepository
 from app.schemas import LecturerDTO
 
@@ -40,13 +40,13 @@ class RatingService:
             ) for lecturer in lecturer_tuples
         ]
 
-    async def create_rating(self, rating: int, lecturer_id: int, user: User) -> Rating | bool:
-        if not await self.can_user_rate_lecturer(user, lecturer_id):
+    async def create_rating(self, rating: int, lecturer_id: int, user_id: int) -> Rating | bool:
+        if not await self.can_user_rate_lecturer(user_id, lecturer_id):
             return False  # TODO(iSlavok): create custom exception
         rating = Rating(
             rating=rating,
             lecturer_id=lecturer_id,
-            user=user,
+            user_id=user_id,
         )
         self._session.add(rating)
         await self._session.commit()
@@ -56,5 +56,5 @@ class RatingService:
         count = await self._lecturer_repository.get_lecturers_count()
         return count // per_page + (1 if count % per_page > 0 else 0)
 
-    async def can_user_rate_lecturer(self, user: User, lecturer_id: int) -> bool:
-        return await self._rating_repository.can_user_rate_lecturer(user.user_id, lecturer_id)
+    async def can_user_rate_lecturer(self, user_id: int, lecturer_id: int) -> bool:
+        return await self._rating_repository.can_user_rate_lecturer(user_id, lecturer_id)

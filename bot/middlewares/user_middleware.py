@@ -6,7 +6,7 @@ from aiogram.types import TelegramObject
 
 from app.database import get_session
 from app.repositories import UserRepository
-from app.services.user import UserService
+from app.services.user_service import UserService
 
 
 class UserMiddleware(BaseMiddleware):
@@ -25,7 +25,7 @@ class UserMiddleware(BaseMiddleware):
                 )
                 data["user_service"] = user_service
                 user = await user_service.get_or_create(
-                    user_id=event_from_user.id,
+                    telegram_id=event_from_user.id,
                     full_name=event_from_user.full_name,
                     username=event_from_user.username,
                 )

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class Group(Base):
-    name: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
+    name: Mapped[str] = mapped_column(index=True, nullable=False)
     course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"))
 
     course: Mapped["Course"] = relationship("Course", back_populates="groups")

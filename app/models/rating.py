@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 class Rating(Base):
     rating: Mapped[int] = mapped_column(nullable=False)
     lecturer_id: Mapped[int] = mapped_column(ForeignKey("lecturers.id"), index=True)
-    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.user_id"))
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"))
 
     lecturer: Mapped["Lecturer"] = relationship("Lecturer", back_populates="ratings")
     user: Mapped["User"] = relationship("User", back_populates="ratings")

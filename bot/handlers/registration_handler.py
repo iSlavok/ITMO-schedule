@@ -45,7 +45,7 @@ async def course_select(callback: CallbackQuery, callback_data: CourseCD, guest_
     await message_manager.send_message(
         text=messages.registration.group_request,
         clear_previous=False,
-        reply_markup=keyboard
+        reply_markup=keyboard,
     )
     await callback.answer()
 

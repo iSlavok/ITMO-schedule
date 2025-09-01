@@ -11,11 +11,11 @@ class UserService:
         self._session = session
         self._user_repo = user_repo
 
-    async def get_or_create(self, user_id: int, username: str | None, full_name: str) -> User:
-        user = await self._user_repo.get_by_user_id_with_group_and_course(user_id)
+    async def get_or_create(self, telegram_id: int, username: str | None, full_name: str) -> User:
+        user = await self._user_repo.get_by_telegram_id_with_group_and_course(telegram_id=telegram_id)
         if not user:
             user = User(
-                user_id=user_id,
+                telegram_id=telegram_id,
                 username=username,
                 name=full_name,
             )

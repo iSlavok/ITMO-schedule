@@ -2,7 +2,7 @@ from collections.abc import Sequence
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import joinedload
 
 from app.models import Group, User
 from app.repositories import BaseRepository
@@ -12,19 +12,10 @@ class UserRepository(BaseRepository[User]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, User)
 
-    async def get_by_user_id_with_group(self, user_id: int) -> User | None:
+    async def get_by_telegram_id_with_group_and_course(self, telegram_id: int) -> User | None:
         statement = (
             select(User)
-            .options(selectinload(User.group))
-            .where(User.user_id == user_id)
-        )
-        result = await self.session.execute(statement)
-        return result.scalar_one_or_none()
-
-    async def get_by_user_id_with_group_and_course(self, user_id: int) -> User | None:
-        statement = (
-            select(User)
-            .where(User.user_id == user_id)
+            .where(User.telegram_id == telegram_id)
             .options(
                 joinedload(User.group).options(
                     joinedload(Group.course),

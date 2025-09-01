@@ -6,7 +6,7 @@ from aiogram.types import CallbackQuery, Message
 
 from app.enums import UserRole
 from app.models import User
-from app.services.user import UserService
+from app.services.user_service import UserService
 from bot.callback_data import UsersListPageCD
 from bot.config import messages
 from bot.filters import RoleFilter
@@ -54,7 +54,7 @@ def get_users_list_text(users: Sequence[User], total_count: int, skip_count: int
         text += "\n" + MessageManager.format_text(
             messages.admin.users_list.user,
             number=i + skip_count,
-            user_id=user.user_id,
+            user_id=user.id,
             group_name=group_name,
             course_name=course_name,
             full_name=user.name,

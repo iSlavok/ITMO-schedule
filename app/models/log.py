@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class Log(Base):
-    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.user_id"))
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"))
     action: Mapped[str] = mapped_column(nullable=False)
 
     user: Mapped["User"] = relationship("User", back_populates="logs")
