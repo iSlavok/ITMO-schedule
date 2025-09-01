@@ -7,7 +7,7 @@ from aiogram.types import TelegramObject
 
 from app.repositories import CourseRepository, GroupRepository, LecturerRepository, LogRepository, RatingRepository
 from app.services.ai import AiService
-from app.services.guest import GuestService
+from app.services.guest_service import GuestService
 from app.services.log import LogService
 from app.services.rating import RatingService
 from app.services.schedule import ScheduleService

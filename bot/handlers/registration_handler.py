@@ -2,13 +2,12 @@ from datetime import datetime
 
 import pytz
 from aiogram import Router
-from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from app.enums import UserRole
 from app.models import User
-from app.services.guest import GuestService
+from app.services.guest_service import GuestService
 from app.services.rating import RatingService
 from app.services.schedule import ScheduleService
 from bot.callback_data import CourseCD, GroupCD
@@ -17,7 +16,6 @@ from bot.filters import RoleFilter
 from bot.handlers.schedule_handler import get_schedule_text
 from bot.keyboards import get_course_keyboard, get_group_keyboard, get_main_kb
 from bot.services import MessageManager
-from bot.states import RegisterStates
 
 router = Router()
 router.message.filter(RoleFilter(UserRole.GUEST))
@@ -26,37 +24,34 @@ router.callback_query.filter(RoleFilter(UserRole.GUEST))
 MSK_TZ = pytz.timezone("Europe/Moscow")
 
 
-@router.message(
-    StateFilter(None),
-    flags={"services": ["guest"]},
-)
-async def start_registration(_: Message, state: FSMContext, guest_service: GuestService,
-                             message_manager: MessageManager) -> None:
+@router.message(flags={"services": ["guest"]})
+async def start_registration(_: Message, guest_service: GuestService, message_manager: MessageManager) -> None:
     courses = await guest_service.get_all_courses()
     keyboard = get_course_keyboard(courses)
     await message_manager.send_message(messages.registration.course_request, reply_markup=keyboard)
-    await state.set_state(RegisterStates.COURSE_SELECT)
 
 
 @router.callback_query(
     CourseCD.filter(),
-    StateFilter(RegisterStates.COURSE_SELECT),
     flags={"services": ["guest"]},
 )
-async def course_select(callback: CallbackQuery, callback_data: CourseCD, state: FSMContext,
-                        guest_service: GuestService, message_manager: MessageManager) -> None:
+async def course_select(callback: CallbackQuery, callback_data: CourseCD, guest_service: GuestService,
+                        message_manager: MessageManager) -> None:
     text = MessageManager.format_text(messages.registration.course_selected, course_name=callback_data.name)
     await message_manager.send_message(text)
+
     groups = await guest_service.get_course_groups(callback_data.id)
     keyboard = get_group_keyboard(groups)
-    await message_manager.send_message(messages.registration.group_request, clear_previous=False, reply_markup=keyboard)
-    await state.set_state(RegisterStates.GROUP_SELECT)
+    await message_manager.send_message(
+        text=messages.registration.group_request,
+        clear_previous=False,
+        reply_markup=keyboard
+    )
     await callback.answer()
 
 
 @router.callback_query(
     GroupCD.filter(),
-    StateFilter(RegisterStates.GROUP_SELECT),
     flags={"services": ["guest", "schedule", "rating"]},
 )
 async def group_select(callback: CallbackQuery, callback_data: GroupCD, state: FSMContext, user: User,  # noqa: PLR0913
@@ -64,8 +59,10 @@ async def group_select(callback: CallbackQuery, callback_data: GroupCD, state: F
                        message_manager: MessageManager) -> None:
     text = MessageManager.format_text(messages.registration.group_selected, group_name=callback_data.name)
     await message_manager.send_message(text)
+
     await guest_service.register_user(user, group_id=callback_data.id)
     await state.clear()
+
     schedule_text = await get_schedule_text(
         group_name=callback_data.name,
         schedule_service=schedule_service,
@@ -76,9 +73,3 @@ async def group_select(callback: CallbackQuery, callback_data: GroupCD, state: F
     )
     await message_manager.send_message(text=schedule_text, reply_markup=get_main_kb())
     await callback.answer()
-
-
-@router.message(~StateFilter(None))
-async def on_message(message: Message, state: FSMContext) -> None:
-    await message.delete()
-    await state.clear()
