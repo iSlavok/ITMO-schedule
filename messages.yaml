@@ -23,7 +23,8 @@ schedule:
     lecturer: $emoji $name
     lecturer_rating: " | ⭐️$rating"
     room: "🚪 Аудитория: <b>$room</b>"
-    end: | 
+    end: " 
     
       ———————————————
-    a: v
+      
+      "

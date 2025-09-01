@@ -5,8 +5,8 @@ from google.oauth2.service_account import Credentials
 
 
 class ScheduleParser:
-    def __init__(self, spreadsheet_url: str) -> None:
-        self._spreadsheet_url = spreadsheet_url
+    def __init__(self, spreadsheet_key: str) -> None:
+        self._spreadsheet_key = spreadsheet_key
         scope = ["https://spreadsheets.google.com/feeds",
                  "https://www.googleapis.com/auth/drive"]
         credentials = Credentials.from_service_account_file(
@@ -78,7 +78,7 @@ class ScheduleParser:
         return {"courses": self._data}
 
     def _parse_google_sheet(self) -> None:
-        spreadsheet = self._gc.open_by_url(self._spreadsheet_url)
+        spreadsheet = self._gc.open_by_key(self._spreadsheet_key)
         self._worksheet = spreadsheet.get_worksheet(0)
         self._values = self._worksheet.get_all_values()
 

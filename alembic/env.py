@@ -2,10 +2,12 @@
 import asyncio
 from logging.config import fileConfig
 
+from loguru import logger
 from sqlalchemy.engine.base import Connection
 
 from alembic import context
 from app.database import Base, async_engine
+from app.models import *  # noqa: F403
 
 config = context.config
 
@@ -16,7 +18,7 @@ target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
-    pass
+    logger.warning("Running migrations in offline mode is not supported in this setup.")
 
 
 def do_run_migrations(connection: Connection) -> None:

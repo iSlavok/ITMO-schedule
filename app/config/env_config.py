@@ -14,6 +14,7 @@ class EnvConfig(BaseSettings):
     REDIS_PORT: int = 6379
     BOT_TOKEN: SecretStr
     GOOGLE_API_KEY: SecretStr
+    SPREADSHEET_ID: str
 
 
 env_config = EnvConfig()

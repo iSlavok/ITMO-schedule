@@ -1,6 +1,7 @@
 services:
   bot:
     image: ghcr.io/islavok/itmo-schedule:latest
+    profiles: [ "prod" ]
     restart: unless-stopped
     env_file:
       - .env
@@ -10,10 +11,9 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./data:/app/data
-      - ./messages.yaml:/app/messages.yaml
-      - ./google-credentials.json:/app/google-credentials.json
-    profiles: ["prod"]
+      - ./data:/src/data
+      - ./messages.yaml:/src/messages.yaml
+      - ./google-credentials.json:/src/google-credentials.json
     deploy:
       resources:
         limits:
@@ -24,7 +24,7 @@ services:
 
   bot-dev:
     build: .
-    restart: unless-stopped
+    profiles: [ "dev" ]
     env_file:
       - .env
     depends_on:
@@ -33,16 +33,14 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./data:/app/data
-      - ./messages.yaml:/app/messages.yaml
-      - ./google-credentials.json:/app/google-credentials.json
-      - ./bot:/app/bot
-      - ./app:/app/app
-      - ./alembic:/app/alembic
-      - ./main.py:/app/main.py
-      - ./alembic.ini:/app/alembic.ini
-    command: python main.py
-    profiles: ["dev"]
+      - ./bot:/src/bot
+      - ./app:/src/app
+      - ./alembic:/src/alembic
+      - ./main.py:/src/main.py
+      - ./alembic.ini:/src/alembic.ini
+      - ./data:/src/data
+      - ./messages.yaml:/src/messages.yaml
+      - ./google-credentials.json:/src/google-credentials.json
     networks:
       - bot_network
 
@@ -51,7 +49,7 @@ services:
     restart: unless-stopped
     volumes:
       - redis_data:/data
-    profiles: ["dev","prod"]
+    profiles: [ "dev", "prod" ]
     healthcheck:
       test: ["CMD","redis-cli","ping"]
       interval: 30s
@@ -67,14 +65,12 @@ services:
 
   postgres:
     image: postgres:17-alpine
+    profiles: [ "dev", "prod", "migrate" ]
     restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-mydatabase}
-      POSTGRES_USER: ${POSTGRES_USER:-user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    env_file:
+      - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    profiles: ["dev","prod"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
@@ -83,12 +79,34 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.3'
-          memory: 256M
+          cpus: '0.5'
+          memory: 512M
     networks:
       - bot_network
     ports:
       - "5434:5432"
+
+
+  migrate:
+    build: .
+    profiles: [ "migrate" ]
+    env_file:
+      - .env
+    command: tail -f /dev/null
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./bot:/src/bot
+      - ./app:/src/app
+      - ./alembic:/src/alembic
+      - ./main.py:/src/main.py
+      - ./alembic.ini:/src/alembic.ini
+      - ./data:/src/data
+      - ./messages.yaml:/src/messages.yaml
+      - ./google-credentials.json:/src/google-credentials.json
+    networks:
+      - bot_network
 
 volumes:
   redis_data:
