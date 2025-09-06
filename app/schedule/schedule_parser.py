@@ -66,6 +66,9 @@ class ScheduleParser:
             "с ноября",
             "ноябрь/декабрь",
         ]
+        self._not_skip_words = [
+            "ВТП",
+        ]
 
     def parse(self) -> dict:
         self._parse_google_sheet()
@@ -149,8 +152,9 @@ class ScheduleParser:
                 data_value = value
                 if j % 2 == 0:
                     continue
-                if (re.search(r"(?<!-)\b(?:[1-9]|[1-9]\d)\b", data_value)
-                        or any(skip_word in data_value.lower() for skip_word in self._skip_words)):
+                if ((re.search(r"(?<!-)\b(?:[1-9]|[1-9]\d)\b", data_value)
+                        or any(skip_word in data_value.lower() for skip_word in self._skip_words))
+                        and not any(not_skip_word in data_value for not_skip_word in self._not_skip_words)):
                     continue
                 for pattern, repl in self._lesson_replace:
                     data_value = pattern.sub(repl, data_value)
