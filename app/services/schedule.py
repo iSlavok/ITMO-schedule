@@ -13,7 +13,7 @@ schedule_times = [
     (time(13, 30), time(15, 0)),
     (time(15, 30), time(17, 0)),
     (time(17, 10), time(18, 40)),
-    (time(18, 40), time(20, 10)),
+    (time(18, 50), time(20, 20)),
 ]
 
 

@@ -2,6 +2,7 @@ import re
 
 import gspread
 from google.oauth2.service_account import Credentials
+from loguru import logger
 
 
 class ScheduleParser:
@@ -75,7 +76,6 @@ class ScheduleParser:
         self._merge_cells()
         self._replace_values()
         self._extract_data()
-        self._remove_empty_lessons()
         self._worksheet = None
         self._values = None
         return {"courses": self._data}
@@ -164,7 +164,9 @@ class ScheduleParser:
                 room, data_value = self._extract_room(data_value, row, j)
                 lecture_type, data_value = self._extract_lecture_type(data_value)
                 name, lecturer = self._extract_name_and_lecturer(data_value)
-                number = len(self._data[year]["groups"][group][week]["days"][self._values[0][j]]["lessons"]) + 1
+                if room is None and lecture_type is None and name is None and lecturer is None:
+                    continue
+                number = int(self._values[1][j+1])
                 self._data[year]["groups"][group][week]["days"][self._values[0][j]]["lessons"].append({
                     "name": name,
                     "room": room,
