@@ -4,6 +4,7 @@ import pytz
 from aiogram import Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
+from loguru import logger
 
 from app.enums import UserRole
 from app.models import User
@@ -25,7 +26,14 @@ MSK_TZ = pytz.timezone("Europe/Moscow")
 
 
 @router.message(flags={"services": ["guest"]})
-async def start_registration(_: Message, guest_service: GuestService, message_manager: MessageManager) -> None:
+async def start_registration(
+        _: Message,
+        user: User,
+        guest_service: GuestService,
+        message_manager: MessageManager
+) -> None:
+    logger.info(f"User {user.id} started registration")
+
     courses = await guest_service.get_all_courses()
     keyboard = get_course_keyboard(courses)
     await message_manager.send_message(messages.registration.course_request, reply_markup=keyboard)
@@ -38,9 +46,12 @@ async def start_registration(_: Message, guest_service: GuestService, message_ma
 async def course_select(
         callback: CallbackQuery,
         callback_data: CourseCD,
+        user: User,
         guest_service: GuestService,
         message_manager: MessageManager,
 ) -> None:
+    logger.info(f"User {user.id} selected course {callback_data.id}")
+
     text = MessageManager.format_text(messages.registration.course_selected, course_name=callback_data.name)
     await message_manager.send_message(text)
 
@@ -68,11 +79,15 @@ async def group_select(
         rating_service: RatingService,
         message_manager: MessageManager,
 ) -> None:
+    logger.info(f"User {user.id} selected group {callback_data.id}")
+
     text = MessageManager.format_text(messages.registration.group_selected, group_name=callback_data.name)
     await message_manager.send_message(text)
 
     await guest_service.register_user(user, group_id=callback_data.id)
     await state.clear()
+
+    logger.info(f"User {user.id} completed registration")
 
     schedule_text = await get_schedule_text(
         group_name=callback_data.name,

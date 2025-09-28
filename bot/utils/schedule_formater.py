@@ -29,7 +29,7 @@ async def get_schedule_text(
     try:
         schedule = schedule_service.get_schedule(day, group_name)
     except ScheduleNotLoadedError:
-        return "⚠️ Расписание еще не загружено. Пожалуйста, попробуйте позже."
+        return messages.schedule.not_loaded_error
 
     return await _schedule_to_text(
         schedule=schedule,

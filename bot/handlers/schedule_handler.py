@@ -4,12 +4,14 @@ from zoneinfo import ZoneInfo
 from aiogram import F, Router
 from aiogram.filters import or_f
 from aiogram.types import CallbackQuery, Message
+from loguru import logger
 
 from app.enums import UserRole
 from app.models import Group, User
 from app.services.ai_service import AiService
 from app.services.rating_service import RatingService
 from app.services.schedule_service import ScheduleService
+from bot.config import messages
 from bot.filters import RoleFilter
 from bot.keyboards import get_main_kb
 from bot.services import MessageManager
@@ -24,15 +26,22 @@ MSK_ZONE = ZoneInfo("Europe/Moscow")
 
 
 @router.message(
-    F.text == "Сегодня",
+    F.text == messages.buttons.today_schedule,
     flags={"services": ["schedule", "rating"]},
 )
 @router.callback_query(
     F.data == "main",
     flags={"services": ["schedule", "rating"]},
 )
-async def today_schedule(event: Message | CallbackQuery, user: User, schedule_service: ScheduleService,
-                         rating_service: RatingService, message_manager: MessageManager) -> None:
+async def today_schedule(
+        event: Message | CallbackQuery,
+        user: User,
+        schedule_service: ScheduleService,
+        rating_service: RatingService,
+        message_manager: MessageManager
+) -> None:
+    logger.info(f"User {user.id} requested today's schedule")
+
     group: Group = user.group
     schedule_text = await get_schedule_text(
         group_name=group.name,
@@ -49,11 +58,18 @@ async def today_schedule(event: Message | CallbackQuery, user: User, schedule_se
 
 
 @router.message(
-    F.text == "Завтра",
+    F.text == messages.buttons.tomorrow_schedule,
     flags={"services": ["schedule", "rating"]},
 )
-async def tomorrow_schedule(_: Message, user: User, schedule_service: ScheduleService, rating_service: RatingService,
-                            message_manager: MessageManager) -> None:
+async def tomorrow_schedule(
+        _: Message,
+        user: User,
+        schedule_service: ScheduleService,
+        rating_service: RatingService,
+        message_manager: MessageManager
+) -> None:
+    logger.info(f"User {user.id} requested tomorrow's schedule")
+
     group: Group = user.group
     schedule_text = await get_schedule_text(
         group_name=group.name,
@@ -77,6 +93,8 @@ async def schedule_by_date(
         message_manager: MessageManager,
         ai_service: AiService,
         date_text: str) -> None:
+    logger.info(f"User {user.id} requested schedule for date text: {date_text}")
+
     day = await ai_service.date_parsing(date_text)
 
     group: Group = user.group

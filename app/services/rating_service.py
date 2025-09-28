@@ -41,7 +41,7 @@ class RatingService:
             LecturerDTO(
                 name=lecturer[0],
                 avg_rating=lecturer[1],
-                reviews_count=lecturer[2],
+                ratings_count=lecturer[2],
                 rank=lecturer[3],
             ) for lecturer in lecturer_tuples
         ]

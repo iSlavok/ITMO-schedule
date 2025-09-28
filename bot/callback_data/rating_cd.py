@@ -11,6 +11,7 @@ class RatingListCD(CallbackData, prefix="rating"):
 class SelectLecturerCD(CallbackData, prefix="select_lecturer"):
     lecturer_id: int
 
+
 class AddRatingCD(CallbackData, prefix="add_rating"):
     lecturer_id: int
     rating: int

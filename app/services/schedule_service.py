@@ -1,4 +1,4 @@
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 from app.enums import DateType, Week, Weekday
@@ -87,7 +87,9 @@ class ScheduleService:
 
     def get_today_past_lecturers(self, group: str) -> list[str]:
         try:
-            schedule = self.get_schedule(datetime.now(tz=MSK_ZONE).date(), group)
+            # schedule = self.get_schedule(datetime.now(tz=MSK_ZONE).date(), group)
+            # +1 day for testing purposes
+            schedule = self.get_schedule((datetime.now(tz=MSK_ZONE) + timedelta(days=1)).date(), group)
         except ScheduleNotLoadedError:
             return []
 
