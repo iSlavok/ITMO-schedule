@@ -17,7 +17,7 @@ from bot.keyboards import get_course_keyboard, get_group_keyboard, get_main_kb
 from bot.services import MessageManager
 from bot.utils import get_schedule_text
 
-router = Router()
+router = Router(name="registration_router")
 router.message.filter(RoleFilter(UserRole.GUEST))
 router.callback_query.filter(RoleFilter(UserRole.GUEST))
 

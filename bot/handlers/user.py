@@ -6,72 +6,18 @@ from aiogram.filters import or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-from app.enums import RatingType, UserRole
+from app.enums import UserRole
 from app.models import Group, User
 from app.services.log import LogService
 from app.services.rating_service import RatingService
 from app.services.schedule_service import ScheduleService
-from bot.callback_data import AddRatingCD, RatingCD
+from bot.callback_data import AddRatingCD
 from bot.filters import RoleFilter
-from bot.keyboards import get_add_rating_kb, get_main_kb, get_pagination_rating_kb, get_rating_kb
+from bot.keyboards import get_add_rating_kb, get_main_kb
 
 router = Router()
 router.message.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole.ADMIN)))
 router.callback_query.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole.ADMIN)))
-
-
-@router.message(
-    F.text == "Рейтинг",
-)
-async def get_rating_menu(message: Message, state: FSMContext, log_service: LogService, user: User) -> None:
-    with suppress(Exception):
-        await message.delete()
-    await log_service.log_action(user.id, f"message {message.text}")
-    await show_rating_menu(message, state)
-
-
-async def show_rating_menu(message: Message, state: FSMContext) -> None:
-    new_message = await message.answer(
-        "Выберите, какой рейтинг вы хотите посмотреть:",
-        reply_markup=get_rating_kb(),
-    )
-    await delete_last_message(message, state, new_message.message_id)
-
-
-@router.callback_query(
-    F.data == "rating",
-)
-async def get_rating_menu_button(callback: CallbackQuery, state: FSMContext, log_service: LogService,
-                                 user: User) -> None:
-    with suppress(Exception):
-        await callback.answer()
-        await callback.message.delete()
-    await log_service.log_action(user.id, f"button {callback.data}")
-    await show_rating_menu(callback.message, state)
-
-
-@router.callback_query(
-    RatingCD.filter(),
-    flags={"services": ["rating"]},
-)
-async def show_rating(callback: CallbackQuery, callback_data: RatingCD, state: FSMContext, user: User,  # noqa: PLR0913
-                      rating_service: RatingService, log_service: LogService) -> None:
-    with suppress(Exception):
-        await callback.answer()
-        await callback.message.delete()
-    await log_service.log_action(user.id, f"button {callback.data}")
-    rating_type = callback_data.type
-    page = callback_data.page
-    rating = await rating_service.get_top_lecturers_with_rank(page, ascending=rating_type != RatingType.BEST)
-    text = "<b>" + ("Лучшие преподаватели:" if rating_type == RatingType.BEST else "Худшие преподаватели:") + "</b>\n\n"
-    for lecturer in rating:
-        text += (f"{lecturer.rank}. {lecturer.name} — ⭐️{round(lecturer.avg_rating, 2)} "
-                 f"({lecturer.reviews_count} оценок)\n")
-    new_message = await callback.message.answer(
-        text,
-        reply_markup=get_pagination_rating_kb(page, await rating_service.get_lecturers_page_count(), rating_type),
-    )
-    await delete_last_message(callback.message, state, new_message.message_id)
 
 
 @router.message(

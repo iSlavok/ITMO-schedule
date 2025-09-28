@@ -12,7 +12,7 @@ from app.database import close_db, init_db
 from app.schedule import ScheduleParser, ScheduleUpdater
 from app.services.ai_service import AiService
 from app.services.schedule_service import ScheduleService
-from bot.handlers import admin_router, registration_router, schedule_router, user_router
+from bot.handlers import admin_router, registration_router, schedule_router, user_router, rating_list_router
 from bot.middlewares import MessageManagerMiddleware, ServicesMiddleware, UserMiddleware
 
 
@@ -60,8 +60,9 @@ async def start_bot(schedule_service: ScheduleService, ai_service: AiService) ->
     dp.callback_query.middleware(MessageManagerMiddleware(bot=bot))
 
     dp.include_router(admin_router)
-    dp.include_router(user_router)
     dp.include_router(registration_router)
+    dp.include_router(rating_list_router)
+    dp.include_router(user_router)
     dp.include_router(schedule_router)
 
     await dp.start_polling(bot)

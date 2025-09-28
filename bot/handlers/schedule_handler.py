@@ -32,7 +32,7 @@ MSK_ZONE = ZoneInfo("Europe/Moscow")
     F.data == "main",
     flags={"services": ["schedule", "rating"]},
 )
-async def today_schedule(_: Message | CallbackQuery, user: User, schedule_service: ScheduleService,
+async def today_schedule(event: Message | CallbackQuery, user: User, schedule_service: ScheduleService,
                          rating_service: RatingService, message_manager: MessageManager) -> None:
     group: Group = user.group
     schedule_text = await get_schedule_text(
@@ -44,6 +44,9 @@ async def today_schedule(_: Message | CallbackQuery, user: User, schedule_servic
         is_today=True,
     )
     await message_manager.send_message(text=schedule_text, reply_markup=get_main_kb())
+
+    if isinstance(event, CallbackQuery):
+        await event.answer()
 
 
 @router.message(
