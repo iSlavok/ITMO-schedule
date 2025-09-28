@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import date
 from enum import Enum
 from typing import Literal
@@ -40,20 +41,41 @@ class ScheduleDay(BaseModel):
 
 
 class ScheduleWeek(BaseModel):
-    days: dict[Weekday, ScheduleDay] = Field(default_factory=dict)
+    days: dict[Weekday, ScheduleDay] = Field(
+        default_factory=lambda: defaultdict(ScheduleDay),
+    )
 
 
 class ScheduleGroup(BaseModel):
-    odd_week: ScheduleWeek | None = None
-    even_week: ScheduleWeek | None = None
+    odd_week: ScheduleWeek = Field(default_factory=ScheduleWeek)
+    even_week: ScheduleWeek = Field(default_factory=ScheduleWeek)
 
 
 class ScheduleCourse(BaseModel):
-    groups: dict[str, ScheduleGroup] = Field(default_factory=dict)
+    groups: dict[str, ScheduleGroup] = Field(
+        default_factory=lambda: defaultdict(ScheduleGroup),
+    )
 
 
 class Schedule(BaseModel):
-    courses: dict[str, ScheduleCourse] = Field(default_factory=dict)
+    courses: dict[str, ScheduleCourse] = Field(
+        default_factory=lambda: defaultdict(ScheduleCourse),
+    )
+
+    def add_lesson(
+        self,
+        course: str,
+        group: str,
+        week_type: Literal["odd_week", "even_week"],
+        weekday: Weekday,
+        lesson: Lesson,
+    ) -> None:
+        target_week = (
+            self.courses[course].groups[group].odd_week
+            if week_type == "odd_week"
+            else self.courses[course].groups[group].even_week
+        )
+        target_week.days[weekday].lessons.append(lesson)
 
 
 class DatedLesson(BaseModel):

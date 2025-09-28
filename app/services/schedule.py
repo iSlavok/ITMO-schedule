@@ -28,9 +28,9 @@ class ScheduleService:
         return self._schedule
 
     @schedule.setter
-    def schedule(self, value: dict) -> None:
-        self._schedule = Schedule.model_validate(value)
-        self._schedule_repository.schedule = self._schedule
+    def schedule(self, schedule: Schedule) -> None:
+        self._schedule = schedule
+        self._schedule_repository.schedule = schedule
 
     def get_schedule(self, target_date: date, group: str) -> list[Lesson] | None:
         if self._schedule is None:

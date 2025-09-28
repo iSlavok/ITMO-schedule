@@ -22,7 +22,7 @@ class ScheduleUpdater:
             self._schedule_service.schedule = data
             logger.success("Schedule updated successfully")
         except Exception as e:
-            logger.warning(f"Failed to update schedule: {e}")
+            logger.exception(f"Failed to update schedule: {e}")
 
     def start_update_loop(self) -> None:
         if self._thread is None or not self._thread.is_alive():
