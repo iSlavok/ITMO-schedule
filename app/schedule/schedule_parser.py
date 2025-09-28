@@ -3,7 +3,8 @@ import re
 import gspread
 from google.oauth2.service_account import Credentials
 
-from app.schedule import Lesson, Schedule, Weekday
+from app.enums import Weekday
+from app.schemas import Lesson, Schedule
 
 MULTIPLE_NEWLINES_PATTERN = re.compile(r"\n{2,}")
 NUMBER_PATTERN = re.compile(r"\d+")

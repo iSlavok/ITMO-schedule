@@ -20,6 +20,9 @@ class RatingService:
         rating = await self._lecturer_repository.get_average_rating(name)
         return round(rating, 1) if rating is not None else None
 
+    async def get_lecturers_rating(self, names: list[str]) -> dict[str, float]:
+        return await self._lecturer_repository.get_average_ratings(names)
+
     async def get_top_lecturers_with_rank(self, page: int, per_page: int = 10, *,
                                           ascending: bool = False) -> list[LecturerDTO]:
         lecturers = await self._lecturer_repository.get_top_lecturers_with_rank(

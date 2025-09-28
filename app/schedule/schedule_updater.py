@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from loguru import logger
 
 from app.schedule import ScheduleParser
-from app.services.schedule import ScheduleService
+from app.services.schedule_service import ScheduleService
 
 
 class ScheduleUpdater:

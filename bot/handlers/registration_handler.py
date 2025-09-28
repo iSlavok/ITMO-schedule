@@ -8,14 +8,14 @@ from aiogram.types import CallbackQuery, Message
 from app.enums import UserRole
 from app.models import User
 from app.services.guest_service import GuestService
-from app.services.rating import RatingService
-from app.services.schedule import ScheduleService
+from app.services.rating_service import RatingService
+from app.services.schedule_service import ScheduleService
 from bot.callback_data import CourseCD, GroupCD
 from bot.config import messages
 from bot.filters import RoleFilter
-from bot.handlers.schedule_handler import get_schedule_text
 from bot.keyboards import get_course_keyboard, get_group_keyboard, get_main_kb
 from bot.services import MessageManager
+from bot.utils import get_schedule_text
 
 router = Router()
 router.message.filter(RoleFilter(UserRole.GUEST))
@@ -52,11 +52,18 @@ async def course_select(callback: CallbackQuery, callback_data: CourseCD, guest_
 
 @router.callback_query(
     GroupCD.filter(),
-    flags={"services": ["guest", "schedule", "rating"]},
+    flags={"services": ["guest", "rating"]},
 )
-async def group_select(callback: CallbackQuery, callback_data: GroupCD, state: FSMContext, user: User,  # noqa: PLR0913
-                       guest_service: GuestService, schedule_service: ScheduleService, rating_service: RatingService,
-                       message_manager: MessageManager) -> None:
+async def group_select(  # noqa: PLR0913
+        callback: CallbackQuery,
+        callback_data: GroupCD,
+        state: FSMContext,
+        user: User,
+        guest_service: GuestService,
+        schedule_service: ScheduleService,
+        rating_service: RatingService,
+        message_manager: MessageManager,
+) -> None:
     text = MessageManager.format_text(messages.registration.group_selected, group_name=callback_data.name)
     await message_manager.send_message(text)
 

@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from app.schedule import DatedSchedule, Schedule
+from app.schemas import DatedSchedule, Schedule
 
 
 class ScheduleRepository:

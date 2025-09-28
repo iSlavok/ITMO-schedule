@@ -81,3 +81,17 @@ class LecturerRepository(BaseRepository[Lecturer]):
         )
         result = await self.session.execute(statement)
         return result.scalar_one()
+
+    async def get_average_ratings(self, names: list[str]) -> dict[str, float]:
+        statement = (
+            select(
+                Lecturer.name,
+                func.avg(Rating.rating).label("avg_rating"),
+            )
+            .join(Rating)
+            .where(Lecturer.name.in_(names))
+            .group_by(Lecturer.name)
+        )
+        result = await self.session.execute(statement)
+        return {row.name: row.avg_rating for row in result.all()}
+

@@ -10,8 +10,8 @@ from redis.asyncio.client import Redis
 from app.config import env_config
 from app.database import close_db, init_db
 from app.schedule import ScheduleParser, ScheduleUpdater
-from app.services.ai import AiService
-from app.services.schedule import ScheduleService
+from app.services.ai_service import AiService
+from app.services.schedule_service import ScheduleService
 from bot.handlers import admin_router, registration_router, schedule_router, user_router
 from bot.middlewares import MessageManagerMiddleware, ServicesMiddleware, UserMiddleware
 
@@ -39,14 +39,23 @@ async def start_bot(schedule_service: ScheduleService, ai_service: AiService) ->
         default=DefaultBotProperties(parse_mode="HTML"),
     )
     storage = RedisStorage(
-        redis=Redis(host=env_config.REDIS_HOST, port=env_config.REDIS_PORT),
-        key_builder=DefaultKeyBuilder(with_destiny=True, with_bot_id=True),
+        redis=Redis(
+            host=env_config.REDIS_HOST,
+            port=env_config.REDIS_PORT,
+        ),
+        key_builder=DefaultKeyBuilder(
+            with_destiny=True,
+            with_bot_id=True,
+        ),
     )
     dp = Dispatcher(storage=storage)
 
+    dp["ai_service"] = ai_service
+    dp["schedule_service"] = schedule_service
+
     dp.update.outer_middleware(UserMiddleware())
-    dp.message.middleware(ServicesMiddleware(schedule_service, ai_service))
-    dp.callback_query.middleware(ServicesMiddleware(schedule_service, ai_service))
+    dp.message.middleware(ServicesMiddleware())
+    dp.callback_query.middleware(ServicesMiddleware())
     dp.message.middleware(MessageManagerMiddleware(bot=bot))
     dp.callback_query.middleware(MessageManagerMiddleware(bot=bot))
 

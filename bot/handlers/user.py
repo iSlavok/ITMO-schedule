@@ -9,8 +9,8 @@ from aiogram.types import CallbackQuery, Message
 from app.enums import RatingType, UserRole
 from app.models import Group, User
 from app.services.log import LogService
-from app.services.rating import RatingService
-from app.services.schedule import ScheduleService
+from app.services.rating_service import RatingService
+from app.services.schedule_service import ScheduleService
 from bot.callback_data import AddRatingCD, RatingCD
 from bot.filters import RoleFilter
 from bot.keyboards import get_add_rating_kb, get_main_kb, get_pagination_rating_kb, get_rating_kb

@@ -1,31 +1,10 @@
 from collections import defaultdict
 from datetime import date
-from enum import Enum
 from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-
-class Weekday(str, Enum):
-    MONDAY = "monday"
-    TUESDAY = "tuesday"
-    WEDNESDAY = "wednesday"
-    THURSDAY = "thursday"
-    FRIDAY = "friday"
-    SATURDAY = "saturday"
-    SUNDAY = "sunday"
-
-
-class Week(str, Enum):
-    ODD = "odd_week"
-    EVEN = "even_week"
-    ALL = "all_weeks"
-
-
-class DateType(str, Enum):
-    EXACT = "exact"
-    AFTER = "after"
-    BEFORE = "before"
+from app.enums import DateType, Week, Weekday
 
 
 class Lesson(BaseModel):

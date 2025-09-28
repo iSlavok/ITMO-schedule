@@ -5,7 +5,7 @@ from google import genai
 from google.genai.types import AutomaticFunctionCallingConfig, GenerateContentConfig, ThinkingConfig
 
 from app.schemas import AiDateResponse
-from app.services.schedule import is_even_week
+from app.services.schedule_service import ScheduleService
 
 MSK_TZ = pytz.timezone("Europe/Moscow")
 
@@ -21,7 +21,8 @@ class AiService:
             system_instruction=(
                 f"Ты обрабатываешь запросы от пользователей.\n"
                 f"Отвечай только датой в формате: YYYY-MM-DD, четность недели считай с 1 сентября 2025.\n"
-                f"Сегодня: {today.strftime("%Y-%m-%d")}, {'четная' if is_even_week(today) else 'нечетная'} неделя."
+                f"Сегодня: {today.strftime("%Y-%m-%d")}, "
+                f"{'четная' if ScheduleService.is_even_week(today) else 'нечетная'} неделя."
             ),
             temperature=0.0,
             response_mime_type="application/json",

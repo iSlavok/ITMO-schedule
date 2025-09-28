@@ -6,20 +6,16 @@ from aiogram.dispatcher.flags import get_flag
 from aiogram.types import TelegramObject
 
 from app.repositories import CourseRepository, GroupRepository, LecturerRepository, LogRepository, RatingRepository
-from app.services.ai import AiService
 from app.services.guest_service import GuestService
 from app.services.log import LogService
-from app.services.rating import RatingService
-from app.services.schedule import ScheduleService
+from app.services.rating_service import RatingService
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class ServicesMiddleware(BaseMiddleware):
-    def __init__(self, schedule_service: ScheduleService, ai_service: AiService) -> None:
-        self._schedule_service = schedule_service
-        self._ai_service = ai_service
+    def __init__(self) -> None:
         super().__init__()
 
     async def __call__(self, handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]], event: TelegramObject,
@@ -30,11 +26,7 @@ class ServicesMiddleware(BaseMiddleware):
         log_repo = LogRepository(session)
         services["log_service"] = LogService(session, log_repo)
         for service in required:
-            if service == "schedule":
-                services["schedule_service"] = self._schedule_service
-            elif service == "ai":
-                services["ai_service"] = self._ai_service
-            elif service == "guest":
+            if service == "guest":
                 course_repo = CourseRepository(session)
                 group_repo = GroupRepository(session)
                 services["guest_service"] = GuestService(
