@@ -31,9 +31,6 @@ class UserService:
         return user
 
     async def get_users_with_group_and_course(self, page: int, per_page: int) -> list[UserDTO]:
-        if page < 1:
-            msg = "Page must be greater than 0"
-            raise ValueError(msg)  # TODO(iSlavok): replace with custom exception
         skip = (page - 1) * per_page
         users = await self._user_repo.list_all_with_group_and_course(skip=skip, limit=per_page)
         return [

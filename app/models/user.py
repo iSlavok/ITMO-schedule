@@ -7,7 +7,7 @@ from app.database import Base
 from app.enums import UserRole
 
 if TYPE_CHECKING:
-    from . import Group, Log, Rating
+    from . import Group, Rating
 
 
 class User(Base):
@@ -23,4 +23,3 @@ class User(Base):
 
     group: Mapped["Group | None"] = relationship("Group", back_populates="users")
     ratings: Mapped[list["Rating"]] = relationship("Rating", back_populates="user")
-    logs: Mapped[list["Log"]] = relationship("Log", back_populates="user")

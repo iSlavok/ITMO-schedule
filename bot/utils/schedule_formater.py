@@ -1,6 +1,7 @@
 from datetime import date
 
 from app.schemas import Lesson
+from app.services.exceptions import ScheduleNotLoadedError
 from app.services.rating_service import RatingService
 from app.services.schedule_service import ScheduleService
 from bot.config import messages
@@ -17,7 +18,7 @@ TIMES: list[str] = [
 ]
 
 
-async def get_schedule_text(  # noqa: PLR0913
+async def get_schedule_text(
         schedule_service: ScheduleService,
         rating_service: RatingService,
         group_name: str,
@@ -25,10 +26,10 @@ async def get_schedule_text(  # noqa: PLR0913
         day_str: str,
         *, is_today: bool = False,
 ) -> str:
-    schedule = schedule_service.get_schedule(day, group_name)
-    if schedule is None:
-        msg = "Schedule not found"
-        raise ValueError(msg)  # TODO(iSlavok): create custom exception
+    try:
+        schedule = schedule_service.get_schedule(day, group_name)
+    except ScheduleNotLoadedError:
+        return "⚠️ Расписание еще не загружено. Пожалуйста, попробуйте позже."
 
     return await _schedule_to_text(
         schedule=schedule,

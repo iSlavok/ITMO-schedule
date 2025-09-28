@@ -4,9 +4,9 @@ from aiogram.types import CallbackQuery, Message
 
 from app.enums import RatingType, UserRole
 from app.services.rating_service import RatingService
-from bot.callback_data import RatingCD
+from bot.callback_data import RatingListCD
 from bot.filters import RoleFilter
-from bot.keyboards import get_pagination_rating_kb, get_rating_kb
+from bot.keyboards import get_pagination_rating_list_kb, get_rating_list_kb
 from bot.services import MessageManager
 
 router = Router(name="rating_list_router")
@@ -15,10 +15,10 @@ router.callback_query.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole
 
 
 @router.message(F.text == "Рейтинг")
-@router.callback_query(F.data == "rating")
-async def get_rating_menu(event: Message | CallbackQuery, message_manager: MessageManager) -> None:
+@router.callback_query(F.data == "rating_list")
+async def get_rating_list_menu(event: Message | CallbackQuery, message_manager: MessageManager) -> None:
     text = "Выберите, какой рейтинг вы хотите посмотреть:"
-    keyboard = get_rating_kb()
+    keyboard = get_rating_list_kb()
     if isinstance(event, CallbackQuery):
         await message_manager.edit_message(text, reply_markup=keyboard)
         await event.answer()
@@ -27,12 +27,12 @@ async def get_rating_menu(event: Message | CallbackQuery, message_manager: Messa
 
 
 @router.callback_query(
-    RatingCD.filter(),
+    RatingListCD.filter(),
     flags={"services": ["rating"]},
 )
-async def show_rating(
+async def show_rating_list(
         callback: CallbackQuery,
-        callback_data: RatingCD,
+        callback_data: RatingListCD,
         rating_service: RatingService,
         message_manager: MessageManager,
 ) -> None:
@@ -49,7 +49,7 @@ async def show_rating(
 
     await message_manager.edit_message(
         text,
-        reply_markup=get_pagination_rating_kb(
+        reply_markup=get_pagination_rating_list_kb(
             page=page,
             total_pages=rated_lecturers_pages_count,
             rating_type=rating_type,

@@ -11,23 +11,6 @@ class LecturerRepository(BaseRepository[Lecturer]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, Lecturer)
 
-    async def get_by_name(self, name: str) -> Lecturer | None:
-        statement = (
-            select(Lecturer)
-            .where(Lecturer.name == name)
-        )
-        result = await self.session.execute(statement)
-        return result.scalar_one_or_none()
-
-    async def get_average_rating(self, name: str) -> float | None:
-        statement = (
-            select(func.avg(Rating.rating))
-            .join(Rating.lecturer)
-            .where(Lecturer.name == name)
-        )
-        result = await self.session.execute(statement)
-        return result.scalar_one_or_none()
-
     async def get_top_lecturers_with_rank(
             self,
             limit: int = 10,

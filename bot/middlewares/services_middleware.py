@@ -5,9 +5,8 @@ from aiogram import BaseMiddleware
 from aiogram.dispatcher.flags import get_flag
 from aiogram.types import TelegramObject
 
-from app.repositories import CourseRepository, GroupRepository, LecturerRepository, LogRepository, RatingRepository
+from app.repositories import CourseRepository, GroupRepository, LecturerRepository, RatingRepository
 from app.services.guest_service import GuestService
-from app.services.log import LogService
 from app.services.rating_service import RatingService
 
 if TYPE_CHECKING:
@@ -27,8 +26,6 @@ class ServicesMiddleware(BaseMiddleware):
         required = get_flag(data, "services", default=[])
         services = {}
         session: AsyncSession = data["session"]
-        log_repo = LogRepository(session)
-        services["log_service"] = LogService(session, log_repo)
         for service in required:
             if service == "guest":
                 course_repo = CourseRepository(session)

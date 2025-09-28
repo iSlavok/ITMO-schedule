@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 from app.enums import DateType, Week, Weekday
 from app.repositories import ScheduleRepository
 from app.schemas import Lesson, Schedule
+from app.services.exceptions import ScheduleNotLoadedError
 
 MSK_ZONE = ZoneInfo("Europe/Moscow")
 SCHEDULE_TIMES = [
@@ -41,9 +42,9 @@ class ScheduleService:
         self._schedule = schedule
         self._schedule_repository.schedule = schedule
 
-    def get_schedule(self, target_date: date, group: str) -> list[Lesson] | None:
+    def get_schedule(self, target_date: date, group: str) -> list[Lesson]:
         if self._schedule is None:
-            return None  # TODO(iSlavok): create custom exception
+            raise ScheduleNotLoadedError
 
         lessons = []
         for course in self._schedule.courses:
@@ -85,7 +86,11 @@ class ScheduleService:
         return lessons
 
     def get_today_past_lecturers(self, group: str) -> list[str]:
-        schedule = self.get_schedule(datetime.now(tz=MSK_ZONE).date(), group)
+        try:
+            schedule = self.get_schedule(datetime.now(tz=MSK_ZONE).date(), group)
+        except ScheduleNotLoadedError:
+            return []
+
         if not schedule:
             return []
 
@@ -99,21 +104,6 @@ class ScheduleService:
                 break
 
         return lecturers
-
-    def get_last_lecturer(self, group: str) -> str | None:
-        schedule = self.get_schedule(datetime.now(tz=MSK_ZONE).date(), group)
-        if not schedule:
-            return None
-        last_lesson_num = self._get_last_lesson_num()
-        last_lesson = None
-        for lesson in schedule:
-            if lesson.number <= last_lesson_num:
-                last_lesson = lesson
-            else:
-                break
-        if last_lesson:
-            return last_lesson.lecturer
-        return None
 
     @staticmethod
     def get_current_lesson() -> tuple[int, bool]:

@@ -1,13 +1,14 @@
+from collections.abc import Sequence
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
-import pytz
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Rating
+from app.models import Lecturer, Rating
 from app.repositories import BaseRepository
 
-MSK_TZ = pytz.timezone("Europe/Moscow")
+MSK_ZONE = ZoneInfo("Europe/Moscow")
 
 
 class RatingRepository(BaseRepository[Rating]):
@@ -20,8 +21,30 @@ class RatingRepository(BaseRepository[Rating]):
             .where(
                 Rating.user_id == user_id,
                 Rating.lecturer_id == lecturer_id,
-                datetime.now(tz=MSK_TZ).date() == func.date(Rating.created_at),
+                datetime.now(tz=MSK_ZONE).date() == func.date(Rating.created_at),
             )
         )
         result = await self.session.execute(query)
         return result.first() is None
+
+    async def get_rateable_lecturers(self, lecturer_names: list[str], user_id: int) -> Sequence[Lecturer]:
+        today = datetime.now(tz=MSK_ZONE).date()
+
+        subquery = (
+            select(Rating.lecturer_id)
+            .where(
+                Rating.user_id == user_id,
+                today == func.date(Rating.created_at),
+            )
+            .scalar_subquery()
+        )
+
+        statement = (
+            select(Lecturer)
+            .where(
+                Lecturer.name.in_(lecturer_names),
+                ~Lecturer.id.in_(subquery),
+            )
+        )
+        result = await self.session.execute(statement)
+        return result.scalars().all()

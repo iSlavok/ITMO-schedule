@@ -8,7 +8,6 @@ from aiogram.types import CallbackQuery, Message
 from app.enums import UserRole
 from app.models import Group, User
 from app.services.ai_service import AiService
-from app.services.exceptions import AiServiceError
 from app.services.rating_service import RatingService
 from app.services.schedule_service import ScheduleService
 from bot.filters import RoleFilter
@@ -70,19 +69,16 @@ async def tomorrow_schedule(_: Message, user: User, schedule_service: ScheduleSe
     F.text.as_("date_text"),
     flags={"services": ["schedule", "rating", "ai"]},
 )
-async def schedule_by_date(  # noqa: PLR0913
-        message: Message,
+async def schedule_by_date(
+        _: Message,
         user: User,
         schedule_service: ScheduleService,
         rating_service: RatingService,
         message_manager: MessageManager,
         ai_service: AiService,
         date_text: str) -> None:
-    try:
-        day = await ai_service.date_parsing(date_text)
-    except AiServiceError:
-        await message.delete()
-        return
+    day = await ai_service.date_parsing(date_text)
+
     group: Group = user.group
     schedule_text = await get_schedule_text(
         group_name=group.name,
@@ -92,4 +88,3 @@ async def schedule_by_date(  # noqa: PLR0913
         day_str=day.strftime("%Y-%m-%d"),
     )
     await message_manager.send_message(text=schedule_text, reply_markup=get_main_kb())
-    return

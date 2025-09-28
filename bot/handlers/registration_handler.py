@@ -58,7 +58,7 @@ async def course_select(
     GroupCD.filter(),
     flags={"services": ["guest", "rating"]},
 )
-async def group_select(  # noqa: PLR0913
+async def group_select(
         callback: CallbackQuery,
         callback_data: GroupCD,
         state: FSMContext,
