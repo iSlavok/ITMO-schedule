@@ -18,8 +18,12 @@ class ServicesMiddleware(BaseMiddleware):
     def __init__(self) -> None:
         super().__init__()
 
-    async def __call__(self, handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]], event: TelegramObject,
-                       data: dict[str, Any]) -> dict[str, Any]:
+    async def __call__(
+            self,
+            handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
+            event: TelegramObject,
+            data: dict[str, Any],
+    ) -> dict[str, Any]:
         required = get_flag(data, "services", default=[])
         services = {}
         session: AsyncSession = data["session"]

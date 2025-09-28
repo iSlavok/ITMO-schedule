@@ -35,8 +35,12 @@ async def start_registration(_: Message, guest_service: GuestService, message_ma
     CourseCD.filter(),
     flags={"services": ["guest"]},
 )
-async def course_select(callback: CallbackQuery, callback_data: CourseCD, guest_service: GuestService,
-                        message_manager: MessageManager) -> None:
+async def course_select(
+        callback: CallbackQuery,
+        callback_data: CourseCD,
+        guest_service: GuestService,
+        message_manager: MessageManager,
+) -> None:
     text = MessageManager.format_text(messages.registration.course_selected, course_name=callback_data.name)
     await message_manager.send_message(text)
 

@@ -23,8 +23,12 @@ class RatingService:
     async def get_lecturers_rating(self, names: list[str]) -> dict[str, float]:
         return await self._lecturer_repository.get_average_ratings(names)
 
-    async def get_top_lecturers_with_rank(self, page: int, per_page: int = 10, *,
-                                          ascending: bool = False) -> list[LecturerDTO]:
+    async def get_top_lecturers_with_rank(
+            self,
+            page: int,
+            per_page: int = 10,
+            *, ascending: bool = False,
+    ) -> list[LecturerDTO]:
         lecturers = await self._lecturer_repository.get_top_lecturers_with_rank(
             limit=per_page,
             skip=(page - 1) * per_page,

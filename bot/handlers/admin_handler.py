@@ -22,8 +22,11 @@ USERS_PER_PAGE = 10
 
 
 @router.message(Command(commands=["users_list", "users"]))
-async def users_list_open(_: Message, user_service: UserService,
-                          message_manager: MessageManager) -> None:
+async def users_list_open(
+        _: Message,
+        user_service: UserService,
+        message_manager: MessageManager,
+) -> None:
     await send_users_list_message(
         message_manager=message_manager,
         user_service=user_service,
@@ -32,8 +35,12 @@ async def users_list_open(_: Message, user_service: UserService,
 
 
 @router.callback_query(UsersListPageCD.filter())
-async def users_list_page(callback: CallbackQuery, callback_data: UsersListPageCD, user_service: UserService,
-                          message_manager: MessageManager) -> None:
+async def users_list_page(
+        callback: CallbackQuery,
+        callback_data: UsersListPageCD,
+        user_service: UserService,
+        message_manager: MessageManager,
+) -> None:
     await send_users_list_message(
         message_manager=message_manager,
         user_service=user_service,
@@ -43,8 +50,12 @@ async def users_list_page(callback: CallbackQuery, callback_data: UsersListPageC
     await callback.answer()
 
 
-async def send_users_list_message(message_manager: MessageManager, user_service: UserService, page: int, *,
-                                  send_new_message: bool = True) -> None:
+async def send_users_list_message(
+        message_manager: MessageManager,
+        user_service: UserService,
+        page: int,
+        *, send_new_message: bool = True,
+) -> None:
     users = await user_service.get_users_with_group_and_course(page=page, per_page=USERS_PER_PAGE)
     total_count = await user_service.get_users_count()
     total_pages = math.ceil(total_count / USERS_PER_PAGE)

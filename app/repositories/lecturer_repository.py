@@ -28,8 +28,12 @@ class LecturerRepository(BaseRepository[Lecturer]):
         result = await self.session.execute(statement)
         return result.scalar_one_or_none()
 
-    async def get_top_lecturers_with_rank(self, limit: int = 10, skip: int = 0, *,
-                                          ascending: bool = False) -> Sequence[Row[tuple[str, float, int, int]]]:
+    async def get_top_lecturers_with_rank(
+            self,
+            limit: int = 10,
+            skip: int = 0,
+            *, ascending: bool = False,
+    ) -> Sequence[Row[tuple[str, float, int, int]]]:
         avg_rating_subquery = (
             select(
                 Lecturer.id,

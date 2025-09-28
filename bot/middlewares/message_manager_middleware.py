@@ -15,8 +15,12 @@ class MessageManagerMiddleware(BaseMiddleware):
         self.bot = bot
         super().__init__()
 
-    async def __call__(self, handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]], event: TelegramObject,
-                       data: dict[str, Any]) -> dict[str, Any]:
+    async def __call__(
+            self,
+            handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
+            event: TelegramObject,
+            data: dict[str, Any],
+    ) -> dict[str, Any]:
         state: FSMContext = data.get("state")
         if not state:
             return await handler(event, data)

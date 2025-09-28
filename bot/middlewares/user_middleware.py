@@ -13,8 +13,12 @@ class UserMiddleware(BaseMiddleware):
     def __init__(self) -> None:
         super().__init__()
 
-    async def __call__(self, handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]], event: TelegramObject,
-                       data: dict[str, Any]) -> dict[str, Any]:
+    async def __call__(
+            self,
+            handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
+            event: TelegramObject,
+            data: dict[str, Any],
+    ) -> dict[str, Any]:
         event_from_user = data["event_from_user"]
         if event_from_user:
             async with get_session() as session:
