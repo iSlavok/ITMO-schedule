@@ -49,12 +49,13 @@ class UserRepository(BaseRepository[User]):
         result = await self.session.execute(statement)
         return result.scalar_one()
 
-    async def get_users_with_groups(self) -> Sequence[Row[tuple[str, User]]]:
+    async def get_users_with_rating_notifications_with_groups(self) -> Sequence[Row[tuple[str, User]]]:
         statement = (
             select(Group.name, User)
             .join(User.group)
             .where(
                 User.group_id.isnot(None),
+                User.rating_notifications.is_(True),
             )
         )
         result = await self.session.execute(statement)

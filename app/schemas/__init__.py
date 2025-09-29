@@ -10,7 +10,7 @@ from .schedule_schemas import (
     ScheduleGroup,
     ScheduleWeek,
 )
-from .users_schemas import CourseDTO, GroupDTO, UserDTO, UserWithGroupDTO
+from .users_schemas import CourseDTO, GroupDTO, UserDTO, UserWithGroupDTO, UserSettings
 
 __all__ = [
     "AiDateResponse",
@@ -27,4 +27,5 @@ __all__ = [
     "ScheduleWeek",
     "UserDTO",
     "UserWithGroupDTO",
+    "UserSettings",
 ]

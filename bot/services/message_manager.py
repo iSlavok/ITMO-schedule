@@ -8,7 +8,6 @@ from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
-from loguru import logger
 
 _user_locks = defaultdict(asyncio.Lock)
 
@@ -61,7 +60,6 @@ class MessageManager:
                 return await self.send_message(text, clear_previous=True, **kwargs)
             try:
                 last_bot_msg_id = bot_messages[-1]
-                logger.debug(f"Editing message {last_bot_msg_id} in chat {self.chat_id}")
                 return await self.bot.edit_message_text(
                     text=text,
                     chat_id=self.chat_id,

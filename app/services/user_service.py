@@ -43,11 +43,27 @@ class UserService:
     async def get_users_count(self) -> int:
         return await self._user_repo.get_users_count()
 
-    async def get_users_by_group(self) -> dict[str, list[UserDTO]]:
-        rows = await self._user_repo.get_users_with_groups()
+    async def get_users_with_rating_notifications_by_group(self) -> dict[str, list[UserDTO]]:
+        rows = await self._user_repo.get_users_with_rating_notifications_with_groups()
         grouped: dict[str, list[UserDTO]] = defaultdict(list)
 
         for group_name, user in rows:
             grouped[group_name].append(UserDTO.model_validate(user))
 
         return dict(grouped)
+
+    async def change_settings(
+        self,
+        user: User,
+        rating_notifications: bool | None = None,
+    ) -> User:
+        has_changes = False
+
+        if rating_notifications is not None:
+            user.rating_notifications = rating_notifications
+            has_changes = True
+
+        if has_changes:
+            await self._session.commit()
+            await self._session.refresh(user)
+        return user

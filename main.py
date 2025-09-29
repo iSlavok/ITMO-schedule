@@ -4,6 +4,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.fsm.storage.base import DefaultKeyBuilder
 from aiogram.fsm.storage.redis import RedisStorage
+from aiogram.types import BotCommand
 from loguru import logger
 from redis.asyncio.client import Redis
 
@@ -18,6 +19,7 @@ from bot.handlers import (
     rating_router,
     registration_router,
     schedule_router,
+    settings_router,
     schedule_jobs
 )
 from bot.middlewares import MessageManagerMiddleware, ServicesMiddleware, UserMiddleware
@@ -72,7 +74,13 @@ async def start_bot(schedule_service: ScheduleService, ai_service: AiService) ->
     dp.include_router(registration_router)
     dp.include_router(rating_list_router)
     dp.include_router(rating_router)
+    dp.include_router(settings_router)
     dp.include_router(schedule_router)
+
+    commands = [
+        BotCommand(command="settings", description="Настройки"),
+    ]
+    await bot.set_my_commands(commands=commands)
 
     await dp.start_polling(bot)
 

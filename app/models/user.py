@@ -19,6 +19,7 @@ class User(Base):
         nullable=False,
         default=UserRole.GUEST,
     )
+    rating_notifications: Mapped[bool] = mapped_column(nullable=False, default=True)
     group_id: Mapped[int | None] = mapped_column(ForeignKey("groups.id"), nullable=True)
 
     group: Mapped["Group | None"] = relationship("Group", back_populates="users")

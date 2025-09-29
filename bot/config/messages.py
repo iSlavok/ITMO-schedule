@@ -61,6 +61,10 @@ class NotificationMessages(BaseModel):
     lecturer_rating: str
 
 
+class SettingsMessages(BaseModel):
+    main: str
+
+
 class Buttons(BaseModel):
     today_schedule: str
     tomorrow_schedule: str
@@ -71,6 +75,7 @@ class Buttons(BaseModel):
     back: str
     pagination_next: str
     pagination_prev: str
+    rating_notifications: str
 
 
 class Messages(BaseModel):
@@ -80,6 +85,7 @@ class Messages(BaseModel):
     lecturer_rating_list: LecturerRatingListMessages
     rating: RatingMessages
     notification: NotificationMessages
+    settings: SettingsMessages
     buttons: Buttons
 
 

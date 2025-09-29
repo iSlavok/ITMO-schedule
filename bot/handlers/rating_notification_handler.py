@@ -40,7 +40,7 @@ async def _start_notifications(bot: Bot, schedule_service: ScheduleService, less
     async with get_session() as session:
         user_repository = UserRepository(session)
         user_service = UserService(session, user_repository)
-        users_by_group = await user_service.get_users_by_group()
+        users_by_group = await user_service.get_users_with_rating_notifications_by_group()
 
         rating_repository = RatingRepository(session)
         lecturer_repository = LecturerRepository(session)
