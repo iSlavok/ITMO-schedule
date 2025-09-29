@@ -30,7 +30,7 @@ class UserRepository(BaseRepository[User]):
             select(self.model)
             .offset(skip)
             .limit(limit)
-            .order_by(self.model.created_at)
+            .order_by(self.model.id)
             .options(
                 joinedload(User.group).options(
                     joinedload(Group.course),

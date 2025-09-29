@@ -14,4 +14,5 @@ def get_users_list_kb(page: int, *, has_next_page: bool) -> InlineKeyboardMarkup
     if has_next_page:
         builder.button(text=messages.buttons.pagination_next, callback_data=UsersListPageCD(page=page + 1))
         page_buttons += 1
+    builder.button(text=messages.buttons.back, callback_data="main")
     return builder.as_markup()
