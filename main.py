@@ -12,7 +12,14 @@ from app.database import close_db, init_db
 from app.schedule import ScheduleParser, ScheduleUpdater
 from app.services.ai_service import AiService
 from app.services.schedule_service import ScheduleService
-from bot.handlers import admin_router, rating_list_router, rating_router, registration_router, schedule_router
+from bot.handlers import (
+    admin_router,
+    rating_list_router,
+    rating_router,
+    registration_router,
+    schedule_router,
+    schedule_jobs
+)
 from bot.middlewares import MessageManagerMiddleware, ServicesMiddleware, UserMiddleware
 
 
@@ -52,6 +59,8 @@ async def start_bot(schedule_service: ScheduleService, ai_service: AiService) ->
 
     dp["ai_service"] = ai_service
     dp["schedule_service"] = schedule_service
+
+    schedule_jobs(bot=bot, schedule_service=schedule_service)
 
     dp.update.outer_middleware(UserMiddleware())
     dp.message.middleware(ServicesMiddleware())

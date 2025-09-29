@@ -49,6 +49,12 @@ rating:
     lecturer_not_found: "Преподаватель не найден."
     lecturer_already_rated: "Сегодня вы уже оценили преподавателя $lecturer_name"
     lecturer_no_lecture_today: "Преподаватель $lecturer_name не вел у вас пары сегодня."
+notifications:
+  lecturer_rating: "
+    У вас закончилась пара: <b>$lesson_name</b>
+    Оцените преподавателя: <b>$lecturer_name</b>.
+    <i>Вы можете отключить эти уведомления в настройках</i> (/settings).
+  "
 buttons:
   today_schedule: "Сегодня"
   tomorrow_schedule: "Завтра"

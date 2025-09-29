@@ -1,3 +1,4 @@
+from collections import defaultdict
 from collections.abc import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -67,3 +68,13 @@ class RatingService:
 
     async def get_available_lecturers_for_rating(self, lecturer_names: list[str], user_id: int) -> Sequence[Lecturer]:
         return await self._rating_repository.get_rateable_lecturers(lecturer_names, user_id)
+
+    async def get_all_lecturers(self) -> Sequence[Lecturer]:
+        return await self._lecturer_repository.list_all(limit=1000)
+
+    async def get_all_today_rated_lecturer_by_user(self) -> dict[int, set[int]]:
+        ratings = await self._rating_repository.get_all_today()
+        result: dict[int, set[int]] = defaultdict(set)
+        for rating in ratings:
+            result[rating.user_id].add(rating.lecturer_id)
+        return result

@@ -27,7 +27,7 @@ async def get_schedule_text(
         *, is_today: bool = False,
 ) -> str:
     try:
-        schedule = schedule_service.get_schedule(day, group_name)
+        schedule = schedule_service.get_schedule(target_date=day, group=group_name)
     except ScheduleNotLoadedError:
         return messages.schedule.not_loaded_error
 

@@ -48,3 +48,14 @@ class RatingRepository(BaseRepository[Rating]):
         )
         result = await self.session.execute(statement)
         return result.scalars().all()
+
+    async def get_all_today(self) -> Sequence[Rating]:
+        today = datetime.now(tz=MSK_ZONE).date()
+        statement = (
+            select(Rating)
+            .where(
+                today == func.date(Rating.created_at),
+            )
+        )
+        result = await self.session.execute(statement)
+        return result.scalars().all()

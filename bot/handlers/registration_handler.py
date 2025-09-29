@@ -30,7 +30,7 @@ async def start_registration(
         _: Message,
         user: User,
         guest_service: GuestService,
-        message_manager: MessageManager
+        message_manager: MessageManager,
 ) -> None:
     logger.info(f"User {user.id} started registration")
 

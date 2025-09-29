@@ -8,6 +8,7 @@ from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
+from loguru import logger
 
 _user_locks = defaultdict(asyncio.Lock)
 
@@ -36,12 +37,14 @@ class MessageManager:
 
     @classmethod
     async def from_callback(cls, bot: Bot, callback: CallbackQuery, state: FSMContext) -> Self:
-        return cls(
+        manager = cls(
             bot=bot,
             chat_id=callback.message.chat.id,
             state=state,
             message=callback.message,
         )
+        await manager._add_bot_message(callback.message.message_id)
+        return manager
 
     async def send_message(self, text: str, *, clear_previous: bool = True, **kwargs: object) -> Message:
         async with self._lock:
@@ -58,6 +61,7 @@ class MessageManager:
                 return await self.send_message(text, clear_previous=True, **kwargs)
             try:
                 last_bot_msg_id = bot_messages[-1]
+                logger.debug(f"Editing message {last_bot_msg_id} in chat {self.chat_id}")
                 return await self.bot.edit_message_text(
                     text=text,
                     chat_id=self.chat_id,
@@ -77,14 +81,16 @@ class MessageManager:
 
     async def _add_bot_message(self, message_id: int) -> None:
         messages = await self._get_bot_messages()
-        messages.append(message_id)
-        await self.state.update_data({self._bot_messages_key: messages})
+        if message_id not in messages:
+            messages.append(message_id)
+            await self.state.update_data({self._bot_messages_key: messages})
 
     async def _add_user_message(self, message_id: int) -> None:
         async with self._lock:
             messages = await self._get_user_messages()
-            messages.append(message_id)
-            await self.state.update_data({self._user_messages_key: messages})
+            if message_id not in messages:
+                messages.append(message_id)
+                await self.state.update_data({self._user_messages_key: messages})
 
     async def _clear_messages(self) -> None:
         bot_messages = await self._get_bot_messages()

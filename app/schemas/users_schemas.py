@@ -19,7 +19,7 @@ class GroupDTO(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserDTO(BaseModel):
+class UserWithGroupDTO(BaseModel):
     id: int
     telegram_id: int
     username: str | None
@@ -27,5 +27,16 @@ class UserDTO(BaseModel):
     role: UserRole
     group_id: int | None
     group: GroupDTO | None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserDTO(BaseModel):
+    id: int
+    telegram_id: int
+    username: str | None
+    name: str
+    role: UserRole
+    group_id: int
 
     model_config = ConfigDict(from_attributes=True)

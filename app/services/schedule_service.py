@@ -1,4 +1,4 @@
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time
 from zoneinfo import ZoneInfo
 
 from app.enums import DateType, Week, Weekday
@@ -42,9 +42,12 @@ class ScheduleService:
         self._schedule = schedule
         self._schedule_repository.schedule = schedule
 
-    def get_schedule(self, target_date: date, group: str) -> list[Lesson]:
+    def get_schedule(self, group: str, target_date: date | None = None) -> list[Lesson]:
         if self._schedule is None:
             raise ScheduleNotLoadedError
+
+        if target_date is None:
+            target_date = datetime.now(tz=MSK_ZONE).date()
 
         lessons = []
         for course in self._schedule.courses:
@@ -87,9 +90,7 @@ class ScheduleService:
 
     def get_today_past_lecturers(self, group: str) -> list[str]:
         try:
-            # schedule = self.get_schedule(datetime.now(tz=MSK_ZONE).date(), group)
-            # +1 day for testing purposes
-            schedule = self.get_schedule((datetime.now(tz=MSK_ZONE) + timedelta(days=1)).date(), group)
+            schedule = self.get_schedule(group)
         except ScheduleNotLoadedError:
             return []
 

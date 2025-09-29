@@ -38,7 +38,7 @@ async def today_schedule(
         user: User,
         schedule_service: ScheduleService,
         rating_service: RatingService,
-        message_manager: MessageManager
+        message_manager: MessageManager,
 ) -> None:
     logger.info(f"User {user.id} requested today's schedule")
 
@@ -66,7 +66,7 @@ async def tomorrow_schedule(
         user: User,
         schedule_service: ScheduleService,
         rating_service: RatingService,
-        message_manager: MessageManager
+        message_manager: MessageManager,
 ) -> None:
     logger.info(f"User {user.id} requested tomorrow's schedule")
 

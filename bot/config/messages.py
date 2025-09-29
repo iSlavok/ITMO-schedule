@@ -57,6 +57,10 @@ class RatingMessages(BaseModel):
     alerts: RatingAlerts
 
 
+class NotificationMessages(BaseModel):
+    lecturer_rating: str
+
+
 class Buttons(BaseModel):
     today_schedule: str
     tomorrow_schedule: str
@@ -75,6 +79,7 @@ class Messages(BaseModel):
     schedule: ScheduleMessages
     lecturer_rating_list: LecturerRatingListMessages
     rating: RatingMessages
+    notification: NotificationMessages
     buttons: Buttons
 
 

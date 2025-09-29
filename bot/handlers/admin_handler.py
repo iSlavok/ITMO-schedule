@@ -6,7 +6,7 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 from app.enums import UserRole
-from app.schemas import UserDTO
+from app.schemas import UserWithGroupDTO
 from app.services.user_service import UserService
 from bot.callback_data import UsersListPageCD
 from bot.config import messages
@@ -74,7 +74,7 @@ async def send_users_list_message(
         await message_manager.edit_message(text, reply_markup=keyboard)
 
 
-def get_users_list_text(users: Iterable[UserDTO], total_count: int, skip_count: int = 0) -> str:
+def get_users_list_text(users: Iterable[UserWithGroupDTO], total_count: int, skip_count: int = 0) -> str:
     text = MessageManager.format_text(messages.admin.users_list.header, total_count=total_count)
     for i, user in enumerate(users, start=1):
         group_name = user.group.name if user.group else "Не выбрана"

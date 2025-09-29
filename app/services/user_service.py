@@ -1,8 +1,10 @@
+from collections import defaultdict
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User
 from app.repositories import UserRepository
-from app.schemas import UserDTO
+from app.schemas import UserDTO, UserWithGroupDTO
 
 
 class UserService:
@@ -30,13 +32,22 @@ class UserService:
             await self._session.refresh(user)
         return user
 
-    async def get_users_with_group_and_course(self, page: int, per_page: int) -> list[UserDTO]:
+    async def get_users_with_group_and_course(self, page: int, per_page: int) -> list[UserWithGroupDTO]:
         skip = (page - 1) * per_page
         users = await self._user_repo.list_all_with_group_and_course(skip=skip, limit=per_page)
         return [
-            UserDTO.model_validate(user)
+            UserWithGroupDTO.model_validate(user)
             for user in users
         ]
 
     async def get_users_count(self) -> int:
         return await self._user_repo.get_users_count()
+
+    async def get_users_by_group(self) -> dict[str, list[UserDTO]]:
+        rows = await self._user_repo.get_users_with_groups()
+        grouped: dict[str, list[UserDTO]] = defaultdict(list)
+
+        for group_name, user in rows:
+            grouped[group_name].append(UserDTO.model_validate(user))
+
+        return dict(grouped)

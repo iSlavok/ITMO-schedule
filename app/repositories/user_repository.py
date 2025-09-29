@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from sqlalchemy import func, select
+from sqlalchemy import Row, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -48,3 +48,14 @@ class UserRepository(BaseRepository[User]):
         )
         result = await self.session.execute(statement)
         return result.scalar_one()
+
+    async def get_users_with_groups(self) -> Sequence[Row[tuple[str, User]]]:
+        statement = (
+            select(Group.name, User)
+            .join(User.group)
+            .where(
+                User.group_id.isnot(None),
+            )
+        )
+        result = await self.session.execute(statement)
+        return result.all()

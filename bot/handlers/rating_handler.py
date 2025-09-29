@@ -11,7 +11,7 @@ from app.services.schedule_service import ScheduleService
 from bot.callback_data import AddRatingCD, SelectLecturerCD
 from bot.config import messages
 from bot.filters import RoleFilter
-from bot.keyboards import get_add_rating_kb, get_rating_kb, get_to_rating_kb
+from bot.keyboards import get_add_rating_kb, get_rating_kb, get_to_main_kb
 from bot.services import MessageManager
 
 router = Router(name="rating_router")
@@ -77,9 +77,9 @@ async def select_lecturer_for_rating(
         await callback.answer(
             text=MessageManager.format_text(
                 messages.rating.alerts.lecturer_no_lecture_today,
-                lecturer_name=lecturer.name
+                lecturer_name=lecturer.name,
             ),
-            show_alert=True
+            show_alert=True,
         )
         return
 
@@ -88,18 +88,18 @@ async def select_lecturer_for_rating(
         await callback.answer(
             text=MessageManager.format_text(
                 messages.rating.alerts.lecturer_already_rated,
-                lecturer_name=lecturer.name
+                lecturer_name=lecturer.name,
             ),
-            show_alert=True
+            show_alert=True,
         )
         return
 
     await message_manager.edit_message(
         text=MessageManager.format_text(
             messages.rating.rating_request,
-            lecturer_name=lecturer.name
+            lecturer_name=lecturer.name,
         ),
-        reply_markup=get_add_rating_kb(lecturer.id),
+        reply_markup=get_add_rating_kb(lecturer.id, "rating"),
     )
     await callback.answer()
 
@@ -132,9 +132,9 @@ async def add_rating(
         await callback.answer(
             text=MessageManager.format_text(
                 messages.rating.alerts.lecturer_no_lecture_today,
-                lecturer_name=lecturer.name
+                lecturer_name=lecturer.name,
             ),
-            show_alert=True
+            show_alert=True,
         )
         return
 
@@ -144,11 +144,13 @@ async def add_rating(
         await callback.answer(
             text=MessageManager.format_text(
                 messages.rating.alerts.lecturer_already_rated,
-                lecturer_name=lecturer.name
+                lecturer_name=lecturer.name,
             ),
-            show_alert=True
+            show_alert=True,
         )
         return
+    else:
+        logger.info(f"User {user.id} added rating {rating_value} for lecturer {lecturer.id}")
 
     await message_manager.edit_message(
         text=MessageManager.format_text(
@@ -156,6 +158,6 @@ async def add_rating(
             rating=rating.rating,
             lecturer_name=lecturer.name,
         ),
-        reply_markup=get_to_rating_kb(),
+        reply_markup=get_to_main_kb(),
     )
     await callback.answer()
