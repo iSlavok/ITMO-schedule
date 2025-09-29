@@ -52,7 +52,9 @@ rating:
 notification:
   lecturer_rating: "
     У вас закончилась пара: <b>$lesson_name</b>
-    Оцените преподавателя: <b>$lecturer_name</b>.
+    
+    Оцените преподавателя: <b>$lecturer_name</b>
+    
     <i>Вы можете отключить эти уведомления в настройках</i> (/settings).
   "
 settings:
