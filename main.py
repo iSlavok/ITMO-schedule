@@ -23,6 +23,7 @@ from bot.handlers import (
     schedule_jobs
 )
 from bot.middlewares import MessageManagerMiddleware, ServicesMiddleware, UserMiddleware
+from bot.utils import patch_bot_limited_send
 
 
 async def main() -> None:
@@ -58,6 +59,8 @@ async def start_bot(schedule_service: ScheduleService, ai_service: AiService) ->
         ),
     )
     dp = Dispatcher(storage=storage)
+
+    patch_bot_limited_send(bot, 15)
 
     dp["ai_service"] = ai_service
     dp["schedule_service"] = schedule_service
