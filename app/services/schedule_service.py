@@ -101,7 +101,7 @@ class ScheduleService:
         lecturers = []
 
         for lesson in schedule:
-            if lesson.number < last_lesson_num and lesson.lecturer:
+            if lesson.number <= last_lesson_num and lesson.lecturer:
                 lecturers.append(lesson.lecturer)
             elif lesson.number >= last_lesson_num:
                 break
