@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.enums import FacultyCode
 from app.models import User
 from app.repositories import UserRepository
 from app.schemas import UserDTO, UserWithGroupDTO
@@ -43,12 +44,13 @@ class UserService:
     async def get_users_count(self) -> int:
         return await self._user_repo.get_users_count()
 
-    async def get_users_with_rating_notifications_by_group(self) -> dict[str, list[UserDTO]]:
+    async def get_users_with_rating_notifications_by_group(self) -> dict[tuple[str, FacultyCode], list[UserDTO]]:
+        """Users to notify, keyed by the (group, faculty) whose schedule they follow."""
         rows = await self._user_repo.get_users_with_rating_notifications_with_groups()
-        grouped: dict[str, list[UserDTO]] = defaultdict(list)
+        grouped: dict[tuple[str, FacultyCode], list[UserDTO]] = defaultdict(list)
 
-        for group_name, user in rows:
-            grouped[group_name].append(UserDTO.model_validate(user))
+        for group_name, faculty_code, user in rows:
+            grouped[(group_name, FacultyCode(faculty_code))].append(UserDTO.model_validate(user))
 
         return dict(grouped)
 

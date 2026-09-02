@@ -20,16 +20,18 @@ class RatingService:
     async def get_lecturer_by_id(self, lecturer_id: int) -> Lecturer | None:
         return await self._lecturer_repository.get_by_id(lecturer_id)
 
-    async def get_lecturers_rating(self, names: list[str]) -> dict[str, float]:
-        return await self._lecturer_repository.get_average_ratings(names)
+    async def get_lecturers_rating(self, names: list[str], faculty_id: int) -> dict[str, float]:
+        return await self._lecturer_repository.get_average_ratings(names, faculty_id)
 
     async def get_top_lecturers_with_rank(
             self,
             page: int,
+            faculty_id: int,
             per_page: int = 10,
             *, ascending: bool = False,
     ) -> list[LecturerDTO]:
         lecturers = await self._lecturer_repository.get_top_lecturers_with_rank(
+            faculty_id=faculty_id,
             limit=per_page,
             skip=(page - 1) * per_page,
             ascending=ascending,
@@ -47,8 +49,8 @@ class RatingService:
             ) for lecturer in lecturer_tuples
         ]
 
-    async def get_lecturers_page_count(self, per_page: int = 10) -> int:
-        count = await self._lecturer_repository.get_lecturers_count()
+    async def get_lecturers_page_count(self, faculty_id: int, per_page: int = 10) -> int:
+        count = await self._lecturer_repository.get_lecturers_count(faculty_id)
         return count // per_page + (1 if count % per_page > 0 else 0)
 
     async def create_rating(self, rating: int, lecturer_id: int, user_id: int) -> Rating:
@@ -66,8 +68,13 @@ class RatingService:
     async def can_user_rate_lecturer(self, user_id: int, lecturer_id: int) -> bool:
         return await self._rating_repository.can_user_rate_lecturer(user_id, lecturer_id)
 
-    async def get_available_lecturers_for_rating(self, lecturer_names: list[str], user_id: int) -> Sequence[Lecturer]:
-        return await self._rating_repository.get_rateable_lecturers(lecturer_names, user_id)
+    async def get_available_lecturers_for_rating(
+        self,
+        lecturer_names: list[str],
+        user_id: int,
+        faculty_id: int,
+    ) -> Sequence[Lecturer]:
+        return await self._rating_repository.get_rateable_lecturers(lecturer_names, user_id, faculty_id)
 
     async def get_all_lecturers(self) -> Sequence[Lecturer]:
         return await self._lecturer_repository.list_all(limit=1000)

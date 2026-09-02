@@ -3,7 +3,7 @@ from aiogram.filters import or_f
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
-from app.enums import UserRole
+from app.enums import FacultyCode, UserRole
 from app.models import Group, User
 from app.services.exceptions import UserCannotRateLecturerError
 from app.services.rating_service import RatingService
@@ -37,8 +37,15 @@ async def get_rating_list_menu(
     logger.info(f"User {user.id} requested lecturer rating menu")
 
     user_group: Group = user.group
-    today_lecturer_names = schedule_service.get_today_past_lecturers(user_group.name)
-    lecturers = await rating_service.get_available_lecturers_for_rating(today_lecturer_names, user.id)
+    today_lecturer_names = schedule_service.get_today_past_lecturers(
+        user_group.name,
+        faculty=FacultyCode(user_group.faculty.code),
+    )
+    lecturers = await rating_service.get_available_lecturers_for_rating(
+        today_lecturer_names,
+        user.id,
+        user_group.faculty_id,
+    )
     keyboard = get_rating_kb(lecturers)
 
     text = messages.rating.lecturer_request if lecturers else messages.rating.no_available_lecturers
@@ -72,7 +79,10 @@ async def select_lecturer_for_rating(
         await callback.answer(messages.rating.alerts.lecturer_not_found, show_alert=True)
         return
 
-    today_lecturer_names = schedule_service.get_today_past_lecturers(user_group.name)
+    today_lecturer_names = schedule_service.get_today_past_lecturers(
+        user_group.name,
+        faculty=FacultyCode(user_group.faculty.code),
+    )
     if lecturer.name not in today_lecturer_names:
         await callback.answer(
             text=MessageManager.format_text(
@@ -127,7 +137,10 @@ async def add_rating(
         await callback.answer(messages.rating.alerts.lecturer_not_found, show_alert=True)
         return
 
-    today_lecturer_names = schedule_service.get_today_past_lecturers(user_group.name)
+    today_lecturer_names = schedule_service.get_today_past_lecturers(
+        user_group.name,
+        faculty=FacultyCode(user_group.faculty.code),
+    )
     if lecturer.name not in today_lecturer_names:
         await callback.answer(
             text=MessageManager.format_text(

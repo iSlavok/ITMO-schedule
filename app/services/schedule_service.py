@@ -1,9 +1,9 @@
 from datetime import date, datetime, time
 from zoneinfo import ZoneInfo
 
-from app.enums import DatedAction, Weekday
+from app.enums import DatedAction, FacultyCode, Weekday
 from app.repositories import ScheduleRepository
-from app.schemas import DatedSchedule, Lesson, Schedule
+from app.schemas import DatedSchedule, Lesson, Schedule, ScheduleGroup
 from app.services.exceptions import ScheduleNotLoadedError
 
 MSK_ZONE = ZoneInfo("Europe/Moscow")
@@ -28,19 +28,24 @@ WEEKDAYS = [
 
 
 class ScheduleService:
+    """Holds one recurring schedule per faculty plus the shared dated overlay.
+
+    Group names carry a faculty prefix and never collide, so a lookup without a
+    faculty still resolves; passing one turns a faculty whose parse has not
+    succeeded yet into an error instead of an empty day.
+    """
+
     def __init__(self) -> None:
         self._schedule_repository = ScheduleRepository()
-        self._schedule: Schedule | None = None
+        self._schedules: dict[FacultyCode, Schedule] = {}
         self._dated_schedule = self._schedule_repository.dated_schedule
 
-    @property
-    def schedule(self) -> Schedule:
-        return self._schedule
+    def get_faculty_schedule(self, faculty: FacultyCode) -> Schedule | None:
+        return self._schedules.get(faculty)
 
-    @schedule.setter
-    def schedule(self, schedule: Schedule) -> None:
-        self._schedule = schedule
-        self._schedule_repository.schedule = schedule
+    def set_faculty_schedule(self, faculty: FacultyCode, schedule: Schedule) -> None:
+        self._schedules[faculty] = schedule
+        self._schedule_repository.set_schedule(faculty, schedule)
 
     @property
     def dated_schedule(self) -> DatedSchedule:
@@ -51,8 +56,14 @@ class ScheduleService:
         self._dated_schedule = dated_schedule
         self._schedule_repository.dated_schedule = dated_schedule
 
-    def get_schedule(self, group: str, target_date: date | None = None) -> list[Lesson]:
-        if self._schedule is None:
+    def get_schedule(
+        self,
+        group: str,
+        target_date: date | None = None,
+        faculty: FacultyCode | None = None,
+    ) -> list[Lesson]:
+        schedules = self._schedules_to_search(faculty)
+        if not schedules:
             raise ScheduleNotLoadedError
 
         if target_date is None:
@@ -62,13 +73,14 @@ class ScheduleService:
         is_even_week = self.is_even_week(target_date)
 
         lessons = []
-        for course in self._schedule.courses:
-            if group in self._schedule.courses[course].groups:
-                group_schedule = self._schedule.courses[course].groups[group]
-                week = group_schedule.even_week if is_even_week else group_schedule.odd_week
-                # deep copy: dated overrides patch lessons in place
-                lessons = [lesson.model_copy(deep=True) for lesson in week.days[weekday].lessons]
-                break
+        for schedule in schedules:
+            group_schedule = self._find_group(schedule, group)
+            if group_schedule is None:
+                continue
+            week = group_schedule.even_week if is_even_week else group_schedule.odd_week
+            # deep copy: dated overrides patch lessons in place
+            lessons = [lesson.model_copy(deep=True) for lesson in week.days[weekday].lessons]
+            break
 
         lessons = self._apply_dated_schedule(lessons, target_date, group, weekday, is_even_week=is_even_week)
         return sorted(lessons, key=lambda x: x.number)
@@ -108,9 +120,22 @@ class ScheduleService:
         ]
         return lessons
 
-    def get_today_past_lecturers(self, group: str) -> list[str]:
+    def _schedules_to_search(self, faculty: FacultyCode | None) -> list[Schedule]:
+        if faculty is not None:
+            schedule = self._schedules.get(faculty)
+            return [schedule] if schedule is not None else []
+        return list(self._schedules.values())
+
+    @staticmethod
+    def _find_group(schedule: Schedule, group: str) -> ScheduleGroup | None:
+        for course in schedule.courses.values():
+            if group in course.groups:
+                return course.groups[group]
+        return None
+
+    def get_today_past_lecturers(self, group: str, faculty: FacultyCode | None = None) -> list[str]:
         try:
-            schedule = self.get_schedule(group)
+            schedule = self.get_schedule(group, faculty=faculty)
         except ScheduleNotLoadedError:
             return []
 

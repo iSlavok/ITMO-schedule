@@ -13,7 +13,7 @@ from .schedule_schemas import (
     ScheduleNote,
     ScheduleWeek,
 )
-from .users_schemas import CourseDTO, GroupDTO, UserDTO, UserSettings, UserWithGroupDTO
+from .users_schemas import CourseDTO, FacultyDTO, GroupDTO, UserDTO, UserSettings, UserWithGroupDTO
 
 __all__ = [
     "AiDate",
@@ -23,6 +23,7 @@ __all__ = [
     "CourseDTO",
     "DatedLesson",
     "DatedSchedule",
+    "FacultyDTO",
     "GroupDTO",
     "LecturerDTO",
     "Lesson",

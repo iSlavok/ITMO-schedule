@@ -79,12 +79,14 @@ def get_users_list_text(users: Iterable[UserWithGroupDTO], total_count: int, ski
     for i, user in enumerate(users, start=1):
         group_name = user.group.name if user.group else "Не выбрана"
         course_name = user.group.course.name if user.group else ""
+        faculty_name = user.group.faculty.name if user.group else ""
         text += "\n" + MessageManager.format_text(
             messages.admin.users_list.user,
             number=i + skip_count,
             user_id=user.id,
             group_name=group_name,
             course_name=course_name,
+            faculty_name=faculty_name,
             full_name=user.name,
             username=user.username,
         )

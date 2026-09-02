@@ -1,5 +1,6 @@
 from datetime import date
 
+from app.enums import FacultyCode
 from app.schemas import Lesson
 from app.services.exceptions import ScheduleNotLoadedError
 from app.services.rating_service import RatingService
@@ -20,14 +21,17 @@ TIMES: list[str] = [
 
 async def get_schedule_text(
         schedule_service: ScheduleService,
+        *,
         rating_service: RatingService,
         group_name: str,
+        faculty: FacultyCode,
+        faculty_id: int,
         day: date,
         day_str: str,
-        *, is_today: bool = False,
+        is_today: bool = False,
 ) -> str:
     try:
-        schedule = schedule_service.get_schedule(target_date=day, group=group_name)
+        schedule = schedule_service.get_schedule(target_date=day, group=group_name, faculty=faculty)
     except ScheduleNotLoadedError:
         return messages.schedule.not_loaded_error
 
@@ -35,6 +39,7 @@ async def get_schedule_text(
         schedule=schedule,
         schedule_service=schedule_service,
         rating_service=rating_service,
+        faculty_id=faculty_id,
         day=day_str,
         is_today=is_today,
     )
@@ -43,9 +48,11 @@ async def get_schedule_text(
 async def _schedule_to_text(
         schedule: list[Lesson],
         schedule_service: ScheduleService,
+        *,
         rating_service: RatingService,
+        faculty_id: int,
         day: str,
-        *, is_today: bool = False,
+        is_today: bool = False,
 ) -> str:
     text = MessageManager.format_text(messages.schedule.header, day=day)
 
@@ -54,7 +61,7 @@ async def _schedule_to_text(
         current, is_waiting = schedule_service.get_current_lesson()
 
     lecturer_names = [lesson.lecturer for lesson in schedule if lesson.lecturer]
-    lecturer_ratings = await rating_service.get_lecturers_rating(lecturer_names)
+    lecturer_ratings = await rating_service.get_lecturers_rating(lecturer_names, faculty_id)
 
     for lesson in schedule:
         text += _lesson_to_text(

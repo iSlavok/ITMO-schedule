@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.enums import DatedAction, Week, Weekday
 
-LessonType = Literal["лекция", "практика", "теория", "лабораторная", "факультатив"]
+LessonType = Literal["лекция", "практика", "теория", "семинар", "лабораторная", "факультатив"]
 
 
 class Lesson(BaseModel):
@@ -75,6 +75,17 @@ class Schedule(BaseModel):
             else self.courses[course].groups[group].even_week
         )
         target_week.days[weekday].lessons.append(lesson)
+
+    def lecturer_names(self) -> set[str]:
+        return {
+            lesson.lecturer
+            for course in self.courses.values()
+            for group in course.groups.values()
+            for week in (group.odd_week, group.even_week)
+            for day in week.days.values()
+            for lesson in day.lessons
+            if lesson.lecturer
+        }
 
     def get_lessons(self, course: str, group: str, week: Week, weekday: Weekday, number: int) -> list[Lesson]:
         schedule_course = self.courses.get(course)

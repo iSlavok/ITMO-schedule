@@ -5,7 +5,13 @@ from aiogram import BaseMiddleware
 from aiogram.dispatcher.flags import get_flag
 from aiogram.types import TelegramObject
 
-from app.repositories import CourseRepository, GroupRepository, LecturerRepository, RatingRepository
+from app.repositories import (
+    CourseRepository,
+    FacultyRepository,
+    GroupRepository,
+    LecturerRepository,
+    RatingRepository,
+)
 from app.services.guest_service import GuestService
 from app.services.rating_service import RatingService
 
@@ -34,6 +40,7 @@ class ServicesMiddleware(BaseMiddleware):
                     session=session,
                     course_repo=course_repo,
                     group_repo=group_repo,
+                    faculty_repo=FacultyRepository(session),
                 )
             elif service == "rating":
                 lecturer_repo = LecturerRepository(session)

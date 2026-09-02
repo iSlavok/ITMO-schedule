@@ -27,7 +27,12 @@ class RatingRepository(BaseRepository[Rating]):
         result = await self.session.execute(query)
         return result.first() is None
 
-    async def get_rateable_lecturers(self, lecturer_names: list[str], user_id: int) -> Sequence[Lecturer]:
+    async def get_rateable_lecturers(
+        self,
+        lecturer_names: list[str],
+        user_id: int,
+        faculty_id: int,
+    ) -> Sequence[Lecturer]:
         today = datetime.now(tz=MSK_ZONE).date()
 
         subquery = (
@@ -43,6 +48,7 @@ class RatingRepository(BaseRepository[Rating]):
             select(Lecturer)
             .where(
                 Lecturer.name.in_(lecturer_names),
+                Lecturer.faculty_id == faculty_id,
                 ~Lecturer.id.in_(subquery),
             )
         )

@@ -45,8 +45,13 @@ async def show_rating_list(
     rating_type = callback_data.type
     page = callback_data.page
 
-    rating = await rating_service.get_top_lecturers_with_rank(page, ascending=rating_type != RatingType.BEST)
-    rated_lecturers_pages_count = await rating_service.get_lecturers_page_count()
+    faculty_id = user.group.faculty_id
+    rating = await rating_service.get_top_lecturers_with_rank(
+        page,
+        faculty_id=faculty_id,
+        ascending=rating_type != RatingType.BEST,
+    )
+    rated_lecturers_pages_count = await rating_service.get_lecturers_page_count(faculty_id)
 
     text = messages.lecturer_rating_list.best_header \
         if rating_type == RatingType.BEST \

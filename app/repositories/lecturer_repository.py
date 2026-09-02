@@ -1,4 +1,4 @@
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 
 from sqlalchemy import Row, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,6 +13,7 @@ class LecturerRepository(BaseRepository[Lecturer]):
 
     async def get_top_lecturers_with_rank(
             self,
+            faculty_id: int,
             limit: int = 10,
             skip: int = 0,
             *, ascending: bool = False,
@@ -25,6 +26,7 @@ class LecturerRepository(BaseRepository[Lecturer]):
                 func.count(Rating.id).label("reviews_count"),
             )
             .join(Rating)
+            .where(Lecturer.faculty_id == faculty_id)
             .group_by(
                 Lecturer.id,
                 Lecturer.name,
@@ -56,10 +58,11 @@ class LecturerRepository(BaseRepository[Lecturer]):
         result = await self.session.execute(statement)
         return result.all()
 
-    async def get_lecturers_count(self) -> int:
+    async def get_lecturers_count(self, faculty_id: int) -> int:
         statement = (
             select(func.count(Lecturer.id))
             .where(
+                Lecturer.faculty_id == faculty_id,
                 Lecturer.id.in_(
                     select(Rating.lecturer_id)
                     .distinct(),
@@ -69,16 +72,28 @@ class LecturerRepository(BaseRepository[Lecturer]):
         result = await self.session.execute(statement)
         return result.scalar_one()
 
-    async def get_average_ratings(self, names: list[str]) -> dict[str, float]:
+    async def get_average_ratings(self, names: list[str], faculty_id: int) -> dict[str, float]:
         statement = (
             select(
                 Lecturer.name,
                 func.avg(Rating.rating).label("avg_rating"),
             )
             .join(Rating)
-            .where(Lecturer.name.in_(names))
+            .where(
+                Lecturer.name.in_(names),
+                Lecturer.faculty_id == faculty_id,
+            )
             .group_by(Lecturer.name)
         )
         result = await self.session.execute(statement)
         return {row.name: row.avg_rating for row in result.all()}
 
+    async def get_names_by_faculty(self, faculty_id: int) -> set[str]:
+        statement = select(Lecturer.name).where(Lecturer.faculty_id == faculty_id)
+        result = await self.session.execute(statement)
+        return set(result.scalars().all())
+
+    def add_many(self, names: Iterable[str], faculty_id: int) -> list[Lecturer]:
+        lecturers = [Lecturer(name=name, faculty_id=faculty_id) for name in names]
+        self.session.add_all(lecturers)
+        return lecturers

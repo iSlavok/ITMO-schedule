@@ -10,11 +10,21 @@ class CourseDTO(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class FacultyDTO(BaseModel):
+    id: int
+    code: str
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class GroupDTO(BaseModel):
     id: int
     name: str
     course_id: int
+    faculty_id: int
     course: CourseDTO
+    faculty: FacultyDTO
 
     model_config = ConfigDict(from_attributes=True)
 

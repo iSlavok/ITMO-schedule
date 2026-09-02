@@ -4,8 +4,10 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from loguru import logger
 
 from app.database import get_session
-from app.repositories import LecturerRepository, RatingRepository, UserRepository
+from app.enums import FacultyCode
+from app.repositories import FacultyRepository, LecturerRepository, RatingRepository, UserRepository
 from app.schemas import Lesson
+from app.services.exceptions import ScheduleNotLoadedError
 from app.services.rating_service import RatingService
 from app.services.schedule_service import SCHEDULE_TIMES, ScheduleService
 from app.services.user_service import UserService
@@ -46,8 +48,13 @@ async def _start_notifications(bot: Bot, schedule_service: ScheduleService, less
         lecturer_repository = LecturerRepository(session)
         rating_service = RatingService(session, lecturer_repository, rating_repository)
 
+        faculty_ids_by_code = {
+            faculty.code: faculty.id
+            for faculty in await FacultyRepository(session).list_all()
+        }
         lecturers = await rating_service.get_all_lecturers()
-        lecturer_ids_by_name = {lecturer.name: lecturer.id for lecturer in lecturers}
+        # the same surname can teach on both faculties, as two rows with two ratings
+        lecturer_ids_by_name = {(lecturer.faculty_id, lecturer.name): lecturer.id for lecturer in lecturers}
 
         today_rated_lecturers_by_user = await rating_service.get_all_today_rated_lecturer_by_user()
 
@@ -55,18 +62,24 @@ async def _start_notifications(bot: Bot, schedule_service: ScheduleService, less
 
     successful_notifications = 0
 
-    for group_name, users in users_by_group.items():
-        scheduled_lessons = schedule_service.get_schedule(group_name)
+    for (group_name, faculty), users in users_by_group.items():
+        faculty_id = faculty_ids_by_code.get(faculty.value)
+        if faculty_id is None:
+            continue
+
+        scheduled_lessons = _group_schedule(schedule_service, group_name, faculty)
         current_lesson = next((
             lesson
             for lesson in scheduled_lessons
             if lesson.number == lesson_number
         ), None)
 
-        if current_lesson is None or not current_lesson.lecturer or current_lesson.lecturer not in lecturer_ids_by_name:
+        if current_lesson is None or not current_lesson.lecturer:
             continue
 
-        lecturer_id = lecturer_ids_by_name[current_lesson.lecturer]
+        lecturer_id = lecturer_ids_by_name.get((faculty_id, current_lesson.lecturer))
+        if lecturer_id is None:
+            continue
 
         for user in users:
             if user.id in today_rated_lecturers_by_user and lecturer_id in today_rated_lecturers_by_user[user.id]:
@@ -80,6 +93,14 @@ async def _start_notifications(bot: Bot, schedule_service: ScheduleService, less
                 successful_notifications += 1
 
     logger.info(f"Sent {successful_notifications} notifications for lesson {lesson_number}")
+
+
+def _group_schedule(schedule_service: ScheduleService, group_name: str, faculty: FacultyCode) -> list[Lesson]:
+    try:
+        return schedule_service.get_schedule(group_name, faculty=faculty)
+    except ScheduleNotLoadedError:
+        logger.warning(f"Schedule of {faculty.value} is not loaded, skipping group {group_name}")
+        return []
 
 
 async def _send_user_notification(bot: Bot, user_id: int, lesson: Lesson, lecturer_id: int) -> None:

@@ -6,12 +6,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 if TYPE_CHECKING:
-    from . import Course, User
+    from . import Course, Faculty, User
 
 
 class Group(Base):
     name: Mapped[str] = mapped_column(index=True, nullable=False)
     course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"))
+    faculty_id: Mapped[int] = mapped_column(ForeignKey("faculties.id"), index=True)
 
     course: Mapped["Course"] = relationship("Course", back_populates="groups")
+    faculty: Mapped["Faculty"] = relationship("Faculty", back_populates="groups")
     users: Mapped[list["User"]] = relationship("User", back_populates="group")

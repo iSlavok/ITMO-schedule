@@ -11,10 +11,14 @@ class GroupRepository(BaseRepository[Group]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, Group)
 
-    async def get_by_course_id(self, course_id: int) -> Sequence[Group]:
+    async def get_by_course_and_faculty(self, course_id: int, faculty_id: int) -> Sequence[Group]:
         statement = (
             select(Group)
-            .where(Group.course_id == course_id)
+            .where(
+                Group.course_id == course_id,
+                Group.faculty_id == faculty_id,
+            )
+            .order_by(Group.name)
         )
         result = await self.session.execute(statement)
         return result.scalars().all()

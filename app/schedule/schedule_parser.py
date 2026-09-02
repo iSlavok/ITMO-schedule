@@ -20,6 +20,7 @@ ROOM_PATTERN = re.compile(r"ауд(?:\.?\s*|\s+)(\d+)", flags=re.IGNORECASE)
 COURSE_HEADER_PATTERN = re.compile(r"^\s*\d+\s+курс\s*$", flags=re.IGNORECASE)
 BLANK_LINE_PATTERN = re.compile(r"\n\s*\n")
 SUBGROUP_PATTERN = re.compile(r"^Z\d{3,4}$", flags=re.IGNORECASE)
+GROUP_PREFIX = "Z"
 
 
 WEEKDAY_REPLACE_MAP = {
@@ -165,7 +166,7 @@ class ScheduleParser:
 
             year = row[0].strip()
             week_type = row[1].strip()
-            group = row[2].strip()
+            group = self._normalize_group_name(row[2])
 
             for j, value in enumerate(row[3:], 3):
                 if j % 2 == 0 or not value.strip():
@@ -218,6 +219,18 @@ class ScheduleParser:
                     ))
 
         return result
+
+    @staticmethod
+    def _normalize_group_name(value: str) -> str:
+        """Prefix the group number with the faculty letter.
+
+        The sheet writes the prefix on some groups and omits it on others, while
+        group numbers are shared with the other faculty, so it is always added.
+        """
+        name = value.strip()
+        if name.upper().startswith(GROUP_PREFIX):
+            return f"{GROUP_PREFIX}{name[1:]}"
+        return f"{GROUP_PREFIX}{name}"
 
     @staticmethod
     def _split_subgroups(schedule: Schedule) -> dict[tuple[str, str], list[str]]:

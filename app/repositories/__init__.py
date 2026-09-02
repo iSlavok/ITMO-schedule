@@ -1,5 +1,6 @@
 from .base_repository import BaseRepository
 from .course_repository import CourseRepository
+from .faculty_repository import FacultyRepository
 from .group_repository import GroupRepository
 from .lecturer_repository import LecturerRepository
 from .rating_repository import RatingRepository
@@ -9,6 +10,7 @@ from .user_repository import UserRepository
 __all__ = [
     "BaseRepository",
     "CourseRepository",
+    "FacultyRepository",
     "GroupRepository",
     "LecturerRepository",
     "RatingRepository",

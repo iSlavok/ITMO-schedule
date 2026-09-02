@@ -10,8 +10,10 @@ from redis.asyncio.client import Redis
 
 from app.config import env_config
 from app.database import close_db, init_db
-from app.schedule import DatedScheduleBuilder, ScheduleParser, ScheduleUpdater
+from app.enums import FacultyCode
+from app.schedule import CtScheduleParser, DatedScheduleBuilder, ScheduleParser, ScheduleUpdater
 from app.services.ai_service import AiService
+from app.services.lecturer_service import LecturerService
 from app.services.schedule_service import ScheduleService
 from bot.handlers import (
     admin_router,
@@ -30,22 +32,37 @@ async def main() -> None:
     await init_db()
     schedule_service = ScheduleService()
     ai_service = AiService()
-    schedule_parser = ScheduleParser(spreadsheet_key=env_config.SPREADSHEET_ID)
-    dated_schedule_builder = DatedScheduleBuilder(ai_service=ai_service)
-    schedule_updater = ScheduleUpdater(
-        schedule_service=schedule_service,
-        schedule_parser=schedule_parser,
-        dated_schedule_builder=dated_schedule_builder,
-        interval=600,
-    )
+    lecturer_service = LecturerService()
+    schedule_updaters = [
+        ScheduleUpdater(
+            schedule_service=schedule_service,
+            schedule_parser=ScheduleParser(spreadsheet_key=env_config.SPREADSHEET_ID),
+            faculty=FacultyCode.PHYSICS,
+            lecturer_service=lecturer_service,
+            dated_schedule_builder=DatedScheduleBuilder(ai_service=ai_service),
+            interval=600,
+        ),
+        ScheduleUpdater(
+            schedule_service=schedule_service,
+            schedule_parser=CtScheduleParser(
+                sheet_key=env_config.CT_SHEET_KEY,
+                sheet_gid=env_config.CT_SHEET_GID,
+            ),
+            faculty=FacultyCode.CT,
+            lecturer_service=lecturer_service,
+            interval=600,
+        ),
+    ]
 
-    await schedule_updater.update_schedule()
-    schedule_updater.start_update_loop()
+    for updater in schedule_updaters:
+        await updater.update_schedule()
+        updater.start_update_loop()
 
     try:
         await start_bot(schedule_service, ai_service)
     finally:
-        await schedule_updater.stop()
+        for updater in schedule_updaters:
+            await updater.stop()
         await close_db()
 
 
