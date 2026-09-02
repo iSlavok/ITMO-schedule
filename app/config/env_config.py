@@ -15,6 +15,8 @@ class EnvConfig(BaseSettings):
     BOT_TOKEN: SecretStr
     GOOGLE_API_KEY: SecretStr
     SPREADSHEET_ID: str
+    SEMESTER_START_YEAR: int
+    AI_MODEL: str = "gemini-3.5-flash-lite"
 
 
 env_config = EnvConfig()

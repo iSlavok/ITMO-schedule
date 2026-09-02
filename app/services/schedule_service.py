@@ -1,9 +1,9 @@
 from datetime import date, datetime, time
 from zoneinfo import ZoneInfo
 
-from app.enums import DateType, Week, Weekday
+from app.enums import DatedAction, Weekday
 from app.repositories import ScheduleRepository
-from app.schemas import Lesson, Schedule
+from app.schemas import DatedSchedule, Lesson, Schedule
 from app.services.exceptions import ScheduleNotLoadedError
 
 MSK_ZONE = ZoneInfo("Europe/Moscow")
@@ -42,6 +42,15 @@ class ScheduleService:
         self._schedule = schedule
         self._schedule_repository.schedule = schedule
 
+    @property
+    def dated_schedule(self) -> DatedSchedule:
+        return self._dated_schedule
+
+    @dated_schedule.setter
+    def dated_schedule(self, dated_schedule: DatedSchedule) -> None:
+        self._dated_schedule = dated_schedule
+        self._schedule_repository.dated_schedule = dated_schedule
+
     def get_schedule(self, group: str, target_date: date | None = None) -> list[Lesson]:
         if self._schedule is None:
             raise ScheduleNotLoadedError
@@ -49,43 +58,54 @@ class ScheduleService:
         if target_date is None:
             target_date = datetime.now(tz=MSK_ZONE).date()
 
+        weekday = self._get_weekday(target_date)
+        is_even_week = self.is_even_week(target_date)
+
         lessons = []
         for course in self._schedule.courses:
             if group in self._schedule.courses[course].groups:
-                weekday = self._get_weekday(target_date)
-                is_even_week = self.is_even_week(target_date)
-
                 group_schedule = self._schedule.courses[course].groups[group]
                 week = group_schedule.even_week if is_even_week else group_schedule.odd_week
-                lessons = week.days[weekday].lessons.copy()
+                # deep copy: dated overrides patch lessons in place
+                lessons = [lesson.model_copy(deep=True) for lesson in week.days[weekday].lessons]
                 break
 
-        lessons += self._get_dated_schedule(target_date, group)
+        lessons = self._apply_dated_schedule(lessons, target_date, group, weekday, is_even_week=is_even_week)
         return sorted(lessons, key=lambda x: x.number)
 
-    def _get_dated_schedule(self, target_date: date, group: str) -> list[Lesson]:
-        lessons = []
+    def _apply_dated_schedule(
+        self,
+        lessons: list[Lesson],
+        target_date: date,
+        group: str,
+        weekday: Weekday,
+        *,
+        is_even_week: bool,
+    ) -> list[Lesson]:
+        """Apply the dated entries of a group: cancellations, then overrides, then additions."""
+        entries = [
+            entry for entry in self._dated_schedule.groups.get(group, [])
+            if entry.matches(target_date, weekday, is_even_week=is_even_week)
+        ]
+        if not entries:
+            return lessons
 
-        if group in self._dated_schedule.groups:
-            is_even_week = self.is_even_week(target_date)
-            weekday = self._get_weekday(target_date)
+        cancelled = {entry.number for entry in entries if entry.action == DatedAction.CANCEL}
+        lessons = [lesson for lesson in lessons if lesson.number not in cancelled]
 
-            for lesson in self._dated_schedule.groups[group]:
-                is_date_match = lesson.date == target_date
-                is_relative_match = (
-                    (lesson.date_type == DateType.AFTER and target_date > lesson.date)
-                    or (lesson.date_type == DateType.BEFORE and target_date < lesson.date)
-                )
-                is_week_match = (
-                    lesson.week == Week.ALL
-                    or (lesson.week == Week.EVEN and is_even_week)
-                    or (lesson.week == Week.ODD and not is_even_week)
-                )
-                is_weekday_match = lesson.weekday == weekday
+        for entry in entries:
+            if entry.action != DatedAction.OVERRIDE:
+                continue
+            lessons = [
+                entry.patch.apply_to(lesson) if lesson.number == entry.number else lesson
+                for lesson in lessons
+            ]
 
-                if is_date_match or (is_relative_match and is_week_match and is_weekday_match):
-                    lessons.append(lesson.lesson)
-
+        lessons += [
+            entry.lesson.model_copy(deep=True)
+            for entry in entries
+            if entry.action == DatedAction.ADD
+        ]
         return lessons
 
     def get_today_past_lecturers(self, group: str) -> list[str]:

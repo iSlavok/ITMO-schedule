@@ -17,7 +17,9 @@ class Week(str, Enum):
     ALL = "all_weeks"
 
 
-class DateType(str, Enum):
-    EXACT = "exact"
-    AFTER = "after"
-    BEFORE = "before"
+class DatedAction(str, Enum):
+    """What a dated entry does to the recurring schedule of its slot."""
+
+    ADD = "add"
+    CANCEL = "cancel"
+    OVERRIDE = "override"

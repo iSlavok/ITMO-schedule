@@ -88,6 +88,8 @@ def _lesson_to_text(
     text += "\n" + MessageManager.format_text(lesson_message.name, name=lesson.name)
     if lesson.type:
         text += MessageManager.format_text(lesson_message.type, type=lesson.type)
+    if lesson.subgroup:
+        text += MessageManager.format_text(lesson_message.subgroup, subgroup=lesson.subgroup)
     text += "\n"
 
     if lesson.lecturer:
@@ -100,6 +102,11 @@ def _lesson_to_text(
 
     if lesson.room:
         text += MessageManager.format_text(lesson_message.room, room=lesson.room)
+
+    if lesson.note:
+        if lesson.room:
+            text += "\n"
+        text += MessageManager.format_text(lesson_message.note, note=lesson.note)
 
     text += lesson_message.end
 
