@@ -10,7 +10,7 @@ from redis.asyncio.client import Redis
 
 from app.config import env_config
 from app.database import close_db, init_db
-from app.schedule import ScheduleParser, ScheduleUpdater
+from app.schedule import DatedScheduleBuilder, ScheduleParser, ScheduleUpdater
 from app.services.ai_service import AiService
 from app.services.schedule_service import ScheduleService
 from bot.handlers import (
@@ -31,14 +31,21 @@ async def main() -> None:
     schedule_service = ScheduleService()
     ai_service = AiService()
     schedule_parser = ScheduleParser(spreadsheet_key=env_config.SPREADSHEET_ID)
-    schedule_updater = ScheduleUpdater(schedule_service=schedule_service, schedule_parser=schedule_parser, interval=600)
+    dated_schedule_builder = DatedScheduleBuilder(ai_service=ai_service)
+    schedule_updater = ScheduleUpdater(
+        schedule_service=schedule_service,
+        schedule_parser=schedule_parser,
+        dated_schedule_builder=dated_schedule_builder,
+        interval=600,
+    )
 
-    schedule_updater.update_schedule()
+    await schedule_updater.update_schedule()
     schedule_updater.start_update_loop()
 
     try:
         await start_bot(schedule_service, ai_service)
     finally:
+        await schedule_updater.stop()
         await close_db()
 
 

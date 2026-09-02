@@ -21,9 +21,11 @@ schedule:
     number: $status_emoji <b>$time</b> | $number пара
     name: 📚 $name
     type: " - $type"
+    subgroup: " [$subgroup]"
     lecturer: $emoji $name
     lecturer_rating: " | ⭐️$rating"
     room: "🚪 Аудитория: <b>$room</b>"
+    note: "📝 <i>$note</i>"
     end: " 
     
       ———————————————

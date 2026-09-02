@@ -3,15 +3,23 @@ import re
 import gspread
 from google.oauth2.service_account import Credentials
 
-from app.enums import Weekday
-from app.schemas import Lesson, Schedule
+from app.enums import Week, Weekday
+from app.schemas import (
+    Lesson,
+    ParseResult,
+    Schedule,
+    ScheduleGroup,
+    ScheduleNote,
+)
 
 MULTIPLE_NEWLINES_PATTERN = re.compile(r"\n{2,}")
-NUMBER_PATTERN = re.compile(r"\d+")
 SPACE_PATTERN = re.compile(r"\s+")
 SKIP_LESSON_PATTERN = re.compile(r"(?<!-)\b(?:[1-9]|[12]\d|3[01])\b(?!:\d{2})")
 LECTURE_TYPE_PATTERN = re.compile(r"\b(лекция|практика|лабораторная|факультатив|ZOOM)\b", flags=re.IGNORECASE)
 ROOM_PATTERN = re.compile(r"ауд(?:\.?\s*|\s+)(\d+)", flags=re.IGNORECASE)
+COURSE_HEADER_PATTERN = re.compile(r"^\s*\d+\s+курс\s*$", flags=re.IGNORECASE)
+BLANK_LINE_PATTERN = re.compile(r"\n\s*\n")
+SUBGROUP_PATTERN = re.compile(r"^Z\d{3,4}$", flags=re.IGNORECASE)
 
 
 WEEKDAY_REPLACE_MAP = {
@@ -54,6 +62,19 @@ LESSON_DATA_REPLACE_PATTERN = [
     (re.compile(r"Английский язык в профессиональной деятельности"), "Английский язык в проф. деятельности"),
     (re.compile(r"Дополнительные главы квантовой механики"), "Доп. главы квантмеха"),
     (re.compile(r"Машинное обучение в физических задачах"), "ML в физических задачах"),
+    (re.compile(r"\bМатан\b"), "Матанализ"),
+    (re.compile(r"\bДиффуры\b"), "Дифференциальные уравнения"),
+    (re.compile(r"\bДиффур\b"), "Дифференциальные уравнения"),
+    (re.compile(r"Дифф\.\s*ур\."), "Дифференциальные уравнения"),
+    (re.compile(r"Техническая электродимика"), "Техническая электродинамика"),
+    (re.compile(r"\bШендерович\b(?!\s+И\.Е\.)"), "Шендерович И.Е."),
+    (re.compile(r"\bСмирнов\b(?!\s+[А-Я]\.)"), "Смирнов А.В."),
+    (re.compile(r"\bБатракова\b(?!\s+П\.)"), "Батракова П."),
+    (re.compile(r"\bГилев П\.(?!А)"), "Гилев П.А."),
+    (re.compile(r"\bЯковлев З\.А\.\."), "Яковлев З.А."),
+    (re.compile(r"\bДенисов\b(?!\s+[А-Я]\.)"), "Денисов К.М."),
+    (re.compile(r"\bМысляева\b(?!\s+[А-Я]\.)"), "Мысляева Д."),
+    (re.compile(r"\bВасильев\b(?!\s+[А-Я]\.)"), "Васильев Д.В."),
 ]
 SKIP_WORDS = [
     "с ноября",
@@ -74,14 +95,16 @@ class ScheduleParser:
         self._worksheet: gspread.Worksheet | None = None
         self._values: list[list[str]] | None = None
 
-    def parse(self) -> Schedule:
+    def parse(self) -> ParseResult:
         self._parse_google_sheet()
         self._merge_cells()
         self._replace_values()
-        schedule = self._extract_data()
+        result = self._extract_data()
+        renames = self._split_subgroups(result.schedule)
+        self._rename_note_groups(result, renames)
         self._worksheet = None
         self._values = None
-        return schedule
+        return result
 
     def _parse_google_sheet(self) -> None:
         spreadsheet = self._gc.open_by_key(self._spreadsheet_key)
@@ -129,66 +152,186 @@ class ScheduleParser:
         fill_and_replace(self._values[1], WEEK_TYPE_REPLACE_MAP)
         fill_and_replace(self._values[2], GROUP_NAME_REPLACE_MAP)
 
-        self._values = [list(r) for r in zip(*self._values, strict=False)][:44]
+        transposed = [list(r) for r in zip(*self._values, strict=False)]
+        self._values = transposed[:3] + [
+            column for column in transposed[3:] if COURSE_HEADER_PATTERN.search(column[0])
+        ]
 
         fill_and_replace(self._values[0], WEEKDAY_REPLACE_MAP)
 
-    def _extract_data(self) -> Schedule:
-        schedule = Schedule()
-        for _i, row in enumerate(self._values[3:], 3):
+    def _extract_data(self) -> ParseResult:
+        result = ParseResult()
+        for row in self._values[3:]:
 
             year = row[0].strip()
             week_type = row[1].strip()
             group = row[2].strip()
 
             for j, value in enumerate(row[3:], 3):
-                if j % 2 == 0:
+                if j % 2 == 0 or not value.strip():
+                    continue
+                if j + 1 >= len(self._values[1]):
                     continue
 
-                data_value = value
                 second_value = row[j + 1] if j + 1 < len(row) else ""
-
-                if ((re.search(SKIP_LESSON_PATTERN, data_value)
-                        or any(skip_word in data_value.lower() for skip_word in SKIP_WORDS))
-                        and not any(not_skip_word in data_value for not_skip_word in NOT_SKIP_WORDS)):
-                    continue
-
-                for pattern, repl in LESSON_DATA_REPLACE_PATTERN:
-                    data_value = pattern.sub(repl, data_value)
-
-                data_value = data_value.replace(",", "").replace('"', "")
-                data_value = MULTIPLE_NEWLINES_PATTERN.sub("\n", data_value)
-
-                room = self._extract_room(second_value)
-                lecture_type, data_value = self._extract_lecture_type(data_value)
-                name, lecturer = self._extract_name_and_lecturer(data_value)
-
-                if (room is None) and (lecture_type is None) and (name is None) and (lecturer is None):
-                    continue
-
-                lesson_number = int(self._values[1][j+1])
+                lesson_parts, note_text = self._split_blocks(value)
+                room = self._extract_room(second_value, value)
+                lesson_number = int(self._values[1][j + 1])
                 weekday = Weekday(self._values[0][j])
 
-                schedule.add_lesson(
-                    course=year,
-                    group=group,
-                    week_type=week_type,
-                    weekday=weekday,
-                    lesson=Lesson(
-                        name=name,
-                        room=room,
-                        lecturer=lecturer,
-                        type=lecture_type,
-                        number=lesson_number,
-                    ),
-                )
+                for subgroup, raw_block in lesson_parts:
+                    block = raw_block
+                    for pattern, repl in LESSON_DATA_REPLACE_PATTERN:
+                        block = pattern.sub(repl, block)
+                    block = block.replace(",", "").replace('"', "")
+                    block = MULTIPLE_NEWLINES_PATTERN.sub("\n", block)
 
-        return schedule
+                    lecture_type, block = self._extract_lecture_type(block)
+                    name, lecturer = self._extract_name_and_lecturer(block)
+
+                    if (room is None) and (lecture_type is None) and (name is None) and (lecturer is None):
+                        continue
+
+                    result.schedule.add_lesson(
+                        course=year,
+                        group=group,
+                        week_type=week_type,
+                        weekday=weekday,
+                        lesson=Lesson(
+                            name=name,
+                            room=room,
+                            lecturer=lecturer,
+                            type=lecture_type,
+                            number=lesson_number,
+                            subgroup=subgroup,
+                        ),
+                    )
+
+                if note_text:
+                    result.notes.append(ScheduleNote(
+                        course=year,
+                        group=group,
+                        week=Week(week_type),
+                        weekday=weekday,
+                        number=lesson_number,
+                        text=note_text,
+                    ))
+
+        return result
 
     @staticmethod
-    def _extract_room(value: str) -> int | None:
-        room_match = re.search(NUMBER_PATTERN, value)
-        return int(room_match.group()) if room_match else None
+    def _split_subgroups(schedule: Schedule) -> dict[tuple[str, str], list[str]]:
+        """Turn a group holding subgroup-tagged lessons into one group per subgroup.
+
+        Third-year track columns (радио / навигация / телеком) are shared by two
+        subgroups, Z3300 and Z3301, which have different lessons in the same slot.
+        A student belongs to a track and to a subgroup at once, so the two are
+        merged into a single group named "<track> <subgroup>". Untagged lessons are
+        common to both and land in every resulting group.
+
+        Returns the (course, old group) -> new group names map, so that footnotes
+        collected under the old name can be moved onto the new ones.
+        """
+        renames: dict[tuple[str, str], list[str]] = {}
+        for course_name, course in schedule.courses.items():
+            for group_name, group in list(course.groups.items()):
+                subgroups = sorted({
+                    lesson.subgroup
+                    for week in (group.odd_week, group.even_week)
+                    for day in week.days.values()
+                    for lesson in day.lessons
+                    if lesson.subgroup
+                })
+                if not subgroups:
+                    continue
+
+                for subgroup in subgroups:
+                    new_group = ScheduleGroup()
+                    for source_week, target_week in (
+                        (group.odd_week, new_group.odd_week),
+                        (group.even_week, new_group.even_week),
+                    ):
+                        for weekday, day in source_week.days.items():
+                            lessons = [
+                                lesson for lesson in day.lessons
+                                if lesson.subgroup in (None, subgroup)
+                            ]
+                            if lessons:
+                                target_week.days[weekday].lessons.extend(lessons)
+                    course.groups[f"{group_name} {subgroup}"] = new_group
+
+                renames[(course_name, group_name)] = [f"{group_name} {sub}" for sub in subgroups]
+                del course.groups[group_name]
+
+        return renames
+
+    @staticmethod
+    def _rename_note_groups(result: ParseResult, renames: dict[tuple[str, str], list[str]]) -> None:
+        """Point footnotes at the groups produced by the subgroup split."""
+        if not renames:
+            return
+
+        moved = []
+        for note in result.notes:
+            new_names = renames.get((note.course, note.group))
+            if new_names is None:
+                moved.append(note)
+                continue
+            moved.extend(note.model_copy(update={"group": name}) for name in new_names)
+
+        result.notes = moved
+
+    @classmethod
+    def _split_blocks(cls, value: str) -> tuple[list[tuple[str | None, str]], str | None]:
+        """Split a cell into lesson blocks and a footnote.
+
+        Blocks are separated by a blank line. Blocks starting with a subgroup
+        marker (Z3300 / Z3301) are separate lessons for those subgroups. Without
+        such markers the first block is the lesson and everything after it is a
+        footnote about it: a cancellation, a date list or an extra remark.
+
+        A first block that is itself about dates means there is no recurring
+        lesson at all, so the whole cell becomes the footnote.
+        """
+        blocks = [block.strip() for block in BLANK_LINE_PATTERN.split(value)]
+        blocks = [block for block in blocks if block]
+        if not blocks:
+            return [], None
+
+        subgroup_blocks = []
+        for block in blocks:
+            marker, _, rest = block.partition("\n")
+            if SUBGROUP_PATTERN.match(marker.strip()):
+                subgroup_blocks.append((marker.strip().upper(), rest))
+
+        if subgroup_blocks:
+            return subgroup_blocks, None
+
+        if cls._is_note_only(blocks[0]):
+            return [], value.strip()
+
+        return [(None, blocks[0])], "\n".join(blocks[1:]).strip() or None
+
+    @staticmethod
+    def _is_note_only(block: str) -> bool:
+        """Whether a block carries dates instead of a lesson."""
+        has_date = re.search(SKIP_LESSON_PATTERN, block)
+        has_skip_word = any(skip_word in block.lower() for skip_word in SKIP_WORDS)
+        has_keep_word = any(keep_word in block for keep_word in NOT_SKIP_WORDS)
+        return bool(has_date or has_skip_word) and not has_keep_word
+
+    @staticmethod
+    def _extract_room(value: str, lesson_value: str) -> str | None:
+        """Take the room cell as a whole string.
+
+        Rooms are not always numeric, so pulling a number out of the cell is
+        meaningless. A cell equal to the lesson cell is a merged cell spanning
+        both columns, not a room.
+        """
+        room = SPACE_PATTERN.sub(" ", value).strip()
+        if not room or room == SPACE_PATTERN.sub(" ", lesson_value).strip():
+            return None
+        return room
 
     @staticmethod
     def _extract_lecture_type(value: str) -> tuple[str | None, str]:
