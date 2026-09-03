@@ -11,6 +11,7 @@ from bot.config import messages
 from bot.filters import RoleFilter
 from bot.keyboards import get_pagination_rating_list_kb, get_rating_list_kb
 from bot.services import MessageManager
+from bot.utils import get_user_group
 
 router = Router(name="rating_list_router")
 router.message.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole.ADMIN)))
@@ -45,7 +46,7 @@ async def show_rating_list(
     rating_type = callback_data.type
     page = callback_data.page
 
-    faculty_id = user.group.faculty_id
+    faculty_id = get_user_group(user).faculty_id
     rating = await rating_service.get_top_lecturers_with_rank(
         page,
         faculty_id=faculty_id,

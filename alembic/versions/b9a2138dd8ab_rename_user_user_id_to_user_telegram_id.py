@@ -9,7 +9,6 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.engine import reflection
 
 # revision identifiers, used by Alembic.
 revision: str = 'b9a2138dd8ab'
@@ -91,13 +90,13 @@ def downgrade() -> None:
     op.alter_column('users', 'user_id', nullable=False)
     op.create_index('ix_users_user_id', 'users', ['user_id'], unique=True)
 
-    insp = reflection.Inspector.from_engine(conn)
+    insp = sa.inspect(conn)
     for fk in insp.get_foreign_keys('logs'):
-        if fk['referred_columns'] == ['id']:
+        if fk['name'] and fk['referred_columns'] == ['id']:
             op.drop_constraint(fk['name'], 'logs', type_='foreignkey')
 
     for fk in insp.get_foreign_keys('ratings'):
-        if fk['referred_columns'] == ['id']:
+        if fk['name'] and fk['referred_columns'] == ['id']:
             op.drop_constraint(fk['name'], 'ratings', type_='foreignkey')
 
     conn.execute(sa.text('UPDATE logs SET user_id = temp_user_id'))

@@ -106,17 +106,18 @@ class ScheduleService:
         lessons = [lesson for lesson in lessons if lesson.number not in cancelled]
 
         for entry in entries:
-            if entry.action != DatedAction.OVERRIDE:
+            if entry.action != DatedAction.OVERRIDE or entry.patch is None:
                 continue
+            patch = entry.patch
             lessons = [
-                entry.patch.apply_to(lesson) if lesson.number == entry.number else lesson
+                patch.apply_to(lesson) if lesson.number == entry.number else lesson
                 for lesson in lessons
             ]
 
         lessons += [
             entry.lesson.model_copy(deep=True)
             for entry in entries
-            if entry.action == DatedAction.ADD
+            if entry.action == DatedAction.ADD and entry.lesson is not None
         ]
         return lessons
 

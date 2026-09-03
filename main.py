@@ -20,9 +20,9 @@ from bot.handlers import (
     rating_list_router,
     rating_router,
     registration_router,
+    schedule_jobs,
     schedule_router,
     settings_router,
-    schedule_jobs
 )
 from bot.middlewares import MessageManagerMiddleware, ServicesMiddleware, UserMiddleware
 from bot.utils import patch_bot_limited_send

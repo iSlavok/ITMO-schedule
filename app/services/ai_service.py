@@ -66,7 +66,7 @@ class AiService:
             response_mime_type="application/json",
             response_schema=AiDateResponse,
             automatic_function_calling=AutomaticFunctionCallingConfig(disable=True),
-            thinking_config=ThinkingConfig(thinking_level=ThinkingLevel.MINIMAL)
+            thinking_config=ThinkingConfig(thinking_level=ThinkingLevel.MINIMAL),
         )
 
         response = await self._client.models.generate_content(
@@ -74,7 +74,10 @@ class AiService:
             contents=message,
             config=generate_content_config,
         )
-        date_response: AiDateResponse = response.parsed
+        date_response = response.parsed
+        if not isinstance(date_response, AiDateResponse):
+            msg = f"Expected a date answer, got {type(date_response).__name__}"
+            raise TypeError(msg)
         return date_response.date
 
     async def note_parsing(self, note: str) -> AiNoteResponse | None:
@@ -92,7 +95,7 @@ class AiService:
             response_mime_type="application/json",
             response_schema=AiNoteResponse,
             automatic_function_calling=AutomaticFunctionCallingConfig(disable=True),
-            thinking_config=ThinkingConfig(thinking_level=ThinkingLevel.MEDIUM)
+            thinking_config=ThinkingConfig(thinking_level=ThinkingLevel.MEDIUM),
         )
 
         for attempt in range(1, NOTE_PARSING_ATTEMPTS + 1):
@@ -107,8 +110,8 @@ class AiService:
                     f"Failed to parse note {note!r}, attempt {attempt}: {type(e).__name__}: {e}",
                 )
             else:
-                note_response: AiNoteResponse | None = response.parsed
-                if note_response is not None:
+                note_response = response.parsed
+                if isinstance(note_response, AiNoteResponse):
                     return note_response
                 logger.warning(f"No structured answer for note {note!r}, attempt {attempt}")
 

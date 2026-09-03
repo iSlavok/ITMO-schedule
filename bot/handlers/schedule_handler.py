@@ -7,7 +7,7 @@ from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
 from app.enums import UserRole
-from app.models import Group, User
+from app.models import User
 from app.services.ai_service import AiService
 from app.services.rating_service import RatingService
 from app.services.schedule_service import ScheduleService
@@ -15,7 +15,7 @@ from bot.config import messages
 from bot.filters import RoleFilter
 from bot.keyboards import get_main_kb
 from bot.services import MessageManager
-from bot.utils import get_schedule_text
+from bot.utils import get_schedule_text, get_user_group
 
 router = Router(name="schedule_router")
 
@@ -42,7 +42,7 @@ async def today_schedule(
 ) -> None:
     logger.info(f"User {user.id} requested today's schedule")
 
-    group: Group = user.group
+    group = get_user_group(user)
     schedule_text = await get_schedule_text(
         group_name=group.name,
         faculty=group.faculty.code,
@@ -72,7 +72,7 @@ async def tomorrow_schedule(
 ) -> None:
     logger.info(f"User {user.id} requested tomorrow's schedule")
 
-    group: Group = user.group
+    group = get_user_group(user)
     schedule_text = await get_schedule_text(
         group_name=group.name,
         faculty=group.faculty.code,
@@ -91,6 +91,7 @@ async def tomorrow_schedule(
 )
 async def schedule_by_date(
         _: Message,
+        *,
         user: User,
         schedule_service: ScheduleService,
         rating_service: RatingService,
@@ -101,7 +102,7 @@ async def schedule_by_date(
 
     day = await ai_service.date_parsing(date_text)
 
-    group: Group = user.group
+    group = get_user_group(user)
     schedule_text = await get_schedule_text(
         group_name=group.name,
         faculty=group.faculty.code,

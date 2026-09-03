@@ -14,6 +14,6 @@ __all__ = [
     "get_rating_kb",
     "get_rating_list_kb",
     "get_to_main_kb",
-    "get_users_list_kb",
     "get_user_setting_kb",
+    "get_users_list_kb",
 ]

@@ -24,4 +24,4 @@ class EnvConfig(BaseSettings):
     AI_MODEL: str = "gemini-3.5-flash-lite"
 
 
-env_config = EnvConfig()
+env_config = EnvConfig()  # pyright: ignore[reportCallIssue]

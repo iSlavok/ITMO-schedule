@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class Weekday(str, Enum):
+class Weekday(StrEnum):
     MONDAY = "monday"
     TUESDAY = "tuesday"
     WEDNESDAY = "wednesday"
@@ -11,13 +11,13 @@ class Weekday(str, Enum):
     SUNDAY = "sunday"
 
 
-class Week(str, Enum):
+class Week(StrEnum):
     ODD = "odd_week"
     EVEN = "even_week"
     ALL = "all_weeks"
 
 
-class DatedAction(str, Enum):
+class DatedAction(StrEnum):
     """What a dated entry does to the recurring schedule of its slot."""
 
     ADD = "add"

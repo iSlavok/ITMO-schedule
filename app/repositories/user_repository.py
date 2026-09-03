@@ -4,6 +4,7 @@ from sqlalchemy import Row, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
+from app.enums import FacultyCode
 from app.models import Faculty, Group, User
 from app.repositories import BaseRepository
 
@@ -51,7 +52,7 @@ class UserRepository(BaseRepository[User]):
         result = await self.session.execute(statement)
         return result.scalar_one()
 
-    async def get_users_with_rating_notifications_with_groups(self) -> Sequence[Row[tuple[str, str, User]]]:
+    async def get_users_with_rating_notifications_with_groups(self) -> Sequence[Row[tuple[str, FacultyCode, User]]]:
         statement = (
             select(Group.name, Faculty.code, User)
             .join(User.group)

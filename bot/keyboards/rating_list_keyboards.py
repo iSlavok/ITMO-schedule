@@ -20,7 +20,8 @@ def get_rating_list_kb() -> InlineKeyboardMarkup:
     builder.button(text=messages.buttons.best_lecturers, callback_data=RatingListCD(type=RatingType.BEST, page=1))
     builder.button(text=messages.buttons.worst_lecturers, callback_data=RatingListCD(type=RatingType.WORST, page=1))
     builder.button(text=messages.buttons.back, callback_data="main")
-    return builder.adjust(2).as_markup()
+    builder.adjust(2)
+    return builder.as_markup()
 
 
 def get_pagination_rating_list_kb(page: int, total_pages: int, rating_type: RatingType) -> InlineKeyboardMarkup:
@@ -36,4 +37,5 @@ def get_pagination_rating_list_kb(page: int, total_pages: int, rating_type: Rati
             callback_data=RatingListCD(type=rating_type, page=page + 1),
         )
     builder.button(text=messages.buttons.back, callback_data="rating_list")
-    return builder.adjust(2).as_markup()
+    builder.adjust(2)
+    return builder.as_markup()

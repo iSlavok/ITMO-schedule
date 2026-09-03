@@ -94,8 +94,8 @@ def upgrade() -> None:
                 ).bindparams(group=group_name, course=course_name),
             )
 
-    op.alter_column("groups", "is_active", server_default=None)
-    op.alter_column("lecturers", "is_hidden", server_default=None)
+    op.execute("ALTER TABLE groups ALTER COLUMN is_active DROP DEFAULT")
+    op.execute("ALTER TABLE lecturers ALTER COLUMN is_hidden DROP DEFAULT")
 
 
 def downgrade() -> None:

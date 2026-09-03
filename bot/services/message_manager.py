@@ -2,7 +2,7 @@ import asyncio
 import contextlib
 from collections import defaultdict
 from string import Template
-from typing import Self
+from typing import Any, Self
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest
@@ -36,16 +36,22 @@ class MessageManager:
 
     @classmethod
     async def from_callback(cls, bot: Bot, callback: CallbackQuery, state: FSMContext) -> Self:
+        message = callback.message
+        if not isinstance(message, Message):
+            # a callback older than 48 hours comes without its message
+            msg = "Callback query without an accessible message"
+            raise TypeError(msg)
+
         manager = cls(
             bot=bot,
-            chat_id=callback.message.chat.id,
+            chat_id=message.chat.id,
             state=state,
-            message=callback.message,
+            message=message,
         )
-        await manager._add_bot_message(callback.message.message_id)
+        await manager._add_bot_message(message.message_id)
         return manager
 
-    async def send_message(self, text: str, *, clear_previous: bool = True, **kwargs: object) -> Message:
+    async def send_message(self, text: str, *, clear_previous: bool = True, **kwargs: Any) -> Message:  # noqa: ANN401
         async with self._lock:
             message = await self.bot.send_message(chat_id=self.chat_id, text=text, **kwargs)
             if clear_previous:
@@ -53,7 +59,7 @@ class MessageManager:
             await self._add_bot_message(message.message_id)
             return message
 
-    async def edit_message(self, text: str, **kwargs: object) -> Message | bool:
+    async def edit_message(self, text: str, **kwargs: Any) -> Message | bool:  # noqa: ANN401
         async with self._lock:
             bot_messages = await self._get_bot_messages()
             if not bot_messages:

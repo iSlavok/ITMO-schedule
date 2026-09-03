@@ -169,7 +169,7 @@ class PublishedSheetParser(HTMLParser):
         if self._cell is None:
             return
         self._cell.text = self._normalize("".join(self._chunks))
-        self._cell.origin = (self._row, self._column_of(self._cell_positions[0])) if self._row is not None else None
+        self._cell.origin = self._coordinates(self._cell_positions[0])
         self._place(self._cell, self._cell_positions[:1])
         self._place(self._cell.copy_as_merged(), self._cell_positions[1:])
         self._cell = None
@@ -198,6 +198,12 @@ class PublishedSheetParser(HTMLParser):
             if column is None:
                 continue
             self.sheet.cells[(self._row, column)] = cell
+
+    def _coordinates(self, position: int) -> tuple[int, int] | None:
+        column = self._column_of(position)
+        if self._row is None or column is None:
+            return None
+        return (self._row, column)
 
     def _column_of(self, position: int) -> int | None:
         return self._positions[position] if position < len(self._positions) else None

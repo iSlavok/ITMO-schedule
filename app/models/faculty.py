@@ -11,8 +11,6 @@ if TYPE_CHECKING:
 
 
 class Faculty(Base):
-    __tablename__ = "faculties"
-
     code: Mapped[FacultyCode] = mapped_column(
         Enum(FacultyCode, name="faculty_code_enum", create_constraint=True, native_enum=False),
         unique=True,

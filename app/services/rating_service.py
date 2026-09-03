@@ -56,14 +56,14 @@ class RatingService:
     async def create_rating(self, rating: int, lecturer_id: int, user_id: int) -> Rating:
         if not await self.can_user_rate_lecturer(user_id, lecturer_id):
             raise UserCannotRateLecturerError
-        rating = Rating(
+        new_rating = Rating(
             rating=rating,
             lecturer_id=lecturer_id,
             user_id=user_id,
         )
-        self._session.add(rating)
+        self._session.add(new_rating)
         await self._session.commit()
-        return rating
+        return new_rating
 
     async def can_user_rate_lecturer(self, user_id: int, lecturer_id: int) -> bool:
         return await self._rating_repository.can_user_rate_lecturer(user_id, lecturer_id)

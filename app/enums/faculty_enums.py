@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class FacultyCode(str, Enum):
+class FacultyCode(StrEnum):
     """Stable key of a faculty: names its schedule file, parser and group prefix."""
 
     PHYSICS = "physics"

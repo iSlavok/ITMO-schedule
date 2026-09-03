@@ -57,6 +57,7 @@ class UserService:
     async def change_settings(
         self,
         user: User,
+        *,
         rating_notifications: bool | None = None,
     ) -> User:
         has_changes = False

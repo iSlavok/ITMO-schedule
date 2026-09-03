@@ -21,7 +21,7 @@ class RatingRepository(BaseRepository[Rating]):
             .where(
                 Rating.user_id == user_id,
                 Rating.lecturer_id == lecturer_id,
-                datetime.now(tz=MSK_ZONE).date() == func.date(Rating.created_at),
+                func.date(Rating.created_at) == datetime.now(tz=MSK_ZONE).date(),
             )
         )
         result = await self.session.execute(query)
@@ -39,7 +39,7 @@ class RatingRepository(BaseRepository[Rating]):
             select(Rating.lecturer_id)
             .where(
                 Rating.user_id == user_id,
-                today == func.date(Rating.created_at),
+                func.date(Rating.created_at) == today,
             )
             .scalar_subquery()
         )
@@ -61,7 +61,7 @@ class RatingRepository(BaseRepository[Rating]):
         statement = (
             select(Rating)
             .where(
-                today == func.date(Rating.created_at),
+                func.date(Rating.created_at) == today,
             )
         )
         result = await self.session.execute(statement)

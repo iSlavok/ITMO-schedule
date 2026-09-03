@@ -28,7 +28,7 @@ class CourseRepository(BaseRepository[Course]):
 
     async def get_ids_by_name(self) -> dict[str, int]:
         result = await self.session.execute(select(Course.name, Course.id))
-        return dict(result.all())
+        return {row.name: row.id for row in result.all()}
 
     def add_many(self, names: Iterable[str]) -> list[Course]:
         courses = [Course(name=name) for name in names]

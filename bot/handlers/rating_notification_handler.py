@@ -112,5 +112,5 @@ async def _send_user_notification(bot: Bot, user_id: int, lesson: Lesson, lectur
     await bot.send_message(
         chat_id=user_id,
         text=text,
-        reply_markup=get_add_rating_kb(lecturer_id, "main")
+        reply_markup=get_add_rating_kb(lecturer_id, "main"),
     )

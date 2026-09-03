@@ -44,4 +44,5 @@ def get_group_keyboard(groups: Iterable[Group], course: CourseCD) -> InlineKeybo
                 faculty_code=course.faculty_code,
             ),
         )
-    return builder.adjust(3).as_markup()
+    builder.adjust(3)
+    return builder.as_markup()

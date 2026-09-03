@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class AiNoteAction(str, Enum):
+class AiNoteAction(StrEnum):
     """How a footnote changes the recurring schedule of its lesson."""
 
     CANCEL = "cancel"

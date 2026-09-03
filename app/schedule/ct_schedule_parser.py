@@ -17,10 +17,11 @@ Layout (one sheet, one semester):
 """
 
 import re
+from typing import Literal
 
 from app.enums import Weekday
 from app.schedule.published_sheet import Sheet, fetch_published_sheet
-from app.schemas import Lesson, ParseResult
+from app.schemas import Lesson, LessonType, ParseResult
 
 WEEKDAY_COLUMN = 0
 LESSON_NUMBER_COLUMN = 2
@@ -37,11 +38,11 @@ WEEKDAY_REPLACE_MAP = {
     "сб": "saturday",
     "вс": "sunday",
 }
-WEEK_TYPE_REPLACE_MAP = {
+WEEK_TYPE_REPLACE_MAP: dict[str, Literal["odd_week", "even_week"]] = {
     "н": "odd_week",
     "ч": "even_week",
 }
-LESSON_TYPE_REPLACE_MAP = {
+LESSON_TYPE_REPLACE_MAP: dict[str, LessonType] = {
     "лек": "лекция",
     "пр": "практика",
     "лаб": "лабораторная",
@@ -62,21 +63,22 @@ class CtScheduleParser:
     def __init__(self, sheet_key: str, sheet_gid: str) -> None:
         self._sheet_key = sheet_key
         self._sheet_gid = sheet_gid
-        self._sheet: Sheet | None = None
 
     def parse(self) -> ParseResult:
-        self._sheet = fetch_published_sheet(self._sheet_key, self._sheet_gid)
-        result = self._extract_data(self._extract_groups())
-        self._sheet = None
-        return result
+        sheet = fetch_published_sheet(self._sheet_key, self._sheet_gid)
+        return self.extract(sheet)
 
-    def _extract_groups(self) -> list[tuple[int, str]]:
+    def extract(self, sheet: Sheet) -> ParseResult:
+        return self._extract_data(sheet, self._extract_groups(sheet))
+
+    @staticmethod
+    def _extract_groups(sheet: Sheet) -> list[tuple[int, str]]:
         """Return (first column, group name) for every group block of the header row."""
         groups = []
-        for row, column in sorted(self._sheet.cells):
+        for row, column in sorted(sheet.cells):
             if row != GROUP_HEADER_ROW:
                 continue
-            cell = self._sheet.cells[(row, column)]
+            cell = sheet.cells[(row, column)]
             if cell.origin != (row, column):
                 continue  # a later column of a block already taken through its origin
             name = cell.text.upper()
@@ -85,18 +87,18 @@ class CtScheduleParser:
             groups.append((column, name))
         return groups
 
-    def _extract_data(self, groups: list[tuple[int, str]]) -> ParseResult:
+    def _extract_data(self, sheet: Sheet, groups: list[tuple[int, str]]) -> ParseResult:
         result = ParseResult()
 
-        for row in self._sheet.visible_rows:
-            weekday = WEEKDAY_REPLACE_MAP.get(self._sheet.text(row, WEEKDAY_COLUMN).lower())
-            week_type = WEEK_TYPE_REPLACE_MAP.get(self._sheet.text(row, WEEK_TYPE_COLUMN).lower())
-            number = self._sheet.text(row, LESSON_NUMBER_COLUMN)
+        for row in sheet.visible_rows:
+            weekday = WEEKDAY_REPLACE_MAP.get(sheet.text(row, WEEKDAY_COLUMN).lower())
+            week_type = WEEK_TYPE_REPLACE_MAP.get(sheet.text(row, WEEK_TYPE_COLUMN).lower())
+            number = sheet.text(row, LESSON_NUMBER_COLUMN)
             if weekday is None or week_type is None or not number.isdigit():
                 continue
 
             for column, group in groups:
-                lesson = self._extract_lesson(row, column, int(number))
+                lesson = self._extract_lesson(sheet, row, column, int(number))
                 if lesson is None:
                     continue
                 result.schedule.add_lesson(
@@ -109,11 +111,11 @@ class CtScheduleParser:
 
         return result
 
-    def _extract_lesson(self, row: int, column: int, number: int) -> Lesson | None:
-        block = [self._sheet.cell(row, column + offset) for offset in range(GROUP_BLOCK_WIDTH)]
+    def _extract_lesson(self, sheet: Sheet, row: int, column: int, number: int) -> Lesson | None:
+        block = [sheet.cell(row, column + offset) for offset in range(GROUP_BLOCK_WIDTH)]
         origins = {cell.origin for cell in block if cell is not None}
 
-        if len(origins) == 1:
+        if len(origins) == 1 and block[0] is not None:
             # one cell merged over the whole block is a bare label: no room, no lecturer
             name = self._clean(block[0].text)
             return Lesson(name=name, number=number) if name else None

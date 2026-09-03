@@ -19,7 +19,8 @@ def get_rating_kb(lecturers: Iterable[Lecturer]) -> InlineKeyboardMarkup:
     for lecturer in lecturers:
         builder.button(text=lecturer.name, callback_data=SelectLecturerCD(lecturer_id=lecturer.id))
     builder.button(text=messages.buttons.back, callback_data="main")
-    return builder.adjust(1).as_markup()
+    builder.adjust(1)
+    return builder.as_markup()
 
 
 def get_add_rating_kb(lecturer_id: int, back_callback_data: str) -> InlineKeyboardMarkup:
@@ -27,4 +28,5 @@ def get_add_rating_kb(lecturer_id: int, back_callback_data: str) -> InlineKeyboa
     for i in range(1, 11):
         builder.button(text=f"⭐{i}", callback_data=AddRatingCD(lecturer_id=lecturer_id, rating=i))
     builder.button(text=messages.buttons.back, callback_data=back_callback_data)
-    return builder.adjust(5, 5, 1).as_markup()
+    builder.adjust(5, 5, 1)
+    return builder.as_markup()

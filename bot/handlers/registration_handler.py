@@ -97,6 +97,7 @@ async def course_select(
 )
 async def group_select(
         callback: CallbackQuery,
+        *,
         callback_data: GroupCD,
         state: FSMContext,
         user: User,

@@ -5,6 +5,8 @@ from pydantic import BaseModel
 
 
 class RegistrationMessages(BaseModel):
+    faculty_request: str
+    faculty_selected: str
     course_request: str
     course_selected: str
     group_request: str
@@ -24,9 +26,11 @@ class LessonScheduleMessage(BaseModel):
     number: str
     name: str
     type: str
+    subgroup: str
     lecturer: str
     lecturer_rating: str
     room: str
+    note: str
     end: str
 
 

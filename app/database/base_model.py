@@ -27,6 +27,8 @@ class Base(DeclarativeBase):
     @declared_attr.directive
     def __tablename__(self) -> str:
         name = re.sub(r"(?<!^)(?=[A-Z])", "_", self.__name__).lower()
+        if name.endswith("y"):
+            return f"{name[:-1]}ies"
         if not name.endswith("s"):
             name += "s"
         return name
