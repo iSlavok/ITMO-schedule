@@ -21,7 +21,7 @@ class MessageManagerMiddleware(BaseMiddleware):
             event: TelegramObject,
             data: dict[str, Any],
     ) -> dict[str, Any]:
-        state: FSMContext = data.get("state")
+        state: FSMContext | None = data.get("state")
         if not state:
             return await handler(event, data)
         if isinstance(event, types.Message):

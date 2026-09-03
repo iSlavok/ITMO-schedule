@@ -4,7 +4,7 @@ from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
 from app.enums import UserRole
-from app.models import Group, User
+from app.models import User
 from app.services.exceptions import UserCannotRateLecturerError
 from app.services.rating_service import RatingService
 from app.services.schedule_service import ScheduleService
@@ -13,6 +13,7 @@ from bot.config import messages
 from bot.filters import RoleFilter
 from bot.keyboards import get_add_rating_kb, get_rating_kb, get_to_main_kb
 from bot.services import MessageManager
+from bot.utils import get_user_group
 
 router = Router(name="rating_router")
 router.message.filter(or_f(RoleFilter(UserRole.USER), RoleFilter(UserRole.ADMIN)))
@@ -36,9 +37,16 @@ async def get_rating_list_menu(
 ) -> None:
     logger.info(f"User {user.id} requested lecturer rating menu")
 
-    user_group: Group = user.group
-    today_lecturer_names = schedule_service.get_today_past_lecturers(user_group.name)
-    lecturers = await rating_service.get_available_lecturers_for_rating(today_lecturer_names, user.id)
+    user_group = get_user_group(user)
+    today_lecturer_names = schedule_service.get_today_past_lecturers(
+        user_group.name,
+        faculty=user_group.faculty.code,
+    )
+    lecturers = await rating_service.get_available_lecturers_for_rating(
+        today_lecturer_names,
+        user.id,
+        user_group.faculty_id,
+    )
     keyboard = get_rating_kb(lecturers)
 
     text = messages.rating.lecturer_request if lecturers else messages.rating.no_available_lecturers
@@ -56,6 +64,7 @@ async def get_rating_list_menu(
 )
 async def select_lecturer_for_rating(
         callback: CallbackQuery,
+        *,
         user: User,
         callback_data: SelectLecturerCD,
         rating_service: RatingService,
@@ -64,7 +73,7 @@ async def select_lecturer_for_rating(
 ) -> None:
     logger.info(f"User {user.id} selected lecturer {callback_data.lecturer_id} for rating")
 
-    user_group: Group = user.group
+    user_group = get_user_group(user)
     lecturer_id = callback_data.lecturer_id
 
     lecturer = await rating_service.get_lecturer_by_id(lecturer_id)
@@ -72,7 +81,10 @@ async def select_lecturer_for_rating(
         await callback.answer(messages.rating.alerts.lecturer_not_found, show_alert=True)
         return
 
-    today_lecturer_names = schedule_service.get_today_past_lecturers(user_group.name)
+    today_lecturer_names = schedule_service.get_today_past_lecturers(
+        user_group.name,
+        faculty=user_group.faculty.code,
+    )
     if lecturer.name not in today_lecturer_names:
         await callback.answer(
             text=MessageManager.format_text(
@@ -110,6 +122,7 @@ async def select_lecturer_for_rating(
 )
 async def add_rating(
         callback: CallbackQuery,
+        *,
         user: User,
         callback_data: AddRatingCD,
         rating_service: RatingService,
@@ -118,7 +131,7 @@ async def add_rating(
 ) -> None:
     logger.info(f"User {user.id} is adding rating {callback_data.rating} for lecturer {callback_data.lecturer_id}")
 
-    user_group: Group = user.group
+    user_group = get_user_group(user)
     lecturer_id = callback_data.lecturer_id
     rating_value = callback_data.rating
 
@@ -127,7 +140,10 @@ async def add_rating(
         await callback.answer(messages.rating.alerts.lecturer_not_found, show_alert=True)
         return
 
-    today_lecturer_names = schedule_service.get_today_past_lecturers(user_group.name)
+    today_lecturer_names = schedule_service.get_today_past_lecturers(
+        user_group.name,
+        faculty=user_group.faculty.code,
+    )
     if lecturer.name not in today_lecturer_names:
         await callback.answer(
             text=MessageManager.format_text(

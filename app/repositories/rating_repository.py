@@ -21,20 +21,25 @@ class RatingRepository(BaseRepository[Rating]):
             .where(
                 Rating.user_id == user_id,
                 Rating.lecturer_id == lecturer_id,
-                datetime.now(tz=MSK_ZONE).date() == func.date(Rating.created_at),
+                func.date(Rating.created_at) == datetime.now(tz=MSK_ZONE).date(),
             )
         )
         result = await self.session.execute(query)
         return result.first() is None
 
-    async def get_rateable_lecturers(self, lecturer_names: list[str], user_id: int) -> Sequence[Lecturer]:
+    async def get_rateable_lecturers(
+        self,
+        lecturer_names: list[str],
+        user_id: int,
+        faculty_id: int,
+    ) -> Sequence[Lecturer]:
         today = datetime.now(tz=MSK_ZONE).date()
 
         subquery = (
             select(Rating.lecturer_id)
             .where(
                 Rating.user_id == user_id,
-                today == func.date(Rating.created_at),
+                func.date(Rating.created_at) == today,
             )
             .scalar_subquery()
         )
@@ -43,6 +48,8 @@ class RatingRepository(BaseRepository[Rating]):
             select(Lecturer)
             .where(
                 Lecturer.name.in_(lecturer_names),
+                Lecturer.faculty_id == faculty_id,
+                Lecturer.is_hidden.is_(False),
                 ~Lecturer.id.in_(subquery),
             )
         )
@@ -54,7 +61,7 @@ class RatingRepository(BaseRepository[Rating]):
         statement = (
             select(Rating)
             .where(
-                today == func.date(Rating.created_at),
+                func.date(Rating.created_at) == today,
             )
         )
         result = await self.session.execute(statement)

@@ -11,10 +11,10 @@ from app.models import User
 from app.services.guest_service import GuestService
 from app.services.rating_service import RatingService
 from app.services.schedule_service import ScheduleService
-from bot.callback_data import CourseCD, GroupCD
+from bot.callback_data import CourseCD, FacultyCD, GroupCD
 from bot.config import messages
 from bot.filters import RoleFilter
-from bot.keyboards import get_course_keyboard, get_group_keyboard, get_main_kb
+from bot.keyboards import get_course_keyboard, get_faculty_keyboard, get_group_keyboard, get_main_kb
 from bot.services import MessageManager
 from bot.utils import get_schedule_text
 
@@ -34,9 +34,35 @@ async def start_registration(
 ) -> None:
     logger.info(f"User {user.id} started registration")
 
-    courses = await guest_service.get_all_courses()
-    keyboard = get_course_keyboard(courses)
-    await message_manager.send_message(messages.registration.course_request, reply_markup=keyboard)
+    faculties = await guest_service.get_all_faculties()
+    keyboard = get_faculty_keyboard(faculties)
+    await message_manager.send_message(messages.registration.faculty_request, reply_markup=keyboard)
+
+
+@router.callback_query(
+    FacultyCD.filter(),
+    flags={"services": ["guest"]},
+)
+async def faculty_select(
+        callback: CallbackQuery,
+        callback_data: FacultyCD,
+        user: User,
+        guest_service: GuestService,
+        message_manager: MessageManager,
+) -> None:
+    logger.info(f"User {user.id} selected faculty {callback_data.id}")
+
+    text = MessageManager.format_text(messages.registration.faculty_selected, faculty_name=callback_data.name)
+    await message_manager.send_message(text)
+
+    courses = await guest_service.get_faculty_courses(callback_data.id)
+    keyboard = get_course_keyboard(courses, faculty=callback_data)
+    await message_manager.send_message(
+        text=messages.registration.course_request,
+        clear_previous=False,
+        reply_markup=keyboard,
+    )
+    await callback.answer()
 
 
 @router.callback_query(
@@ -55,8 +81,8 @@ async def course_select(
     text = MessageManager.format_text(messages.registration.course_selected, course_name=callback_data.name)
     await message_manager.send_message(text)
 
-    groups = await guest_service.get_course_groups(callback_data.id)
-    keyboard = get_group_keyboard(groups)
+    groups = await guest_service.get_course_groups(callback_data.id, faculty_id=callback_data.faculty_id)
+    keyboard = get_group_keyboard(groups, course=callback_data)
     await message_manager.send_message(
         text=messages.registration.group_request,
         clear_previous=False,
@@ -71,6 +97,7 @@ async def course_select(
 )
 async def group_select(
         callback: CallbackQuery,
+        *,
         callback_data: GroupCD,
         state: FSMContext,
         user: User,
@@ -91,6 +118,8 @@ async def group_select(
 
     schedule_text = await get_schedule_text(
         group_name=callback_data.name,
+        faculty=callback_data.faculty_code,
+        faculty_id=callback_data.faculty_id,
         schedule_service=schedule_service,
         rating_service=rating_service,
         day=datetime.now(tz=MSK_TZ).date(),

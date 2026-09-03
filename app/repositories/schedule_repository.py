@@ -5,10 +5,14 @@ from typing import TypeVar
 from loguru import logger
 from pydantic import BaseModel, ValidationError
 
+from app.enums import FacultyCode
 from app.schemas import AiNoteResponse, DatedSchedule, Schedule
 
 DATA_DIR = Path("data")
-SCHEDULE_PATH = DATA_DIR / "schedule.json"
+SCHEDULE_PATHS = {
+    FacultyCode.PHYSICS: DATA_DIR / "schedule.json",
+    FacultyCode.CT: DATA_DIR / "schedule_ct.json",
+}
 DATED_SCHEDULE_PATH = DATA_DIR / "dated_schedule.json"
 DATED_OVERRIDES_PATH = DATA_DIR / "dated_overrides.json"
 NOTE_CACHE_PATH = DATA_DIR / "ai_notes_cache.json"
@@ -17,13 +21,11 @@ ModelT = TypeVar("ModelT", bound=BaseModel)
 
 
 class ScheduleRepository:
-    @property
-    def schedule(self) -> Schedule:
-        return self._read(SCHEDULE_PATH, Schedule)
+    def get_schedule(self, faculty: FacultyCode) -> Schedule:
+        return self._read(SCHEDULE_PATHS[faculty], Schedule)
 
-    @schedule.setter
-    def schedule(self, schedule: Schedule) -> None:
-        self._write(SCHEDULE_PATH, schedule)
+    def set_schedule(self, faculty: FacultyCode, schedule: Schedule) -> None:
+        self._write(SCHEDULE_PATHS[faculty], schedule)
 
     @property
     def dated_schedule(self) -> DatedSchedule:

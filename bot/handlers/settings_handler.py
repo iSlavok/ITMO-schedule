@@ -1,5 +1,5 @@
 from aiogram import F, Router
-from aiogram.filters import or_f, Command
+from aiogram.filters import Command, or_f
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 

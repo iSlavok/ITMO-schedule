@@ -1,4 +1,5 @@
 import re
+from typing import cast
 
 import gspread
 from google.oauth2.service_account import Credentials
@@ -6,6 +7,7 @@ from google.oauth2.service_account import Credentials
 from app.enums import Week, Weekday
 from app.schemas import (
     Lesson,
+    LessonType,
     ParseResult,
     Schedule,
     ScheduleGroup,
@@ -20,6 +22,7 @@ ROOM_PATTERN = re.compile(r"ауд(?:\.?\s*|\s+)(\d+)", flags=re.IGNORECASE)
 COURSE_HEADER_PATTERN = re.compile(r"^\s*\d+\s+курс\s*$", flags=re.IGNORECASE)
 BLANK_LINE_PATTERN = re.compile(r"\n\s*\n")
 SUBGROUP_PATTERN = re.compile(r"^Z\d{3,4}$", flags=re.IGNORECASE)
+GROUP_PREFIX = "Z"
 
 
 WEEKDAY_REPLACE_MAP = {
@@ -92,28 +95,25 @@ class ScheduleParser:
                  "https://www.googleapis.com/auth/drive"]
         credentials = Credentials.from_service_account_file("google-credentials.json", scopes=scope)
         self._gc: gspread.Client = gspread.authorize(credentials)
-        self._worksheet: gspread.Worksheet | None = None
-        self._values: list[list[str]] | None = None
 
     def parse(self) -> ParseResult:
-        self._parse_google_sheet()
-        self._merge_cells()
-        self._replace_values()
-        result = self._extract_data()
+        worksheet = self._open_worksheet()
+        values = worksheet.get_all_values()
+        self._merge_cells(worksheet, values)
+        values = self._replace_values(values)
+        result = self._extract_data(values)
         renames = self._split_subgroups(result.schedule)
         self._rename_note_groups(result, renames)
-        self._worksheet = None
-        self._values = None
         return result
 
-    def _parse_google_sheet(self) -> None:
+    def _open_worksheet(self) -> gspread.Worksheet:
         spreadsheet = self._gc.open_by_key(self._spreadsheet_key)
-        self._worksheet = spreadsheet.get_worksheet(0)
-        self._values = self._worksheet.get_all_values()
+        return spreadsheet.get_worksheet(0)
 
-    def _merge_cells(self) -> None:
-        sheet_id = self._worksheet.id
-        sheets = self._worksheet.spreadsheet.fetch_sheet_metadata().get("sheets", [])
+    @staticmethod
+    def _merge_cells(worksheet: gspread.Worksheet, values: list[list[str]]) -> None:
+        sheet_id = worksheet.id
+        sheets = worksheet.spreadsheet.fetch_sheet_metadata().get("sheets", [])
         merged_cells = next(
             (s.get("merges", []) for s in sheets if s.get("properties", {}).get("sheetId") == sheet_id),
             [],
@@ -123,24 +123,25 @@ class ScheduleParser:
             sr, er = merge.get("startRowIndex"), merge.get("endRowIndex")
             sc, ec = merge.get("startColumnIndex"), merge.get("endColumnIndex")
 
-            if sr < len(self._values) and sc < len(self._values[sr]):
-                value = self._values[sr][sc]
+            if sr < len(values) and sc < len(values[sr]):
+                value = values[sr][sc]
                 for r in range(sr, er):
-                    if r >= len(self._values):
+                    if r >= len(values):
                         continue
-                    row = self._values[r]
+                    row = values[r]
                     for c in range(sc, min(ec, len(row))):
                         row[c] = value
 
             target_row = sr + 1
-            if target_row % 2 == 0 and 3 < target_row < len(self._values):  # noqa: PLR2004
-                row = self._values[target_row]
+            if target_row % 2 == 0 and 3 < target_row < len(values):  # noqa: PLR2004
+                row = values[target_row]
                 next_value = next((row[c] for c in range(sc, min(ec, len(row))) if row[c]), None)
                 if next_value:
                     for c in range(sc, min(ec, len(row))):
                         row[c] = next_value
 
-    def _replace_values(self) -> None:
+    @staticmethod
+    def _replace_values(values: list[list[str]]) -> list[list[str]]:
         def fill_and_replace(row: list[str], replace_map: dict[str, str]) -> None:
             for i, value in enumerate(row[2:], 2):
                 data_value = value.strip()
@@ -149,35 +150,38 @@ class ScheduleParser:
                 elif data_value in replace_map:
                     row[i] = replace_map[data_value]
 
-        fill_and_replace(self._values[1], WEEK_TYPE_REPLACE_MAP)
-        fill_and_replace(self._values[2], GROUP_NAME_REPLACE_MAP)
+        fill_and_replace(values[1], WEEK_TYPE_REPLACE_MAP)
+        fill_and_replace(values[2], GROUP_NAME_REPLACE_MAP)
 
-        transposed = [list(r) for r in zip(*self._values, strict=False)]
-        self._values = transposed[:3] + [
+        transposed = [list(r) for r in zip(*values, strict=False)]
+        values = transposed[:3] + [
             column for column in transposed[3:] if COURSE_HEADER_PATTERN.search(column[0])
         ]
 
-        fill_and_replace(self._values[0], WEEKDAY_REPLACE_MAP)
+        fill_and_replace(values[0], WEEKDAY_REPLACE_MAP)
+        return values
 
-    def _extract_data(self) -> ParseResult:
+    def _extract_data(self, values: list[list[str]]) -> ParseResult:
         result = ParseResult()
-        for row in self._values[3:]:
+        for row in values[3:]:
 
             year = row[0].strip()
             week_type = row[1].strip()
-            group = row[2].strip()
+            group = self._normalize_group_name(row[2])
+            if week_type not in ("odd_week", "even_week"):
+                continue
 
             for j, value in enumerate(row[3:], 3):
                 if j % 2 == 0 or not value.strip():
                     continue
-                if j + 1 >= len(self._values[1]):
+                if j + 1 >= len(values[1]):
                     continue
 
                 second_value = row[j + 1] if j + 1 < len(row) else ""
                 lesson_parts, note_text = self._split_blocks(value)
                 room = self._extract_room(second_value, value)
-                lesson_number = int(self._values[1][j + 1])
-                weekday = Weekday(self._values[0][j])
+                lesson_number = int(values[1][j + 1])
+                weekday = Weekday(values[0][j])
 
                 for subgroup, raw_block in lesson_parts:
                     block = raw_block
@@ -218,6 +222,18 @@ class ScheduleParser:
                     ))
 
         return result
+
+    @staticmethod
+    def _normalize_group_name(value: str) -> str:
+        """Prefix the group number with the faculty letter.
+
+        The sheet writes the prefix on some groups and omits it on others, while
+        group numbers are shared with the other faculty, so it is always added.
+        """
+        name = value.strip()
+        if name.upper().startswith(GROUP_PREFIX):
+            return f"{GROUP_PREFIX}{name[1:]}"
+        return f"{GROUP_PREFIX}{name}"
 
     @staticmethod
     def _split_subgroups(schedule: Schedule) -> dict[tuple[str, str], list[str]]:
@@ -334,9 +350,10 @@ class ScheduleParser:
         return room
 
     @staticmethod
-    def _extract_lecture_type(value: str) -> tuple[str | None, str]:
+    def _extract_lecture_type(value: str) -> tuple[LessonType | None, str]:
         lecture_types = re.findall(LECTURE_TYPE_PATTERN, value)
-        lecture_type = lecture_types[0].lower() if lecture_types else None
+        # the pattern also strips ZOOM, which is not one of the lesson types
+        lecture_type = cast("LessonType", lecture_types[0].lower()) if lecture_types else None
 
         if lecture_type is not None:
             value = LECTURE_TYPE_PATTERN.sub("", value)

@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class RatingType(str, Enum):
+class RatingType(StrEnum):
     BEST = "best"
     WORST = "worst"

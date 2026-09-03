@@ -1,4 +1,6 @@
 registration:
+  faculty_request: "Выберите факультет:"
+  faculty_selected: "Выбран факультет: $faculty_name"
   course_request: "Выберите курс:"
   course_selected: "Выбран: $course_name"
   group_request: "Выберите группу:"
@@ -9,7 +11,7 @@ admin:
       Список пользователей (Всего: $total_count)
     user: |
       <b>$number.</b> (ID: <i>$user_id</i>)
-      <b>Группа</b>: $group_name, $course_name
+      <b>Группа</b>: $group_name, $course_name, $faculty_name
       <b>Имя:</b> $full_name
       <b>Юзернейм:</b> @$username
 schedule:
