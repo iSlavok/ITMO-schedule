@@ -6,7 +6,7 @@ from aiogram.filters import or_f
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
-from app.enums import FacultyCode, UserRole
+from app.enums import UserRole
 from app.models import Group, User
 from app.services.ai_service import AiService
 from app.services.rating_service import RatingService
@@ -45,7 +45,7 @@ async def today_schedule(
     group: Group = user.group
     schedule_text = await get_schedule_text(
         group_name=group.name,
-        faculty=FacultyCode(group.faculty.code),
+        faculty=group.faculty.code,
         faculty_id=group.faculty_id,
         schedule_service=schedule_service,
         rating_service=rating_service,
@@ -75,7 +75,7 @@ async def tomorrow_schedule(
     group: Group = user.group
     schedule_text = await get_schedule_text(
         group_name=group.name,
-        faculty=FacultyCode(group.faculty.code),
+        faculty=group.faculty.code,
         faculty_id=group.faculty_id,
         schedule_service=schedule_service,
         rating_service=rating_service,
@@ -104,7 +104,7 @@ async def schedule_by_date(
     group: Group = user.group
     schedule_text = await get_schedule_text(
         group_name=group.name,
-        faculty=FacultyCode(group.faculty.code),
+        faculty=group.faculty.code,
         faculty_id=group.faculty_id,
         schedule_service=schedule_service,
         rating_service=rating_service,

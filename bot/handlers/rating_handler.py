@@ -3,7 +3,7 @@ from aiogram.filters import or_f
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
-from app.enums import FacultyCode, UserRole
+from app.enums import UserRole
 from app.models import Group, User
 from app.services.exceptions import UserCannotRateLecturerError
 from app.services.rating_service import RatingService
@@ -39,7 +39,7 @@ async def get_rating_list_menu(
     user_group: Group = user.group
     today_lecturer_names = schedule_service.get_today_past_lecturers(
         user_group.name,
-        faculty=FacultyCode(user_group.faculty.code),
+        faculty=user_group.faculty.code,
     )
     lecturers = await rating_service.get_available_lecturers_for_rating(
         today_lecturer_names,
@@ -81,7 +81,7 @@ async def select_lecturer_for_rating(
 
     today_lecturer_names = schedule_service.get_today_past_lecturers(
         user_group.name,
-        faculty=FacultyCode(user_group.faculty.code),
+        faculty=user_group.faculty.code,
     )
     if lecturer.name not in today_lecturer_names:
         await callback.answer(
@@ -139,7 +139,7 @@ async def add_rating(
 
     today_lecturer_names = schedule_service.get_today_past_lecturers(
         user_group.name,
-        faculty=FacultyCode(user_group.faculty.code),
+        faculty=user_group.faculty.code,
     )
     if lecturer.name not in today_lecturer_names:
         await callback.answer(

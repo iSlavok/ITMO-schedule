@@ -17,7 +17,7 @@ class LecturerService:
 
     async def sync_from_schedule(self, faculty: FacultyCode, names: Iterable[str]) -> int:
         async with get_session() as session:
-            faculty_row = await FacultyRepository(session).get_by_code(faculty.value)
+            faculty_row = await FacultyRepository(session).get_by_code(faculty)
             if faculty_row is None:
                 logger.warning(f"Faculty {faculty.value} is missing, skipping the lecturer sync")
                 return 0

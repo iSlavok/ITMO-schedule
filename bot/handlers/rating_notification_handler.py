@@ -63,7 +63,7 @@ async def _start_notifications(bot: Bot, schedule_service: ScheduleService, less
     successful_notifications = 0
 
     for (group_name, faculty), users in users_by_group.items():
-        faculty_id = faculty_ids_by_code.get(faculty.value)
+        faculty_id = faculty_ids_by_code.get(faculty)
         if faculty_id is None:
             continue
 

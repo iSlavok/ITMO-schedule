@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
-from app.enums import FacultyCode, UserRole
+from app.enums import UserRole
 from app.models import User
 from app.services.guest_service import GuestService
 from app.services.rating_service import RatingService
@@ -117,7 +117,7 @@ async def group_select(
 
     schedule_text = await get_schedule_text(
         group_name=callback_data.name,
-        faculty=FacultyCode(callback_data.faculty_code),
+        faculty=callback_data.faculty_code,
         faculty_id=callback_data.faculty_id,
         schedule_service=schedule_service,
         rating_service=rating_service,

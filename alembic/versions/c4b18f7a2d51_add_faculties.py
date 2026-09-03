@@ -21,9 +21,10 @@ down_revision: Union[str, None] = '2ca54a9f1cfb'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
+# SQLAlchemy stores an Enum column by member name, as it already does for user roles
 FACULTIES = [
-    ("physics", "ФизФак"),
-    ("ct", "КТ"),
+    ("PHYSICS", "ФизФак"),
+    ("CT", "КТ"),
 ]
 CT_GROUPS = {
     "1 курс": ["M3132", "M3133", "M3134", "M3135", "M3136", "M3137", "M3138",
@@ -40,7 +41,12 @@ def upgrade() -> None:
     op.create_table(
         "faculties",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("code", sa.String(length=20), nullable=False),
+        sa.Column(
+            "code",
+            sa.Enum(*[code for code, _ in FACULTIES], name="faculty_code_enum",
+                    native_enum=False, create_constraint=True),
+            nullable=False,
+        ),
         sa.Column("name", sa.String(length=100), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
@@ -74,7 +80,7 @@ def upgrade() -> None:
                 sa.text(
                     "INSERT INTO groups (name, course_id, faculty_id) "
                     "SELECT :group, c.id, f.id FROM courses c, faculties f "
-                    "WHERE c.name = :course AND f.code = 'ct' "
+                    "WHERE c.name = :course AND f.code = 'CT' "
                     "AND NOT EXISTS ("
                     "    SELECT 1 FROM groups g WHERE g.name = :group AND g.faculty_id = f.id"
                     ")",
@@ -83,8 +89,8 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute("DELETE FROM groups WHERE faculty_id = (SELECT id FROM faculties WHERE code = 'ct')")
-    op.execute("DELETE FROM lecturers WHERE faculty_id = (SELECT id FROM faculties WHERE code = 'ct')")
+    op.execute("DELETE FROM groups WHERE faculty_id = (SELECT id FROM faculties WHERE code = 'CT')")
+    op.execute("DELETE FROM lecturers WHERE faculty_id = (SELECT id FROM faculties WHERE code = 'CT')")
     op.execute("UPDATE groups SET name = substring(name from 2) WHERE name LIKE 'Z%'")
 
     op.drop_constraint("uq_lecturer_name_faculty", "lecturers", type_="unique")
@@ -100,7 +106,7 @@ def downgrade() -> None:
 def _add_faculty_column(table: str) -> None:
     """Attach a table to the physics faculty: every existing row predates the split."""
     op.add_column(table, sa.Column("faculty_id", sa.Integer(), nullable=True))
-    op.execute(f"UPDATE {table} SET faculty_id = (SELECT id FROM faculties WHERE code = 'physics')")  # noqa: S608
+    op.execute(f"UPDATE {table} SET faculty_id = (SELECT id FROM faculties WHERE code = 'PHYSICS')")  # noqa: S608
     op.alter_column(table, "faculty_id", nullable=False)
     op.create_index(op.f(f"ix_{table}_faculty_id"), table, ["faculty_id"])
     op.create_foreign_key(f"fk_{table}_faculty_id", table, "faculties", ["faculty_id"], ["id"])

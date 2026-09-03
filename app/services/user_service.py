@@ -50,7 +50,7 @@ class UserService:
         grouped: dict[tuple[str, FacultyCode], list[UserDTO]] = defaultdict(list)
 
         for group_name, faculty_code, user in rows:
-            grouped[(group_name, FacultyCode(faculty_code))].append(UserDTO.model_validate(user))
+            grouped[(group_name, faculty_code)].append(UserDTO.model_validate(user))
 
         return dict(grouped)
 

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
-from app.enums import UserRole
+from app.enums import FacultyCode, UserRole
 
 
 class CourseDTO(BaseModel):
@@ -12,7 +12,7 @@ class CourseDTO(BaseModel):
 
 class FacultyDTO(BaseModel):
     id: int
-    code: str
+    code: FacultyCode
     name: str
 
     model_config = ConfigDict(from_attributes=True)
