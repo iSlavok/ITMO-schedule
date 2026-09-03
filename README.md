@@ -13,6 +13,7 @@ The faculties' schedules never landed properly in the official ITMO app, so stud
 - **Odd/even week logic** — the correct weekly variant is selected from the ISO week number.
 - **Dated overrides** — one-off and relative (`before`/`after` a date) lesson changes layered on top of the recurring schedule.
 - **Natural-language dates** — free text like "завтра" or "next Monday" is parsed into a concrete date by Google Gemini with a structured JSON schema.
+- **Self-maintaining catalog** — courses, groups and lecturers are created from the parsed sheets. A group that leaves a sheet is deactivated and disappears from registration without touching the users on it, and a lecturer row can be hidden by hand so that schedule entries which are not people (a platform, a department) cannot be rated, ranked or notified about.
 - **Lecturer ratings** — lecturers belong to a faculty and are created from the parsed schedules; users rate them on a 1–10 scale; the schedule shows each lecturer's average rating with tiered emoji. A user may rate a given lecturer once per day, and only for lessons that have already taken place today.
 - **Rating notifications** — cron jobs fire at each lesson's end time and prompt opted-in users to rate that lesson's lecturer, skipping anyone who already rated them today.
 - **Leaderboard** — paginated ranking of top (and bottom) lecturers of the user's own faculty by average rating.
@@ -81,4 +82,4 @@ Each faculty is parsed by its own `ScheduleUpdater`, running on startup and ever
 
 **CT** — the sheet is published to the web and has no document id behind the link, so `CtScheduleParser` reads its rendered HTML: unlike the CSV export it keeps merges, style classes and the sheet's own row and column indices, and it leaves out rows and columns hidden in the sheet. It carries no footnotes, so it produces a recurring schedule only.
 
-Both write a `Schedule` model keyed by course → group → week → weekday, persisted per faculty (`data/schedule.json`, `data/schedule_ct.json`), and both feed newly seen lecturer names into the lecturers table. `ScheduleService` resolves a group inside its faculty's schedule, layers the dated entries on top, and computes lesson status against the Europe/Moscow clock.
+Both write a `Schedule` model keyed by course → group → week → weekday, persisted per faculty (`data/schedule.json`, `data/schedule_ct.json`), and both feed `CatalogService`, which creates the courses, groups and lecturers it has not seen before and deactivates the groups that are gone. Nothing is deleted: users hang off groups and ratings off lecturers. `ScheduleService` resolves a group inside its faculty's schedule, layers the dated entries on top, and computes lesson status against the Europe/Moscow clock.

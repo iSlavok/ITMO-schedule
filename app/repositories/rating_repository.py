@@ -49,6 +49,7 @@ class RatingRepository(BaseRepository[Rating]):
             .where(
                 Lecturer.name.in_(lecturer_names),
                 Lecturer.faculty_id == faculty_id,
+                Lecturer.is_hidden.is_(False),
                 ~Lecturer.id.in_(subquery),
             )
         )

@@ -26,7 +26,10 @@ class LecturerRepository(BaseRepository[Lecturer]):
                 func.count(Rating.id).label("reviews_count"),
             )
             .join(Rating)
-            .where(Lecturer.faculty_id == faculty_id)
+            .where(
+                Lecturer.faculty_id == faculty_id,
+                Lecturer.is_hidden.is_(False),
+            )
             .group_by(
                 Lecturer.id,
                 Lecturer.name,
@@ -63,6 +66,7 @@ class LecturerRepository(BaseRepository[Lecturer]):
             select(func.count(Lecturer.id))
             .where(
                 Lecturer.faculty_id == faculty_id,
+                Lecturer.is_hidden.is_(False),
                 Lecturer.id.in_(
                     select(Rating.lecturer_id)
                     .distinct(),
@@ -82,11 +86,17 @@ class LecturerRepository(BaseRepository[Lecturer]):
             .where(
                 Lecturer.name.in_(names),
                 Lecturer.faculty_id == faculty_id,
+                Lecturer.is_hidden.is_(False),
             )
             .group_by(Lecturer.name)
         )
         result = await self.session.execute(statement)
         return {row.name: row.avg_rating for row in result.all()}
+
+    async def list_visible(self) -> Sequence[Lecturer]:
+        statement = select(Lecturer).where(Lecturer.is_hidden.is_(False))
+        result = await self.session.execute(statement)
+        return result.scalars().all()
 
     async def get_names_by_faculty(self, faculty_id: int) -> set[str]:
         statement = select(Lecturer.name).where(Lecturer.faculty_id == faculty_id)

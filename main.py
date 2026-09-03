@@ -13,7 +13,7 @@ from app.database import close_db, init_db
 from app.enums import FacultyCode
 from app.schedule import CtScheduleParser, DatedScheduleBuilder, ScheduleParser, ScheduleUpdater
 from app.services.ai_service import AiService
-from app.services.lecturer_service import LecturerService
+from app.services.catalog_service import CatalogService
 from app.services.schedule_service import ScheduleService
 from bot.handlers import (
     admin_router,
@@ -32,13 +32,13 @@ async def main() -> None:
     await init_db()
     schedule_service = ScheduleService()
     ai_service = AiService()
-    lecturer_service = LecturerService()
+    catalog_service = CatalogService()
     schedule_updaters = [
         ScheduleUpdater(
             schedule_service=schedule_service,
             schedule_parser=ScheduleParser(spreadsheet_key=env_config.SPREADSHEET_ID),
             faculty=FacultyCode.PHYSICS,
-            lecturer_service=lecturer_service,
+            catalog_service=catalog_service,
             dated_schedule_builder=DatedScheduleBuilder(ai_service=ai_service),
             interval=600,
         ),
@@ -49,7 +49,7 @@ async def main() -> None:
                 sheet_gid=env_config.CT_SHEET_GID,
             ),
             faculty=FacultyCode.CT,
-            lecturer_service=lecturer_service,
+            catalog_service=catalog_service,
             interval=600,
         ),
     ]

@@ -8,7 +8,7 @@ from loguru import logger
 from app.enums import FacultyCode
 from app.schedule.dated_schedule_builder import DatedScheduleBuilder
 from app.schemas import ParseResult
-from app.services.lecturer_service import LecturerService
+from app.services.catalog_service import CatalogService
 from app.services.schedule_service import ScheduleService
 
 
@@ -22,7 +22,8 @@ class ScheduleUpdater:
     """Refreshes one faculty's schedule on a loop.
 
     Each faculty gets its own updater, so a sheet that fails to parse only leaves
-    that faculty on its previous data. The dated overlay is built from sheet
+    that faculty on its previous data. A successful parse also feeds the catalog
+    of courses, groups and lecturers. The dated overlay is built from sheet
     footnotes and only exists for faculties whose sheet carries them.
     """
 
@@ -32,7 +33,7 @@ class ScheduleUpdater:
         schedule_parser: ScheduleSource,
         faculty: FacultyCode,
         *,
-        lecturer_service: LecturerService | None = None,
+        catalog_service: CatalogService | None = None,
         dated_schedule_builder: DatedScheduleBuilder | None = None,
         interval: int = 600,
     ) -> None:
@@ -40,7 +41,7 @@ class ScheduleUpdater:
         self._schedule_service = schedule_service
         self._schedule_parser = schedule_parser
         self._faculty = faculty
-        self._lecturer_service = lecturer_service
+        self._catalog_service = catalog_service
         self._dated_schedule_builder = dated_schedule_builder
         self._task: asyncio.Task | None = None
 
@@ -53,11 +54,11 @@ class ScheduleUpdater:
             logger.exception(f"Failed to update the schedule of {self._faculty.value}: {e}")
             return
 
-        if self._lecturer_service is not None:
+        if self._catalog_service is not None:
             try:
-                await self._lecturer_service.sync_from_schedule(self._faculty, result.schedule.lecturer_names())
+                await self._catalog_service.sync_from_schedule(self._faculty, result.schedule)
             except Exception as e:
-                logger.exception(f"Failed to sync the lecturers of {self._faculty.value}: {e}")
+                logger.exception(f"Failed to sync the catalog of {self._faculty.value}: {e}")
 
         if self._dated_schedule_builder is not None:
             try:

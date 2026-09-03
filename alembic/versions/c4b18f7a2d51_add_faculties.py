@@ -6,8 +6,9 @@ Create Date: 2026-09-02
 
 Groups and lecturers become faculty-scoped. Existing rows are all from the
 physics faculty, so they are backfilled with it and its group numbers get the
-"Z" prefix the parser now emits. CT groups are seeded here: the sheet is parsed
-for the schedule only, group rows stay under manual control.
+"Z" prefix the parser now emits. CT groups are seeded here as well, to give
+registration something to offer before the first parse of the new sheet lands;
+from then on the catalog sync keeps both faculties up to date.
 """
 from collections.abc import Sequence
 from typing import Union
@@ -64,10 +65,16 @@ def upgrade() -> None:
 
     _add_faculty_column("groups")
     _add_faculty_column("lecturers")
+
+    # server defaults only fill the existing rows; the models set both in Python
+    op.add_column("groups", sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.true()))
+    op.add_column("lecturers", sa.Column("is_hidden", sa.Boolean(), nullable=False, server_default=sa.false()))
     op.create_unique_constraint("uq_lecturer_name_faculty", "lecturers", ["name", "faculty_id"])
 
-    # the sheet writes "Z" on some groups and omits it on others; the parser always emits it
+    # the sheet writes "Z" on some groups and omits it on others; the parser always emits it.
+    # prefixing before the unique constraint, so a collision fails here instead of passing silently
     op.execute("UPDATE groups SET name = 'Z' || name WHERE name NOT LIKE 'Z%'")
+    op.create_unique_constraint("uq_group_name_faculty", "groups", ["name", "faculty_id"])
 
     for course_name, groups in CT_GROUPS.items():
         op.execute(
@@ -87,13 +94,19 @@ def upgrade() -> None:
                 ).bindparams(group=group_name, course=course_name),
             )
 
+    op.alter_column("groups", "is_active", server_default=None)
+    op.alter_column("lecturers", "is_hidden", server_default=None)
+
 
 def downgrade() -> None:
     op.execute("DELETE FROM groups WHERE faculty_id = (SELECT id FROM faculties WHERE code = 'CT')")
     op.execute("DELETE FROM lecturers WHERE faculty_id = (SELECT id FROM faculties WHERE code = 'CT')")
     op.execute("UPDATE groups SET name = substring(name from 2) WHERE name LIKE 'Z%'")
 
+    op.drop_constraint("uq_group_name_faculty", "groups", type_="unique")
     op.drop_constraint("uq_lecturer_name_faculty", "lecturers", type_="unique")
+    op.drop_column("lecturers", "is_hidden")
+    op.drop_column("groups", "is_active")
     _drop_faculty_column("lecturers")
     _drop_faculty_column("groups")
 

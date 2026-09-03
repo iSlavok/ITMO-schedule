@@ -17,8 +17,14 @@ class GroupRepository(BaseRepository[Group]):
             .where(
                 Group.course_id == course_id,
                 Group.faculty_id == faculty_id,
+                Group.is_active.is_(True),
             )
             .order_by(Group.name)
         )
+        result = await self.session.execute(statement)
+        return result.scalars().all()
+
+    async def get_by_faculty(self, faculty_id: int) -> Sequence[Group]:
+        statement = select(Group).where(Group.faculty_id == faculty_id)
         result = await self.session.execute(statement)
         return result.scalars().all()

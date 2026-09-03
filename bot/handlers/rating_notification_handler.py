@@ -52,7 +52,7 @@ async def _start_notifications(bot: Bot, schedule_service: ScheduleService, less
             faculty.code: faculty.id
             for faculty in await FacultyRepository(session).list_all()
         }
-        lecturers = await rating_service.get_all_lecturers()
+        lecturers = await rating_service.get_visible_lecturers()
         # the same surname can teach on both faculties, as two rows with two ratings
         lecturer_ids_by_name = {(lecturer.faculty_id, lecturer.name): lecturer.id for lecturer in lecturers}
 

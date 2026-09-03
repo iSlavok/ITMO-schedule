@@ -76,8 +76,8 @@ class RatingService:
     ) -> Sequence[Lecturer]:
         return await self._rating_repository.get_rateable_lecturers(lecturer_names, user_id, faculty_id)
 
-    async def get_all_lecturers(self) -> Sequence[Lecturer]:
-        return await self._lecturer_repository.list_all(limit=1000)
+    async def get_visible_lecturers(self) -> Sequence[Lecturer]:
+        return await self._lecturer_repository.list_visible()
 
     async def get_all_today_rated_lecturer_by_user(self) -> dict[int, set[int]]:
         ratings = await self._rating_repository.get_all_today()

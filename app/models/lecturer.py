@@ -14,6 +14,8 @@ class Lecturer(Base):
 
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     faculty_id: Mapped[int] = mapped_column(ForeignKey("faculties.id"), index=True)
+    # set by hand for schedule entries that are not people: a platform, a department, ...
+    is_hidden: Mapped[bool] = mapped_column(nullable=False, default=False)
 
     faculty: Mapped["Faculty"] = relationship("Faculty", back_populates="lecturers")
     ratings: Mapped[list["Rating"]] = relationship("Rating", back_populates="lecturer")
