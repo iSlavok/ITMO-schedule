@@ -4,7 +4,7 @@ from typing import cast
 import gspread
 from google.oauth2.service_account import Credentials
 
-from app.enums import Week, Weekday
+from app.enums import FacultyCode, Week, Weekday
 from app.schemas import (
     Lesson,
     LessonType,
@@ -21,8 +21,9 @@ LECTURE_TYPE_PATTERN = re.compile(r"\b(лекция|практика|лабор�
 ROOM_PATTERN = re.compile(r"ауд(?:\.?\s*|\s+)(\d+)", flags=re.IGNORECASE)
 COURSE_HEADER_PATTERN = re.compile(r"^\s*\d+\s+курс\s*$", flags=re.IGNORECASE)
 BLANK_LINE_PATTERN = re.compile(r"\n\s*\n")
-SUBGROUP_PATTERN = re.compile(r"^Z\d{3,4}$", flags=re.IGNORECASE)
-GROUP_PREFIX = "Z"
+GROUP_PREFIX = FacultyCode.PHYSICS.group_prefix
+SUBGROUP_PATTERN = re.compile(rf"^{GROUP_PREFIX}\d{{3,4}}$", flags=re.IGNORECASE)
+GROUP_NUMBER_PATTERN = re.compile(rf"^{GROUP_PREFIX}?(\d{{4}}.*)$", flags=re.IGNORECASE)
 
 
 WEEKDAY_REPLACE_MAP = {
@@ -227,13 +228,15 @@ class ScheduleParser:
     def _normalize_group_name(value: str) -> str:
         """Prefix the group number with the faculty letter.
 
-        The sheet writes the prefix on some groups and omits it on others, while
+        The sheet writes the prefix on some numbers and omits it on others, while
         group numbers are shared with the other faculty, so it is always added.
+        Senior years are taught in tracks instead of numbered groups, and a track
+        goes by its name ("радио", "стф"); the letter belongs in front of a number,
+        so those are left as they are written.
         """
         name = value.strip()
-        if name.upper().startswith(GROUP_PREFIX):
-            return f"{GROUP_PREFIX}{name[1:]}"
-        return f"{GROUP_PREFIX}{name}"
+        match = GROUP_NUMBER_PATTERN.match(name)
+        return f"{GROUP_PREFIX}{match.group(1)}" if match else name
 
     @staticmethod
     def _split_subgroups(schedule: Schedule) -> dict[tuple[str, str], list[str]]:

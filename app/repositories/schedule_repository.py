@@ -13,8 +13,14 @@ SCHEDULE_PATHS = {
     FacultyCode.PHYSICS: DATA_DIR / "schedule.json",
     FacultyCode.CT: DATA_DIR / "schedule_ct.json",
 }
-DATED_SCHEDULE_PATH = DATA_DIR / "dated_schedule.json"
-DATED_OVERRIDES_PATH = DATA_DIR / "dated_overrides.json"
+DATED_SCHEDULE_PATHS = {
+    FacultyCode.PHYSICS: DATA_DIR / "dated_schedule.json",
+    FacultyCode.CT: DATA_DIR / "dated_schedule_ct.json",
+}
+DATED_OVERRIDES_PATHS = {
+    FacultyCode.PHYSICS: DATA_DIR / "dated_overrides.json",
+    FacultyCode.CT: DATA_DIR / "dated_overrides_ct.json",
+}
 NOTE_CACHE_PATH = DATA_DIR / "ai_notes_cache.json"
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
@@ -27,18 +33,15 @@ class ScheduleRepository:
     def set_schedule(self, faculty: FacultyCode, schedule: Schedule) -> None:
         self._write(SCHEDULE_PATHS[faculty], schedule)
 
-    @property
-    def dated_schedule(self) -> DatedSchedule:
-        return self._read(DATED_SCHEDULE_PATH, DatedSchedule)
+    def get_dated_schedule(self, faculty: FacultyCode) -> DatedSchedule:
+        return self._read(DATED_SCHEDULE_PATHS[faculty], DatedSchedule)
 
-    @dated_schedule.setter
-    def dated_schedule(self, schedule: DatedSchedule) -> None:
-        self._write(DATED_SCHEDULE_PATH, schedule)
+    def set_dated_schedule(self, faculty: FacultyCode, schedule: DatedSchedule) -> None:
+        self._write(DATED_SCHEDULE_PATHS[faculty], schedule)
 
-    @property
-    def dated_overrides(self) -> DatedSchedule:
+    def get_dated_overrides(self, faculty: FacultyCode) -> DatedSchedule:
         """Hand-written entries applied on top of the generated dated schedule."""
-        return self._read(DATED_OVERRIDES_PATH, DatedSchedule)
+        return self._read(DATED_OVERRIDES_PATHS[faculty], DatedSchedule)
 
     @property
     def note_cache(self) -> dict[str, AiNoteResponse]:

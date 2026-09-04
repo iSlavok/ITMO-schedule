@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from loguru import logger
 
 from app.config import env_config
-from app.enums import AiNoteAction, DatedAction
+from app.enums import AiNoteAction, DatedAction, FacultyCode
 from app.repositories import ScheduleRepository
 from app.schemas import (
     AiNoteOperation,
@@ -33,7 +33,7 @@ class DatedScheduleBuilder:
         self._ai_service = ai_service
         self._repository = repository or ScheduleRepository()
 
-    async def build(self, result: ParseResult) -> DatedSchedule:
+    async def build(self, faculty: FacultyCode, result: ParseResult) -> DatedSchedule:
         answers = await self._resolve_notes(result.notes)
 
         dated = DatedSchedule()
@@ -45,7 +45,7 @@ class DatedScheduleBuilder:
                 for entry in self._materialize(note, operation, result.schedule):
                     dated.add(note.group, entry)
 
-        overrides = self._repository.dated_overrides
+        overrides = self._repository.get_dated_overrides(faculty)
         if overrides.groups:
             logger.info(f"Applying {sum(len(v) for v in overrides.groups.values())} manual dated overrides")
         return dated.merge(overrides)

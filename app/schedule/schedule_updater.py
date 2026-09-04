@@ -62,8 +62,11 @@ class ScheduleUpdater:
 
         if self._dated_schedule_builder is not None:
             try:
-                self._schedule_service.dated_schedule = await self._dated_schedule_builder.build(result)
-                logger.success("Dated schedule rebuilt successfully")
+                self._schedule_service.set_dated_schedule(
+                    self._faculty,
+                    await self._dated_schedule_builder.build(self._faculty, result),
+                )
+                logger.success(f"Dated schedule of {self._faculty.value} rebuilt successfully")
             except Exception as e:
                 logger.exception(f"Failed to rebuild dated schedule: {e}")
 

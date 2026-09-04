@@ -28,17 +28,21 @@ WEEKDAYS = [
 
 
 class ScheduleService:
-    """Holds one recurring schedule per faculty plus the shared dated overlay.
+    """Holds a recurring schedule and a dated overlay per faculty.
 
-    Group names carry a faculty prefix and never collide, so a lookup without a
-    faculty still resolves; passing one turns a faculty whose parse has not
+    Both are keyed by faculty, so a group only ever meets the overlay of its own
+    faculty. A lookup may still omit the faculty, and then the group is searched
+    for in every schedule; passing one turns a faculty whose parse has not
     succeeded yet into an error instead of an empty day.
     """
 
     def __init__(self) -> None:
         self._schedule_repository = ScheduleRepository()
         self._schedules: dict[FacultyCode, Schedule] = {}
-        self._dated_schedule = self._schedule_repository.dated_schedule
+        self._dated_schedules: dict[FacultyCode, DatedSchedule] = {
+            faculty: self._schedule_repository.get_dated_schedule(faculty)
+            for faculty in FacultyCode
+        }
 
     def get_faculty_schedule(self, faculty: FacultyCode) -> Schedule | None:
         return self._schedules.get(faculty)
@@ -47,14 +51,12 @@ class ScheduleService:
         self._schedules[faculty] = schedule
         self._schedule_repository.set_schedule(faculty, schedule)
 
-    @property
-    def dated_schedule(self) -> DatedSchedule:
-        return self._dated_schedule
+    def get_dated_schedule(self, faculty: FacultyCode) -> DatedSchedule:
+        return self._dated_schedules[faculty]
 
-    @dated_schedule.setter
-    def dated_schedule(self, dated_schedule: DatedSchedule) -> None:
-        self._dated_schedule = dated_schedule
-        self._schedule_repository.dated_schedule = dated_schedule
+    def set_dated_schedule(self, faculty: FacultyCode, dated_schedule: DatedSchedule) -> None:
+        self._dated_schedules[faculty] = dated_schedule
+        self._schedule_repository.set_dated_schedule(faculty, dated_schedule)
 
     def get_schedule(
         self,
@@ -73,16 +75,20 @@ class ScheduleService:
         is_even_week = self.is_even_week(target_date)
 
         lessons = []
-        for schedule in schedules:
+        found_in = faculty
+        for schedule_faculty, schedule in schedules:
             group_schedule = self._find_group(schedule, group)
             if group_schedule is None:
                 continue
             week = group_schedule.even_week if is_even_week else group_schedule.odd_week
             # deep copy: dated overrides patch lessons in place
             lessons = [lesson.model_copy(deep=True) for lesson in week.days[weekday].lessons]
+            found_in = schedule_faculty
             break
 
-        lessons = self._apply_dated_schedule(lessons, target_date, group, weekday, is_even_week=is_even_week)
+        lessons = self._apply_dated_schedule(
+            lessons, target_date, group, weekday, found_in, is_even_week=is_even_week,
+        )
         return sorted(lessons, key=lambda x: x.number)
 
     def _apply_dated_schedule(
@@ -91,12 +97,21 @@ class ScheduleService:
         target_date: date,
         group: str,
         weekday: Weekday,
+        faculty: FacultyCode | None,
         *,
         is_even_week: bool,
     ) -> list[Lesson]:
-        """Apply the dated entries of a group: cancellations, then overrides, then additions."""
+        """Apply the dated entries of a group: cancellations, then overrides, then additions.
+
+        Only the overlay of the group's own faculty is applied. With no faculty to
+        go by -- an unknown group looked up without one -- there is nothing to
+        apply, and the recurring lessons stand as they are.
+        """
+        if faculty is None:
+            return lessons
+
         entries = [
-            entry for entry in self._dated_schedule.groups.get(group, [])
+            entry for entry in self._dated_schedules[faculty].groups.get(group, [])
             if entry.matches(target_date, weekday, is_even_week=is_even_week)
         ]
         if not entries:
@@ -121,11 +136,11 @@ class ScheduleService:
         ]
         return lessons
 
-    def _schedules_to_search(self, faculty: FacultyCode | None) -> list[Schedule]:
+    def _schedules_to_search(self, faculty: FacultyCode | None) -> list[tuple[FacultyCode, Schedule]]:
         if faculty is not None:
             schedule = self._schedules.get(faculty)
-            return [schedule] if schedule is not None else []
-        return list(self._schedules.values())
+            return [(faculty, schedule)] if schedule is not None else []
+        return list(self._schedules.items())
 
     @staticmethod
     def _find_group(schedule: Schedule, group: str) -> ScheduleGroup | None:

@@ -19,7 +19,7 @@ Layout (one sheet, one semester):
 import re
 from typing import Literal
 
-from app.enums import Weekday
+from app.enums import FacultyCode, Weekday
 from app.schedule.published_sheet import Sheet, fetch_published_sheet
 from app.schemas import Lesson, LessonType, ParseResult
 
@@ -78,8 +78,9 @@ LECTURER_REPLACE_PATTERN = [
 ]
 PLACEHOLDER_GROUP_NAMES = {"выбор"}
 UNKNOWN_VALUES = {"?", "-", "—"}
-GROUP_NAME_PATTERN = re.compile(r"^M\d{4}$", flags=re.IGNORECASE)
-COURSE_PATTERN = re.compile(r"^M\d(\d)", flags=re.IGNORECASE)
+GROUP_PREFIX = FacultyCode.CT.group_prefix
+GROUP_NAME_PATTERN = re.compile(rf"^{GROUP_PREFIX}\d{{4}}$", flags=re.IGNORECASE)
+COURSE_PATTERN = re.compile(rf"^{GROUP_PREFIX}\d(\d)", flags=re.IGNORECASE)
 ERROR_VALUE_PATTERN = re.compile(r"^#[A-Z]+[!?]$")
 
 
