@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.enums import FacultyCode
+from app.enums import FacultyCode, UserRole
 from app.models import User
 from app.repositories import UserRepository
 from app.schemas import UserDTO, UserWithGroupDTO
@@ -53,6 +53,19 @@ class UserService:
             grouped[(group_name, faculty_code)].append(UserDTO.model_validate(user))
 
         return dict(grouped)
+
+    async def register_user(self, user: User, group_id: int) -> User:
+        user.group_id = group_id
+        user.role = UserRole.USER
+        await self._session.commit()
+        await self._session.refresh(user)
+        return user
+
+    async def change_group(self, user: User, group_id: int) -> User:
+        user.group_id = group_id
+        await self._session.commit()
+        await self._session.refresh(user)
+        return user
 
     async def change_settings(
         self,

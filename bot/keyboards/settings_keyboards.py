@@ -13,6 +13,7 @@ def get_user_setting_kb(user_settings: UserSettings) -> InlineKeyboardMarkup:
         text=f"{emoji} {messages.buttons.rating_notifications}",
         callback_data="settings_rating_notifications",
     )
+    builder.button(text=messages.buttons.change_group, callback_data="change_group")
     builder.button(text=messages.buttons.back, callback_data="main")
     builder.adjust(1)
     return builder.as_markup()

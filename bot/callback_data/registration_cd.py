@@ -21,3 +21,14 @@ class GroupCD(CallbackData, prefix="group"):
     name: str
     faculty_id: int
     faculty_code: FacultyCode
+
+
+class FacultyListCD(CallbackData, prefix="faculty_list"):
+    """Go back to the faculty list."""
+
+
+class CourseListCD(CallbackData, prefix="course_list"):
+    """Go back to the course list of a faculty."""
+
+    faculty_id: int
+    faculty_code: FacultyCode

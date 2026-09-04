@@ -12,7 +12,7 @@ from app.repositories import (
     LecturerRepository,
     RatingRepository,
 )
-from app.services.guest_service import GuestService
+from app.services.catalog_query_service import CatalogQueryService
 from app.services.rating_service import RatingService
 
 if TYPE_CHECKING:
@@ -33,13 +33,10 @@ class ServicesMiddleware(BaseMiddleware):
         services = {}
         session: AsyncSession = data["session"]
         for service in required:
-            if service == "guest":
-                course_repo = CourseRepository(session)
-                group_repo = GroupRepository(session)
-                services["guest_service"] = GuestService(
-                    session=session,
-                    course_repo=course_repo,
-                    group_repo=group_repo,
+            if service == "catalog":
+                services["catalog_query_service"] = CatalogQueryService(
+                    course_repo=CourseRepository(session),
+                    group_repo=GroupRepository(session),
                     faculty_repo=FacultyRepository(session),
                 )
             elif service == "rating":

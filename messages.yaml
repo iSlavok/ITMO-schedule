@@ -64,9 +64,18 @@ notification:
 settings:
   main: "
     <b>Настройки</b>
-    
+
+
+    <b>Факультет:</b> $faculty_name
+
+    <b>Курс:</b> $course_name
+
+    <b>Группа:</b> $group_name
+
+
     Напоминания оценить преподавателя - $rating_notifications_status
     "
+  group_changed: "Группа изменена на $group_name"
 
 buttons:
   today_schedule: "Сегодня"
@@ -79,3 +88,4 @@ buttons:
   pagination_next: "➡️️"
   pagination_prev: "⬅️️"
   rating_notifications: "Напоминания об оценке"
+  change_group: "Сменить группу"

@@ -67,6 +67,7 @@ class NotificationMessages(BaseModel):
 
 class SettingsMessages(BaseModel):
     main: str
+    group_changed: str
 
 
 class Buttons(BaseModel):
@@ -80,6 +81,7 @@ class Buttons(BaseModel):
     pagination_next: str
     pagination_prev: str
     rating_notifications: str
+    change_group: str
 
 
 class Messages(BaseModel):

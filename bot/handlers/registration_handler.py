@@ -8,15 +8,16 @@ from loguru import logger
 
 from app.enums import UserRole
 from app.models import User
-from app.services.guest_service import GuestService
+from app.services.catalog_query_service import CatalogQueryService
 from app.services.rating_service import RatingService
 from app.services.schedule_service import ScheduleService
-from bot.callback_data import CourseCD, FacultyCD, GroupCD
+from app.services.user_service import UserService
+from bot.callback_data import CourseCD, CourseListCD, FacultyCD, FacultyListCD, GroupCD
 from bot.config import messages
 from bot.filters import RoleFilter
-from bot.keyboards import get_course_keyboard, get_faculty_keyboard, get_group_keyboard, get_main_kb
+from bot.keyboards import get_main_kb
 from bot.services import MessageManager
-from bot.utils import get_schedule_text
+from bot.utils import announce_course, announce_faculty, get_schedule_text, render_faculties, show_courses, show_groups
 
 router = Router(name="registration_router")
 router.message.filter(RoleFilter(UserRole.GUEST))
@@ -25,75 +26,98 @@ router.callback_query.filter(RoleFilter(UserRole.GUEST))
 MSK_TZ = pytz.timezone("Europe/Moscow")
 
 
-@router.message(flags={"services": ["guest"]})
+@router.message(flags={"services": ["catalog"]})
 async def start_registration(
         _: Message,
         user: User,
-        guest_service: GuestService,
+        catalog_query_service: CatalogQueryService,
         message_manager: MessageManager,
 ) -> None:
     logger.info(f"User {user.id} started registration")
+    await render_faculties(message_manager, catalog_query_service)
 
-    faculties = await guest_service.get_all_faculties()
-    keyboard = get_faculty_keyboard(faculties)
-    await message_manager.send_message(messages.registration.faculty_request, reply_markup=keyboard)
+
+@router.callback_query(FacultyListCD.filter(), flags={"services": ["catalog"]})
+async def back_to_faculties(
+        callback: CallbackQuery,
+        user: User,
+        catalog_query_service: CatalogQueryService,
+        message_manager: MessageManager,
+) -> None:
+    logger.info(f"User {user.id} went back to the faculty list")
+    await render_faculties(message_manager, catalog_query_service)
+    await callback.answer()
 
 
 @router.callback_query(
     FacultyCD.filter(),
-    flags={"services": ["guest"]},
+    flags={"services": ["catalog"]},
 )
 async def faculty_select(
         callback: CallbackQuery,
         callback_data: FacultyCD,
         user: User,
-        guest_service: GuestService,
+        catalog_query_service: CatalogQueryService,
         message_manager: MessageManager,
 ) -> None:
     logger.info(f"User {user.id} selected faculty {callback_data.id}")
 
-    text = MessageManager.format_text(messages.registration.faculty_selected, faculty_name=callback_data.name)
-    await message_manager.send_message(text)
+    await announce_faculty(message_manager, callback_data.name)
+    await show_courses(
+        message_manager,
+        catalog_query_service,
+        faculty_id=callback_data.id,
+        faculty_code=callback_data.code,
+    )
+    await callback.answer()
 
-    courses = await guest_service.get_faculty_courses(callback_data.id)
-    keyboard = get_course_keyboard(courses, faculty=callback_data)
-    await message_manager.send_message(
-        text=messages.registration.course_request,
-        clear_previous=False,
-        reply_markup=keyboard,
+
+@router.callback_query(CourseListCD.filter(), flags={"services": ["catalog"]})
+async def back_to_courses(
+        callback: CallbackQuery,
+        callback_data: CourseListCD,
+        user: User,
+        catalog_query_service: CatalogQueryService,
+        message_manager: MessageManager,
+) -> None:
+    logger.info(f"User {user.id} went back to the course list")
+    await show_courses(
+        message_manager,
+        catalog_query_service,
+        faculty_id=callback_data.faculty_id,
+        faculty_code=callback_data.faculty_code,
+        clear_previous=True,
     )
     await callback.answer()
 
 
 @router.callback_query(
     CourseCD.filter(),
-    flags={"services": ["guest"]},
+    flags={"services": ["catalog"]},
 )
 async def course_select(
         callback: CallbackQuery,
         callback_data: CourseCD,
         user: User,
-        guest_service: GuestService,
+        catalog_query_service: CatalogQueryService,
         message_manager: MessageManager,
 ) -> None:
     logger.info(f"User {user.id} selected course {callback_data.id}")
 
-    text = MessageManager.format_text(messages.registration.course_selected, course_name=callback_data.name)
-    await message_manager.send_message(text)
-
-    groups = await guest_service.get_course_groups(callback_data.id, faculty_id=callback_data.faculty_id)
-    keyboard = get_group_keyboard(groups, course=callback_data)
-    await message_manager.send_message(
-        text=messages.registration.group_request,
-        clear_previous=False,
-        reply_markup=keyboard,
+    await announce_course(message_manager, callback_data.name)
+    await show_groups(
+        message_manager,
+        catalog_query_service,
+        course_id=callback_data.id,
+        faculty_id=callback_data.faculty_id,
+        faculty_code=callback_data.faculty_code,
     )
     await callback.answer()
 
 
 @router.callback_query(
     GroupCD.filter(),
-    flags={"services": ["guest", "rating"]},
+    flags={"services": ["rating"]},
 )
 async def group_select(
         callback: CallbackQuery,
@@ -101,7 +125,7 @@ async def group_select(
         callback_data: GroupCD,
         state: FSMContext,
         user: User,
-        guest_service: GuestService,
+        user_service: UserService,
         schedule_service: ScheduleService,
         rating_service: RatingService,
         message_manager: MessageManager,
@@ -111,7 +135,7 @@ async def group_select(
     text = MessageManager.format_text(messages.registration.group_selected, group_name=callback_data.name)
     await message_manager.send_message(text)
 
-    await guest_service.register_user(user, group_id=callback_data.id)
+    await user_service.register_user(user, group_id=callback_data.id)
     await state.clear()
 
     logger.info(f"User {user.id} completed registration")
