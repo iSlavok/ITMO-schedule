@@ -49,6 +49,30 @@ LESSON_TYPE_REPLACE_MAP: dict[str, LessonType] = {
     "сем": "семинар",
     "фак": "факультатив",
 }
+SUBJECT_NAME_REPLACE_PATTERN = [
+    (re.compile(r"^Python и АД$"), "Python и алгоритмы данных"),
+    (re.compile(r"^АКОС$"), "Архитектура компьютерных систем"),
+    (re.compile(r"^АиСД$"), "Алгоритмы и структуры данных"),
+    (re.compile(r"^АнДан$"), "Анализ данных"),
+    (re.compile(r"^АрхКомп$"), "Архитектура компьютера"),
+    (re.compile(r"^БД$"), "Базы данных"),
+    (re.compile(r"^ВычЛА$"), "Вычислительная линейная алгебра"),
+    (re.compile(r"^Дискретка$"), "Дискретная математика"),
+    (re.compile(r"^ИнЯз$"), "Английский язык"),
+    (re.compile(r"^ЛинАл$"), "Линейная алгебра"),
+    (re.compile(r"^МатАн$"), "Матанализ"),
+    (re.compile(r"^МатЛог$"), "Математическая логика"),
+    (re.compile(r"^МатСтат$"), "Математическая статистика"),
+    (re.compile(r"^МашОб$"), "Машинное обучение"),
+    (re.compile(r"^МетПрог$"), "Методология программирования"),
+    (re.compile(r"^ОС$"), "Операционные системы"),
+    (re.compile(r"^ПарПрог$"), "Параллельное программирование"),
+    (re.compile(r"^Прог$"), "Программирование"),
+    (re.compile(r"^СлучПроц$"), "Случайные процессы"),
+    (re.compile(r"^ТеорВер$"), "Теория вероятностей"),
+    (re.compile(r"^ТеорКод$"), "Теория кодирования"),
+    (re.compile(r"^ФП$"), "Функциональное программирование"),
+]
 LECTURER_REPLACE_PATTERN = [
     (re.compile(r"\+\+$"), ""),
 ]
@@ -117,11 +141,11 @@ class CtScheduleParser:
 
         if len(origins) == 1 and block[0] is not None:
             # one cell merged over the whole block is a bare label: no room, no lecturer
-            name = self._clean(block[0].text)
+            name = self._clean_name(block[0].text)
             return Lesson(name=name, number=number) if name else None
 
         texts = [cell.text if cell is not None else "" for cell in block]
-        name = self._clean(texts[0])
+        name = self._clean_name(texts[0])
         lesson_type = LESSON_TYPE_REPLACE_MAP.get(self._clean(texts[1], lower=True) or "")
         room = self._clean(texts[2])
         lecturer = self._clean_lecturer(texts[3])
@@ -136,6 +160,15 @@ class CtScheduleParser:
             type=lesson_type,
             number=number,
         )
+
+    @classmethod
+    def _clean_name(cls, value: str) -> str | None:
+        name = cls._clean(value)
+        if name is None:
+            return None
+        for pattern, repl in SUBJECT_NAME_REPLACE_PATTERN:
+            name = pattern.sub(repl, name)
+        return name
 
     @classmethod
     def _clean_lecturer(cls, value: str) -> str | None:
