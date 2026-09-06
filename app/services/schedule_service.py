@@ -16,6 +16,9 @@ SCHEDULE_TIMES = [
     (time(17, 10), time(18, 40)),
     (time(18, 50), time(20, 20)),
 ]
+# how long before a lesson it starts being announced as the one coming up; the
+# longest break is 30 minutes, so every break is covered end to end
+WAITING_WINDOW_MINUTES = 30
 WEEKDAYS = [
     "monday",
     "tuesday",
@@ -25,6 +28,10 @@ WEEKDAYS = [
     "saturday",
     "sunday",
 ]
+
+
+def _to_minutes(value: time) -> int:
+    return value.hour * 60 + value.minute
 
 
 class ScheduleService:
@@ -171,19 +178,24 @@ class ScheduleService:
 
     @staticmethod
     def get_current_lesson() -> tuple[int, bool]:
+        """The lesson the day has reached, and whether it is still to start.
+
+        Numbers below the returned one are over, the number itself is running or
+        about to, and the ones above are still ahead. A lesson only counts as
+        reached once it is close enough to start, so a day that has not begun
+        returns 0 and a day that is over returns one past the last lesson.
+        """
         msk_time = datetime.now(tz=MSK_ZONE).time()
-        current = len(SCHEDULE_TIMES)
-        is_waiting = False
 
-        for i, (_start, end) in enumerate(SCHEDULE_TIMES, start=1):
-            if msk_time < end:
-                current = i
-                break
+        for i, (start, end) in enumerate(SCHEDULE_TIMES, start=1):
+            if msk_time >= end:
+                continue
+            if msk_time >= start:
+                return i, False
+            minutes_left = _to_minutes(start) - _to_minutes(msk_time)
+            return (i, True) if minutes_left <= WAITING_WINDOW_MINUTES else (i - 1, False)
 
-        if current - 1 < len(SCHEDULE_TIMES) and msk_time < SCHEDULE_TIMES[current - 1][0]:
-            is_waiting = True
-
-        return current, is_waiting
+        return len(SCHEDULE_TIMES) + 1, False
 
     @staticmethod
     def _get_last_lesson_num() -> int:
