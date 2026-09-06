@@ -77,6 +77,14 @@ async def _start_notifications(bot: Bot, schedule_service: ScheduleService, less
         if current_lesson is None or not current_lesson.lecturer:
             continue
 
+        # one notification a day per lecturer, after the last lesson they teach:
+        # a lecturer holding two lessons in a row is asked about after the second
+        if any(
+            lesson.number > lesson_number and lesson.lecturer == current_lesson.lecturer
+            for lesson in scheduled_lessons
+        ):
+            continue
+
         lecturer_id = lecturer_ids_by_name.get((faculty_id, current_lesson.lecturer))
         if lecturer_id is None:
             continue
